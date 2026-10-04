@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class BaselineReactiveSimulation {
     private static final int HOSTS = 2;
-    private static final int HOST_PES = 4;
+    private static final int HOST_PES = 8;
     private static final int VMS = 4;
     private static final int VM_PES = 2;
     private static final int CLOUDLETS = 4;
@@ -145,4 +145,5 @@ public class BaselineReactiveSimulation {
         }
         return energy;
     }
+
 }
