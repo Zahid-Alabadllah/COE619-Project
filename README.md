@@ -14,7 +14,7 @@ This project explores a **Predictive Approach** that uses lightweight forecastin
 3. **Keep Overhead Low:** Prove that lightweight prediction algorithms can balance energy savings and SLA compliance without the massive processing overhead of heavy Deep Learning models.
 
 ## Technology Stack
-- **Language:** Java (JDK 11+)
+- **Language:** Java (JDK 25+)
 - **Simulation Framework:** [CloudSim Plus](https://cloudsimplus.org/) (a modernized, highly extensible fork of CloudSim 3/4)
 - **Dependency Management:** Apache Maven
 - **Workloads:** Real-world PlanetLab CPU utilization traces
@@ -24,7 +24,7 @@ This project explores a **Predictive Approach** that uses lightweight forecastin
 - `pom.xml` : Maven configuration file managing project dependencies.
 
 ## Setup Instructions
-1. Ensure Java (JDK 11 or higher) and Maven are installed on your system.
+1. Ensure Java (JDK 25 or higher) and Maven are installed on your system.
 2. Clone this repository.
 3. Run `mvn clean install` to download dependencies and build the project.
 4. Run the main simulation class from your preferred Java IDE (Eclipse, IntelliJ).

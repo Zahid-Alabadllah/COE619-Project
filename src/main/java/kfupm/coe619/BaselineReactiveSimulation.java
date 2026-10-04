@@ -10,15 +10,16 @@ import org.cloudsimplus.core.CloudSimPlus;
 import org.cloudsimplus.datacenters.Datacenter;
 import org.cloudsimplus.datacenters.DatacenterSimple;
 import org.cloudsimplus.hosts.Host;
+import org.cloudsimplus.hosts.HostStateHistoryEntry;
 import org.cloudsimplus.hosts.HostSimple;
 import org.cloudsimplus.power.models.PowerModelHostSimple;
 import org.cloudsimplus.resources.Pe;
 import org.cloudsimplus.resources.PeSimple;
 import org.cloudsimplus.util.Log;
-import org.cloudsimplus.utilizationmodels.UtilizationModelPlanetLabInMemory;
+import org.cloudsimplus.utilizationmodels.UtilizationModelPlanetLab;
 import org.cloudsimplus.vms.Vm;
 import org.cloudsimplus.vms.VmSimple;
-import org.cloudsimplus.vms.selection.VmSelectionPolicyMinimumMigrationTime;
+import org.cloudsimplus.selectionpolicies.VmSelectionPolicyMinimumMigrationTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class BaselineReactiveSimulation {
         System.out.println("Starting COE 619 Baseline Reactive Simulation (THR)...");
 
         simulation = new CloudSimPlus();
-        createDatacenter();
+        Datacenter datacenter = createDatacenter();
 
         broker = new DatacenterBrokerSimple(simulation);
         
@@ -69,8 +70,8 @@ public class BaselineReactiveSimulation {
         System.out.println("\n--- Simulation Results ---");
         
         double totalEnergy = 0;
-        for (Host host : broker.getDatacenterList().get(0).getHostList()) {
-            totalEnergy += host.getEnergyConsumption();
+        for (Host host : datacenter.getHostList()) {
+            totalEnergy += calculateEnergyConsumption(host);
         }
         System.out.printf("Total Energy Consumption: %.2f Watt-sec (Joules)\n", totalEnergy);
         System.out.println("SLA Violation metrics calculation requires more detailed host tracking and will be refined next.");
@@ -87,6 +88,7 @@ public class BaselineReactiveSimulation {
             Host host = new HostSimple(10000, 8000, 1000000, peList);
             // Attach a simple power model to the host (Max power 250W, Static power 175W)
             host.setPowerModel(new PowerModelHostSimple(250, 175));
+            host.setStateHistoryEnabled(true);
             hostList.add(host);
         }
         
@@ -120,12 +122,27 @@ public class BaselineReactiveSimulation {
             
             // Attach PlanetLab trace to the cloudlet for dynamic CPU utilization
             String tracePath = "src/main/resources/planetlab/20110303/trace_" + i + ".txt";
-            UtilizationModelPlanetLabInMemory cpuUtilizationModel = 
-                new UtilizationModelPlanetLabInMemory(tracePath, 300);
+            UtilizationModelPlanetLab cpuUtilizationModel =
+                new UtilizationModelPlanetLab(tracePath, 300);
             
             cloudlet.setUtilizationModelCpu(cpuUtilizationModel);
             list.add(cloudlet);
         }
         return list;
+    }
+
+    private double calculateEnergyConsumption(Host host) {
+        List<HostStateHistoryEntry> history = host.getStateHistory();
+        double energy = 0;
+        for (int i = 1; i < history.size(); i++) {
+            HostStateHistoryEntry previous = history.get(i - 1);
+            HostStateHistoryEntry current = history.get(i);
+            if (previous.active()) {
+                double averageUtilization = (previous.percentUsage() + current.percentUsage()) / 2;
+                energy += host.getPowerModel().getPower(averageUtilization)
+                    * (current.time() - previous.time());
+            }
+        }
+        return energy;
     }
 }
