@@ -67,7 +67,13 @@ public class BaselineReactiveSimulation {
         new CloudletsTableBuilder(broker.getCloudletFinishedList()).build();
         
         System.out.println("\n--- Simulation Results ---");
-        System.out.println("Energy Consumption and SLA Violation metrics will be processed here.");
+        
+        double totalEnergy = 0;
+        for (Host host : broker.getDatacenterList().get(0).getHostList()) {
+            totalEnergy += host.getEnergyConsumption();
+        }
+        System.out.printf("Total Energy Consumption: %.2f Watt-sec (Joules)\n", totalEnergy);
+        System.out.println("SLA Violation metrics calculation requires more detailed host tracking and will be refined next.");
         System.out.println("Simulation finished successfully.");
     }
 
