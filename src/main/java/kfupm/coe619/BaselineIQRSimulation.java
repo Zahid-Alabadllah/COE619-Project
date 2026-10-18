@@ -57,7 +57,7 @@ public class BaselineIQRSimulation {
 
     private BaselineIQRSimulation() {
         Log.setLevel(ch.qos.logback.classic.Level.WARN);
-        System.out.println("=== COE 619: Baseline Dynamic Simulation (MAD / IQR Statistical Policy) ===\n");
+        System.out.println("=== COE 619: Baseline Dynamic Simulation (MAD / IQR Statistical Policy) ===");
 
         simulation = new CloudSimPlus();
         datacenter = createDatacenter();

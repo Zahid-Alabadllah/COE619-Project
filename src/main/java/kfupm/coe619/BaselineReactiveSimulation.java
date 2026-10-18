@@ -53,7 +53,7 @@ public class BaselineReactiveSimulation {
 
     private BaselineReactiveSimulation() {
         Log.setLevel(ch.qos.logback.classic.Level.WARN);
-        System.out.println("=== COE 619: Baseline Reactive Simulation (Static Threshold - THR) ===\n");
+        System.out.println("=== COE 619: Baseline Reactive Simulation (Static Threshold - THR) ===");
 
         simulation = new CloudSimPlus();
         datacenter = createDatacenter();
