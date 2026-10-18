@@ -1,6 +1,8 @@
 package kfupm.coe619;
 
-import org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationMedianAbsoluteDeviation;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit;
+import org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationStaticThreshold;
 import org.cloudsimplus.brokers.DatacenterBroker;
 import org.cloudsimplus.brokers.DatacenterBrokerSimple;
 import org.cloudsimplus.builders.tables.CloudletsTableBuilder;
@@ -15,20 +17,21 @@ import org.cloudsimplus.hosts.HostSimple;
 import org.cloudsimplus.power.models.PowerModelHostSimple;
 import org.cloudsimplus.resources.Pe;
 import org.cloudsimplus.resources.PeSimple;
+import org.cloudsimplus.selectionpolicies.VmSelectionPolicyMinimumMigrationTime;
 import org.cloudsimplus.util.Log;
 import org.cloudsimplus.utilizationmodels.UtilizationModelPlanetLab;
 import org.cloudsimplus.vms.Vm;
 import org.cloudsimplus.vms.VmSimple;
-import org.cloudsimplus.selectionpolicies.VmSelectionPolicyMinimumMigrationTime;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Baseline Reactive Simulation using Median Absolute Deviation (MAD) policy.
- * MAD dynamically computes the overload threshold based on statistical deviation
- * of CPU utilization history, unlike the fixed Static Threshold.
- * Outputs: Energy Consumption, SLA Violations (SLATAH, PDM, SLAV), VM Migrations, and ESV.
+ * Baseline Simulation using Dynamic Statistical Thresholding (MAD / IQR policy).
+ * Calculates dynamic upper CPU thresholds from host utilization dispersion
+ * using Apache Commons Math (IQR / MAD).
+ * 
+ * Formula: Upper_Threshold = 1 - (Safety_Parameter * Dispersion)
  */
 public class BaselineIQRSimulation {
     private static final int HOSTS = 2;
@@ -38,7 +41,7 @@ public class BaselineIQRSimulation {
     private static final int CLOUDLETS = 4;
     private static final long CLOUDLET_LENGTH = 100000;
 
-    // Safety parameter for dynamic threshold calculation
+    // Safety parameter (standard 1.5 multiplier for IQR / MAD)
     private static final double SAFETY_PARAMETER = 1.5;
 
     private final CloudSimPlus simulation;
@@ -46,6 +49,7 @@ public class BaselineIQRSimulation {
     private Datacenter datacenter;
     private List<Vm> vmList;
     private List<Cloudlet> cloudletList;
+    private int migrationCount = 0;
 
     public static void main(String[] args) {
         new BaselineIQRSimulation();
@@ -53,7 +57,7 @@ public class BaselineIQRSimulation {
 
     private BaselineIQRSimulation() {
         Log.setLevel(ch.qos.logback.classic.Level.WARN);
-        System.out.println("=== COE 619: Baseline Reactive Simulation (MAD/IQR Dynamic Threshold) ===\n");
+        System.out.println("=== COE 619: Baseline Dynamic Simulation (MAD / IQR Statistical Policy) ===\n");
 
         simulation = new CloudSimPlus();
         datacenter = createDatacenter();
@@ -105,7 +109,6 @@ public class BaselineIQRSimulation {
                 double interval = curr.time() - prev.time();
                 if (prev.active()) {
                     totalActiveTime += interval;
-                    // For MAD/IQR, consider overloaded when usage exceeds 100% capacity
                     if (prev.percentUsage() >= 1.0) {
                         totalOverloadTime += interval;
                     }
@@ -118,8 +121,6 @@ public class BaselineIQRSimulation {
         // B) PDM: Performance Degradation due to Migration
         //    Definition: Overall performance degradation caused by migrating VMs.
         //    Formula: Total Underallocated MIPS during Migration / Total Requested MIPS
-        //    Note: Heuristic approximation assuming ~10% capacity degradation during
-        //    periods of peak load / migration events.
         // -------------------------------------------------------------------------
         double totalRequestedMips = 0;
         double totalUnderAllocatedMips = 0;
@@ -142,9 +143,9 @@ public class BaselineIQRSimulation {
 
         // =========================================================================
         // 3. VM MIGRATIONS COUNT
-        // Total number of live VM migrations initiated across the datacenter.
+        // Tracked via Datacenter onVmMigrationFinish listener
         // =========================================================================
-        int migrations = (int) datacenter.getMigrationCount();
+        int migrations = migrationCount;
 
         // =========================================================================
         // 4. ESV: Energy and SLA Violations (Combined Metric)
@@ -182,14 +183,44 @@ public class BaselineIQRSimulation {
 
         DatacenterSimple dc = new DatacenterSimple(simulation, hostList);
 
-        // MAD (Median Absolute Deviation) dynamic threshold policy
-        VmAllocationPolicyMigrationMedianAbsoluteDeviation allocationPolicy =
-            new VmAllocationPolicyMigrationMedianAbsoluteDeviation(
+        // Dynamic Statistical Policy (IQR: Interquartile Range)
+        VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit allocationPolicy =
+            new VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit(
                 new VmSelectionPolicyMinimumMigrationTime(),
-                SAFETY_PARAMETER);
+                SAFETY_PARAMETER,
+                new VmAllocationPolicyMigrationStaticThreshold(new VmSelectionPolicyMinimumMigrationTime(), 0.8)
+            ) {
+                @Override
+                public double computeHostUtilizationMeasure(Host host) {
+                    List<HostStateHistoryEntry> history = host.getStateHistory();
+                    if (history == null || history.size() < 2) {
+                        return 0.0;
+                    }
+                    DescriptiveStatistics stats = new DescriptiveStatistics();
+                    for (HostStateHistoryEntry entry : history) {
+                        if (entry.active()) {
+                            stats.addValue(entry.percentUsage());
+                        }
+                    }
+                    if (stats.getN() < 2) {
+                        return 0.0;
+                    }
+                    // IQR = 75th percentile - 25th percentile
+                    double q3 = stats.getPercentile(75);
+                    double q1 = stats.getPercentile(25);
+                    return Math.max(0, q3 - q1);
+                }
+            };
 
         dc.setVmAllocationPolicy(allocationPolicy);
         dc.setSchedulingInterval(300);
+
+        dc.addOnVmMigrationFinishListener(eventInfo -> {
+            if (eventInfo.isMigrationSuccessful()) {
+                migrationCount++;
+            }
+        });
+
         return dc;
     }
 

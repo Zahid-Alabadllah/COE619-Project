@@ -45,6 +45,7 @@ public class BaselineReactiveSimulation {
     private Datacenter datacenter;
     private List<Vm> vmList;
     private List<Cloudlet> cloudletList;
+    private int migrationCount = 0;
 
     public static void main(String[] args) {
         new BaselineReactiveSimulation();
@@ -140,9 +141,9 @@ public class BaselineReactiveSimulation {
 
         // =========================================================================
         // 3. VM MIGRATIONS COUNT
-        // Total number of live VM migrations initiated across the datacenter.
+        // Tracked via Datacenter onVmMigrationFinish listener
         // =========================================================================
-        int migrations = (int) datacenter.getMigrationCount();
+        int migrations = migrationCount;
 
         // =========================================================================
         // 4. ESV: Energy and SLA Violations (Combined Metric)
@@ -187,6 +188,14 @@ public class BaselineReactiveSimulation {
 
         dc.setVmAllocationPolicy(allocationPolicy);
         dc.setSchedulingInterval(300);
+
+        // Track live migrations accurately
+        dc.addOnVmMigrationFinishListener(eventInfo -> {
+            if (eventInfo.isMigrationSuccessful()) {
+                migrationCount++;
+            }
+        });
+
         return dc;
     }
 
