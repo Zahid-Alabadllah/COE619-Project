@@ -76,15 +76,25 @@ public class BaselineIQRSimulation {
     private void printMetrics() {
         List<Host> hostList = datacenter.getHostList();
 
-        // --- 1. Energy Consumption ---
+        // =========================================================================
+        // 1. ENERGY CONSUMPTION CALCULATION
+        // Formula: Integrates power consumption over time intervals for each host.
+        // Power Model uses linear active power between Static (175W) and Max (250W).
+        // =========================================================================
         double totalEnergy = 0;
         for (Host host : hostList) {
             totalEnergy += calculateEnergyConsumption(host);
         }
         double energyKwh = totalEnergy / 3600000.0;
 
-        // --- 2. SLA Violations ---
-        // SLATAH = fraction of time hosts were overloaded
+        // =========================================================================
+        // 2. SLA VIOLATIONS CALCULATION (Beloglazov et al., 2012)
+        // -------------------------------------------------------------------------
+        // A) SLATAH: SLA Time Affected by Host Overload
+        //    Definition: Fraction of active time during which hosts experienced
+        //    CPU utilization >= 100% (saturation / overload under dynamic policy).
+        //    Formula: Total Overloaded Time / Total Active Time
+        // -------------------------------------------------------------------------
         double totalActiveTime = 0;
         double totalOverloadTime = 0;
         for (Host host : hostList) {
@@ -95,9 +105,8 @@ public class BaselineIQRSimulation {
                 double interval = curr.time() - prev.time();
                 if (prev.active()) {
                     totalActiveTime += interval;
-                    // For MAD/IQR, consider overloaded when usage exceeds 100%
-                    // (since the threshold is dynamic and set internally)
-                    if (prev.percentUsage() > 1.0) {
+                    // For MAD/IQR, consider overloaded when usage exceeds 100% capacity
+                    if (prev.percentUsage() >= 1.0) {
                         totalOverloadTime += interval;
                     }
                 }
@@ -105,7 +114,13 @@ public class BaselineIQRSimulation {
         }
         double slatah = (totalActiveTime > 0) ? totalOverloadTime / totalActiveTime : 0;
 
-        // PDM = Performance Degradation due to Migration
+        // -------------------------------------------------------------------------
+        // B) PDM: Performance Degradation due to Migration
+        //    Definition: Overall performance degradation caused by migrating VMs.
+        //    Formula: Total Underallocated MIPS during Migration / Total Requested MIPS
+        //    Note: Heuristic approximation assuming ~10% capacity degradation during
+        //    periods of peak load / migration events.
+        // -------------------------------------------------------------------------
         double totalRequestedMips = 0;
         double totalUnderAllocatedMips = 0;
         for (Vm vm : vmList) {
@@ -118,26 +133,38 @@ public class BaselineIQRSimulation {
         }
         double pdm = (totalRequestedMips > 0) ? totalUnderAllocatedMips / totalRequestedMips : 0;
 
-        // SLAV = SLATAH * PDM
+        // -------------------------------------------------------------------------
+        // C) SLAV: Overall SLA Violation Metric
+        //    Combines both host overload time and migration performance degradation.
+        //    Formula: SLAV = SLATAH * PDM
+        // -------------------------------------------------------------------------
         double slav = slatah * pdm;
 
-        // --- 3. VM Migrations ---
+        // =========================================================================
+        // 3. VM MIGRATIONS COUNT
+        // Total number of live VM migrations initiated across the datacenter.
+        // =========================================================================
         int migrations = (int) datacenter.getMigrationCount();
 
-        // --- 4. ESV = Energy * SLAV
+        // =========================================================================
+        // 4. ESV: Energy and SLA Violations (Combined Metric)
+        // Joint optimization objective: evaluates trade-off between energy savings
+        // and SLA penalties. Lower value indicates superior consolidation efficiency.
+        // Formula: ESV = Energy (kWh) * SLAV
+        // =========================================================================
         double esv = energyKwh * slav;
 
-        // --- Print Results ---
-        System.out.println("\n╔══════════════════════════════════════════════════════════╗");
-        System.out.println("║        BASELINE MAD/IQR - SIMULATION METRICS            ║");
-        System.out.println("╠══════════════════════════════════════════════════════════╣");
-        System.out.printf("║  Energy Consumption  : %12.2f Joules (%6.4f kWh) ║\n", totalEnergy, energyKwh);
-        System.out.printf("║  SLATAH              : %12.6f                     ║\n", slatah);
-        System.out.printf("║  PDM                 : %12.6f                     ║\n", pdm);
-        System.out.printf("║  SLAV (SLATAH * PDM) : %12.6f                     ║\n", slav);
-        System.out.printf("║  VM Migrations       : %12d                     ║\n", migrations);
-        System.out.printf("║  ESV (Energy * SLAV) : %12.6f                     ║\n", esv);
-        System.out.println("╚══════════════════════════════════════════════════════════╝");
+        // --- Print Summary Box ---
+        System.out.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                BASELINE MAD/IQR - SIMULATION METRICS                   ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║  Energy Consumption                   : %10.2f J (%6.4f kWh)    ║\n", totalEnergy, energyKwh);
+        System.out.printf("║  SLATAH (SLA Time Affected by Overload): %14.6f                ║\n", slatah);
+        System.out.printf("║  PDM (Degradation due to Migration)   : %14.6f                ║\n", pdm);
+        System.out.printf("║  SLAV (Overall SLA Violation)         : %14.6f                ║\n", slav);
+        System.out.printf("║  VM Migrations                        : %14d                ║\n", migrations);
+        System.out.printf("║  ESV (Energy * SLAV)                  : %14.6f                ║\n", esv);
+        System.out.println("╚════════════════════════════════════════════════════════════════════════╝");
     }
 
     private Datacenter createDatacenter() {
