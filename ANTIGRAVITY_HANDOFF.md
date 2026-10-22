@@ -17,7 +17,7 @@ Console-cleanup commit: `67f812cdb0fc7621c201cb71ee068efe5afc6203` (energy-windo
 
 Earlier verified THR (9.8085 kWh) differs slightly; cause unresolved, recorded as a reproducibility limitation.
 
-**PR1 draft:** `docs/progress_report_1/PR1_Progress_Report_I.tex` (copy in `Course_Documents/04_Progress_Report_I/`). Two screenshot placeholders remain (THR, IQR output).
+**PR1 draft:** `docs/progress_report_1/PR1_Progress_Report_I.tex` (copy in `Course_Documents/04_Progress_Report_I/`). Screenshots inserted; no placeholders remain.
 
 **PDM PE-factor fix (applied):** the PDM denominator now uses `Cloudlet.getTotalLength()` (MI per PE x PEs = 4e7 MI) to match the numerator's two-PE VM capacity. PDM halves from 8.192e-06 to 4.096e-06; SLAV/ESV unchanged (SLATAH = 0).
 
@@ -28,7 +28,7 @@ Post-fix verified runs (`mvn -q compile` + `exec:java`, JAVA_HOME = JDK 25; Mave
 | THR | 8/8 | 8/8 | 2 | 35,312,123.97 J (9.8089 kWh) | 0 | 4.096e-06 | 0 | 0 |
 | IQR | 8/8 | 8/8 | 2 | 35,311,543.37 J (9.8088 kWh) | 0 | 4.096e-06 | 0 | 0 |
 
-PR1 uses these post-fix values. Small run-to-run energy variation remains unexplained.
+Later user-run post-fix screenshots (inserted in PR1 as Figures 1-2, `docs/progress_report_1/figures/`) show THR 35,311,961.05 J and IQR 35,311,761.57 J with PDM 4.096e-06; PR1 table uses these screenshot values. Small run-to-run energy variation remains unexplained.
 
 Full continuation instructions: `docs/progress_report_1/ANTIGRAVITY_Resume_PR1.md`.
 

@@ -127,14 +127,14 @@ where $M$ is the number of VMs, $\text{MIPS}_j$ is VM $j$'s total MIPS capacity 
 \paragraph{Number of VM migrations.} The count of completed live migrations. It indicates network overhead and how stable the placement is.
 
 \section{Preliminary Results}
-Table~\ref{tab:results} reports one run of each baseline, re-run after correcting the PDM work denominator (PE factor). The earlier student-run outputs (commit \texttt{67f812c}) reported a PDM of $8.192\times10^{-6}$ because the denominator counted only one PE; all other metrics are unaffected by that correction. Both runs created 8/8 VMs and completed 8/8 cloudlets, with no errors or exceptions shown. Cloudlets finished between about 42{,}050~s and 46{,}500~s.
+Table~\ref{tab:results} reports one run of each baseline, run by the student after correcting the PDM work denominator (PE factor); Figures~\ref{fig:thr} and~\ref{fig:iqr} show the corresponding console outputs. The earlier student-run outputs (commit \texttt{67f812c}) reported a PDM of $8.192\times10^{-6}$ because the denominator counted only one PE; all other metrics are unaffected by that correction. Both runs created 8/8 VMs and completed 8/8 cloudlets, with no errors or exceptions shown. Cloudlets finished between about 42{,}050~s and 46{,}500~s.
 
 \begin{table}[H]
 \centering
 \begin{tabular}{@{}lrr@{}}
 \toprule
 Metric & THR & IQR \\ \midrule
-Energy (J) & 35{,}312{,}123.97 & 35{,}311{,}543.37 \\
+Energy (J) & 35{,}311{,}961.05 & 35{,}311{,}761.57 \\
 Energy (kWh) & 9.8089 & 9.8088 \\
 SLATAH & 0 & 0 \\
 PDM & $4.096\times10^{-6}$ & $4.096\times10^{-6}$ \\
@@ -150,23 +150,21 @@ VMs created / cloudlets completed & 8/8, 8/8 & 8/8, 8/8 \\
 
 \begin{figure}[H]
 \centering
-\placeholderbox{Figure 1: Console output of \texttt{BaselineReactiveSimulation} (THR).\\
-Replace with \texttt{\textbackslash includegraphics[width=\textbackslash linewidth]\{figures/thr\_output.png\}}}
-\caption{THR baseline output.}
+\includegraphics[width=\linewidth]{figures/BaselineReactiveSimulation.png}
+\caption{Console output of \texttt{BaselineReactiveSimulation} (THR baseline).}
 \label{fig:thr}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\placeholderbox{Figure 2: Console output of \texttt{BaselineIQRSimulation} (IQR).\\
-Replace with \texttt{\textbackslash includegraphics[width=\textbackslash linewidth]\{figures/iqr\_output.png\}}}
-\caption{IQR baseline output.}
+\includegraphics[width=\linewidth]{figures/BaselineIQRSimulation.png}
+\caption{Console output of \texttt{BaselineIQRSimulation} (IQR baseline; the header label ``MAD/IQR'' is historical).}
 \label{fig:iqr}
 \end{figure}
 
-\paragraph{Discussion.} These results show the baselines are working: every VM and task is accounted for, both policies trigger migrations, and the metrics are computed from corrected inputs. The two policies give almost identical results. Their energy differs by about 600~J (0.002\%), and their migration counts are equal. This is expected for a small 4-host system with smooth synthetic traces, where both thresholds are rarely approached. No host reached saturation, so SLATAH, SLAV, and ESV are zero. These are computed values; they were not forced. PDM is positive because two migrations occurred. These runs do not show that either policy is better.
+\paragraph{Discussion.} These results show the baselines are working: every VM and task is accounted for, both policies trigger migrations, and the metrics are computed from corrected inputs. The two policies give almost identical results. Their energy differs by about 200~J (0.0006\%), and their migration counts are equal. This is expected for a small 4-host system with smooth synthetic traces, where both thresholds are rarely approached. No host reached saturation, so SLATAH, SLAV, and ESV are zero. These are computed values; they were not forced. PDM is positive because two migrations occurred. These runs do not show that either policy is better.
 
-\paragraph{Reproducibility note.} THR energy has varied slightly between runs of equivalent code (9.8085~kWh, 9.8089~kWh from 35{,}311{,}961.05~J, and 35{,}312{,}123.97~J here); IQR has also varied in the last digits. The cause of this small difference has not been established. Later reports will use a fixed build, repeated runs, and summary statistics.
+\paragraph{Reproducibility note.} THR energy has varied slightly between runs of equivalent code (9.8085~kWh, 35{,}312{,}123.97~J, and 35{,}311{,}961.05~J in Figure~\ref{fig:thr}); IQR has also varied in the last digits. The cause of this small difference has not been established. Later reports will use a fixed build, repeated runs, and summary statistics.
 
 \section{Limitations}
 \begin{itemize}[nosep]
