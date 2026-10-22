@@ -6,6 +6,22 @@ The THR and IQR baseline simulations now compile and finish with all submitted V
 
 Restoration-fix commit: `42ebb323458af14b6edbfa6c4e91ea8d10e4ca5b`.
 CPU-measurement correction commit: `661bf94c0b89a3c110cf9cc43dc895341821a036`.
+Console-cleanup commit: `67f812cdb0fc7621c201cb71ee068efe5afc6203` (energy-window line removed; CloudSim log level WARN -> ERROR; presentation only).
+
+## Latest evidence (user-run, after 67f812c) — use these for PR1
+
+| Baseline | VMs | Cloudlets | Migrations | Energy | SLATAH | PDM | SLAV | ESV |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| THR | 8/8 | 8/8 | 2 | 35,311,961.05 J (9.8089 kWh) | 0 | 8.192e-06 | 0 | 0 |
+| IQR | 8/8 | 8/8 | 2 | 35,311,761.57 J (9.8088 kWh) | 0 | 8.192e-06 | 0 | 0 |
+
+Earlier verified THR (9.8085 kWh) differs slightly; cause unresolved, recorded as a reproducibility limitation.
+
+**PR1 draft:** `docs/progress_report_1/PR1_Progress_Report_I.tex` (copy in `Course_Documents/04_Progress_Report_I/`). Two screenshot placeholders remain (THR, IQR output).
+
+**Known metric note (not changed in code):** PDM numerator uses VM total MIPS (2 PEs), but denominator uses `Cloudlet.getLength()` (MI per PE). Using total requested work (length x PEs) would halve PDM. SLAV is unaffected while SLATAH = 0. Documented in PR1 as a pending alignment.
+
+Full continuation instructions: `docs/progress_report_1/ANTIGRAVITY_Resume_PR1.md`.
 
 ## Root cause
 
