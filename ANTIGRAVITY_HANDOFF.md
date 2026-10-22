@@ -5,7 +5,7 @@
 The THR and IQR baseline simulations now compile and finish with all submitted VMs and cloudlets accounted for. Resume with Progress Report I (PR1) in LaTeX, using placeholders for figures that Zahed will add. Do not treat the single-run metrics below as statistically conclusive. Predictive-model development and presentation edits are still out of scope.
 
 Restoration-fix commit: `42ebb323458af14b6edbfa6c4e91ea8d10e4ca5b`.
-CPU-measurement correction commit: to be filled after commit.
+CPU-measurement correction commit: `661bf94c0b89a3c110cf9cc43dc895341821a036`.
 
 ## Root cause
 
