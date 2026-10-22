@@ -83,7 +83,7 @@ public class BaselineIQRSimulation {
     }
 
     private BaselineIQRSimulation() {
-        Log.setLevel(ch.qos.logback.classic.Level.WARN);
+        Log.setLevel(ch.qos.logback.classic.Level.ERROR);
         System.out.println("=== COE 619: Baseline Dynamic Simulation (MAD / IQR Statistical Policy) ===");
 
         simulation = new CloudSimPlus();
@@ -221,8 +221,6 @@ public class BaselineIQRSimulation {
         System.out.println("║                BASELINE MAD/IQR - SIMULATION METRICS                   ║");
         System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
         System.out.printf("║  Energy Consumption                   : %10.2f J (%6.4f kWh)    ║\n", totalEnergyJoules, energyKwh);
-        System.out.printf("║  Energy History Window (seconds)      : %10.1f - %10.1f          ║\n",
-            energyWindowStart, energyWindowEnd);
         System.out.printf("║  SLATAH (SLA Time per Active Host)    : %14.6f                ║\n", slatah);
         System.out.printf("║  PDM (Degradation due to Migration)   : %14.9e             ║\n", pdm);
         System.out.printf("║  SLAV (Overall SLA Violation: S * P)  : %14.9e             ║\n", slav);

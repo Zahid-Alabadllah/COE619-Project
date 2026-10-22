@@ -79,7 +79,7 @@ public class BaselineReactiveSimulation {
     }
 
     private BaselineReactiveSimulation() {
-        Log.setLevel(ch.qos.logback.classic.Level.WARN);
+        Log.setLevel(ch.qos.logback.classic.Level.ERROR);
         System.out.println("=== COE 619: Baseline Reactive Simulation (Static Threshold - THR) ===");
 
         simulation = new CloudSimPlus();
@@ -225,8 +225,6 @@ public class BaselineReactiveSimulation {
         System.out.println("║                  BASELINE THR - SIMULATION METRICS                     ║");
         System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
         System.out.printf("║  Energy Consumption                   : %10.2f J (%6.4f kWh)    ║\n", totalEnergyJoules, energyKwh);
-        System.out.printf("║  Energy History Window (seconds)      : %10.1f - %10.1f          ║\n",
-            energyWindowStart, energyWindowEnd);
         System.out.printf("║  SLATAH (SLA Time per Active Host)    : %14.6f                ║\n", slatah);
         System.out.printf("║  PDM (Degradation due to Migration)   : %14.9e             ║\n", pdm);
         System.out.printf("║  SLAV (Overall SLA Violation: S * P)  : %14.9e             ║\n", slav);
