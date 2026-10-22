@@ -118,7 +118,7 @@ where $N$ is the number of hosts that were active at some point, $T_{a_i}$ is ho
 \begin{equation}
 \mathrm{PDM} = \frac{1}{M}\sum_{j=1}^{M}\frac{C_{d_j}}{C_{r_j}}, \qquad C_{d_j} = 0.10 \cdot \text{MIPS}_j \cdot t_{m_j},
 \end{equation}
-where $M$ is the number of VMs, $\text{MIPS}_j$ is VM $j$'s total MIPS capacity (2 PEs $\times$ 1000), $t_{m_j}$ is its observed total migration time in seconds (zero if it never migrated), and $C_{r_j}$ is its work. \emph{Why needed:} it measures the performance cost of the migrations a policy causes. \emph{Assumptions and limits:} the 10\% penalty is a modeling assumption taken from~\cite{beloglazov2012ccpe,voorsluys2009}. It is not a direct measurement of lost instructions. The simulator does not model every pre-copy step, and real hypervisors differ. In the original definition, $C_{r_j}$ is the total CPU capacity requested by the VM over its lifetime. Our implementation instead uses the finished cloudlet length in MI \emph{per PE} (20{,}000{,}000 MI) as $C_{r_j}$, while the numerator uses the VM's two-PE capacity. Using total requested work (length $\times$ PEs) would halve the reported PDM. This difference will be resolved before the final comparison. It does not change SLAV in the current runs, because SLATAH is zero.
+where $M$ is the number of VMs, $\text{MIPS}_j$ is VM $j$'s total MIPS capacity (2 PEs $\times$ 1000), $t_{m_j}$ is its observed total migration time in seconds (zero if it never migrated), and $C_{r_j}$ is its total requested work in MI (cloudlet length per PE $\times$ number of PEs $=4\times10^{7}$~MI). \emph{Why needed:} it measures the performance cost of the migrations a policy causes. \emph{Assumptions and limits:} the 10\% penalty is a modeling assumption taken from~\cite{beloglazov2012ccpe,voorsluys2009}. It is not a direct measurement of lost instructions. The simulator does not model every pre-copy step, and real hypervisors differ. In the original definition, $C_{r_j}$ is the total CPU capacity requested by the VM; we use the completed requested work in MI, which equals it when all requested work is executed, as here.
 
 \paragraph{SLAV -- SLA Violation (dimensionless).} $\mathrm{SLAV} = \mathrm{SLATAH}\times\mathrm{PDM}$~\cite{beloglazov2012ccpe}. It combines saturation and migration cost into one number. Because it is a product, it is zero whenever either factor is zero.
 
@@ -127,17 +127,17 @@ where $M$ is the number of VMs, $\text{MIPS}_j$ is VM $j$'s total MIPS capacity 
 \paragraph{Number of VM migrations.} The count of completed live migrations. It indicates network overhead and how stable the placement is.
 
 \section{Preliminary Results}
-Table~\ref{tab:results} reports one run of each baseline, executed by the student on the code after commit \texttt{67f812c}. Both runs created 8/8 VMs and completed 8/8 cloudlets, with no errors or exceptions shown. Cloudlets finished between about 42{,}050~s and 46{,}500~s.
+Table~\ref{tab:results} reports one run of each baseline, re-run after correcting the PDM work denominator (PE factor). The earlier student-run outputs (commit \texttt{67f812c}) reported a PDM of $8.192\times10^{-6}$ because the denominator counted only one PE; all other metrics are unaffected by that correction. Both runs created 8/8 VMs and completed 8/8 cloudlets, with no errors or exceptions shown. Cloudlets finished between about 42{,}050~s and 46{,}500~s.
 
 \begin{table}[H]
 \centering
 \begin{tabular}{@{}lrr@{}}
 \toprule
 Metric & THR & IQR \\ \midrule
-Energy (J) & 35{,}311{,}961.05 & 35{,}311{,}761.57 \\
+Energy (J) & 35{,}312{,}123.97 & 35{,}311{,}543.37 \\
 Energy (kWh) & 9.8089 & 9.8088 \\
 SLATAH & 0 & 0 \\
-PDM & $8.192\times10^{-6}$ & $8.192\times10^{-6}$ \\
+PDM & $4.096\times10^{-6}$ & $4.096\times10^{-6}$ \\
 SLAV & 0 & 0 \\
 ESV (kWh) & 0 & 0 \\
 VM migrations & 2 & 2 \\
@@ -164,15 +164,15 @@ Replace with \texttt{\textbackslash includegraphics[width=\textbackslash linewid
 \label{fig:iqr}
 \end{figure}
 
-\paragraph{Discussion.} These results show the baselines are working: every VM and task is accounted for, both policies trigger migrations, and the metrics are computed from corrected inputs. The two policies give almost identical results. Their energy differs by about 200~J (0.0006\%), and their migration counts are equal. This is expected for a small 4-host system with smooth synthetic traces, where both thresholds are rarely approached. No host reached saturation, so SLATAH, SLAV, and ESV are zero. These are computed values; they were not forced. PDM is positive because two migrations occurred. These runs do not show that either policy is better.
+\paragraph{Discussion.} These results show the baselines are working: every VM and task is accounted for, both policies trigger migrations, and the metrics are computed from corrected inputs. The two policies give almost identical results. Their energy differs by about 600~J (0.002\%), and their migration counts are equal. This is expected for a small 4-host system with smooth synthetic traces, where both thresholds are rarely approached. No host reached saturation, so SLATAH, SLAV, and ESV are zero. These are computed values; they were not forced. PDM is positive because two migrations occurred. These runs do not show that either policy is better.
 
-\paragraph{Reproducibility note.} An earlier verified THR run of the same code reported 9.8085~kWh, compared with 9.8089~kWh here. The cause of this small difference has not been established. Later reports will use a fixed build, repeated runs, and summary statistics.
+\paragraph{Reproducibility note.} THR energy has varied slightly between runs of equivalent code (9.8085~kWh, 9.8089~kWh from 35{,}311{,}961.05~J, and 35{,}312{,}123.97~J here); IQR has also varied in the last digits. The cause of this small difference has not been established. Later reports will use a fixed build, repeated runs, and summary statistics.
 
 \section{Limitations}
 \begin{itemize}[nosep]
   \item Synthetic traces, a small topology, and one run per policy mean no statistical or generalizable claims can be made yet.
   \item Energy covers the sampled workload window only (excluding the initial interval and the idle tail).
-  \item SLATAH uses $u \ge 0.999$ as the saturation condition. PDM relies on an assumed 10\% migration penalty and currently uses a per-PE work denominator (see Section~5.3).
+  \item SLATAH uses $u \ge 0.999$ as the saturation condition. PDM relies on an assumed 10\% migration penalty.
   \item SLAV and ESV are composite research metrics~\cite{beloglazov2012ccpe}, not contractual SLA measures.
 \end{itemize}
 
@@ -194,7 +194,7 @@ Progress Report II & Week 15 & Planned \\
 
 \noindent Next steps:
 \begin{enumerate}[nosep]
-  \item Align the PDM work denominator with the published definition, and document the SLATAH saturation condition.
+  \item Investigate the small run-to-run energy variation and document the SLATAH saturation condition.
   \item Switch to real PlanetLab traces~\cite{park2006comon} and a larger topology. Run repeated experiments and report means and spread.
   \item Design a lightweight predictive overload detector (e.g., linear regression or exponential smoothing on recent host utilization) for Progress Report II.
   \item Implement and compare it against THR and IQR in Term 262, without assuming in advance that it will improve on them.

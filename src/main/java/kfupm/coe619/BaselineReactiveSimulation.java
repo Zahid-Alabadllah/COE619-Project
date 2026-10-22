@@ -176,7 +176,7 @@ public class BaselineReactiveSimulation {
         // Formula: (1 / M) * sum_{j=1}^{M} ( C_{d_j} / C_{r_j} )
         // Where:
         // C_{d_j} = 10% * Total_MIPS * Migration_Time (Beloglazov 10% empirical penalty)
-        // C_{r_j} = Finished workload length in Million Instructions (MI)
+        // C_{r_j} = Finished total workload in Million Instructions (MI per PE x PEs)
         // -------------------------------------------------------------------------
         double sumPdmRatios = 0;
         int activeVmCount = 0;
@@ -187,7 +187,7 @@ public class BaselineReactiveSimulation {
             // Total instructions requested by this VM across execution
             double requestedInstructions = 0;
             for (org.cloudsimplus.cloudlets.CloudletExecution cle : vm.getCloudletScheduler().getCloudletFinishedList()) {
-                requestedInstructions += cle.getCloudlet().getLength();
+                requestedInstructions += cle.getCloudlet().getTotalLength(); // MI per PE x PEs
             }
             if (requestedInstructions <= 0) {
                 requestedInstructions = vm.getTotalMipsCapacity() * vm.getTotalExecutionTime();

@@ -19,7 +19,16 @@ Earlier verified THR (9.8085 kWh) differs slightly; cause unresolved, recorded a
 
 **PR1 draft:** `docs/progress_report_1/PR1_Progress_Report_I.tex` (copy in `Course_Documents/04_Progress_Report_I/`). Two screenshot placeholders remain (THR, IQR output).
 
-**Known metric note (not changed in code):** PDM numerator uses VM total MIPS (2 PEs), but denominator uses `Cloudlet.getLength()` (MI per PE). Using total requested work (length x PEs) would halve PDM. SLAV is unaffected while SLATAH = 0. Documented in PR1 as a pending alignment.
+**PDM PE-factor fix (applied):** the PDM denominator now uses `Cloudlet.getTotalLength()` (MI per PE x PEs = 4e7 MI) to match the numerator's two-PE VM capacity. PDM halves from 8.192e-06 to 4.096e-06; SLAV/ESV unchanged (SLATAH = 0).
+
+Post-fix verified runs (`mvn -q compile` + `exec:java`, JAVA_HOME = JDK 25; Maven's default JDK is too old to run the classes):
+
+| Baseline | VMs | Cloudlets | Migrations | Energy | SLATAH | PDM | SLAV | ESV |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| THR | 8/8 | 8/8 | 2 | 35,312,123.97 J (9.8089 kWh) | 0 | 4.096e-06 | 0 | 0 |
+| IQR | 8/8 | 8/8 | 2 | 35,311,543.37 J (9.8088 kWh) | 0 | 4.096e-06 | 0 | 0 |
+
+PR1 uses these post-fix values. Small run-to-run energy variation remains unexplained.
 
 Full continuation instructions: `docs/progress_report_1/ANTIGRAVITY_Resume_PR1.md`.
 
@@ -57,7 +66,7 @@ The prior handoff's THR result (10.0909 kWh, SLATAH 0.001623) is superseded. It 
 
 The 24-hour `terminateAt(86_400)` is a simulation upper bound, not the energy integration duration. Cloudlets finish at approximately 46,500 seconds (12.92 hours), and the last recorded host-history samples are at 46,500 seconds. Energy is integrated only between recorded history samples whose previous host state is active; the observed history envelope begins at 300.1 seconds and ends at about 46,500 seconds. Idle intervals represented within that history are charged at the host power model's idle/static power. No energy is extrapolated for the unrecorded idle tail from the last history sample to the 24-hour termination, nor for the initial interval before the first sample. Thus the reported values are sampled-workload-window energy, not full-day energy.
 
-PDM applies the project's empirical 10% migration penalty to the **observed migration duration**, then normalizes by each VM's completed cloudlet instruction length and averages over active VMs. This is a derived metric, not direct measurement of lost CPU instructions or a claim that CloudSim Plus explicitly models pre-copy behavior.
+PDM applies the project's empirical 10% migration penalty to the **observed migration duration**, then normalizes by each VM's completed total cloudlet work (MI per PE x PEs) and averages over active VMs. This is a derived metric, not direct measurement of lost CPU instructions or a claim that CloudSim Plus explicitly models pre-copy behavior.
 
 ## Run commands
 

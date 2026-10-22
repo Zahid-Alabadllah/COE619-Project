@@ -183,7 +183,7 @@ public class BaselineIQRSimulation {
 
             double requestedInstructions = 0;
             for (org.cloudsimplus.cloudlets.CloudletExecution cle : vm.getCloudletScheduler().getCloudletFinishedList()) {
-                requestedInstructions += cle.getCloudlet().getLength();
+                requestedInstructions += cle.getCloudlet().getTotalLength(); // MI per PE x PEs
             }
             if (requestedInstructions <= 0) {
                 requestedInstructions = vm.getTotalMipsCapacity() * vm.getTotalExecutionTime();
