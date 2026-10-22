@@ -41,7 +41,7 @@ import java.util.Map;
  * Dynamic Threshold Formulation:
  * Upper_Threshold = 1.0 - (s * Dispersion)
  * Where:
- * - s: Safety parameter (1.5) that scales the protection buffer.
+ * - s: IQR safety parameter (0.75), equivalent to 1.5 MAD for normally distributed samples.
  * - Dispersion: Statistical spread of past host CPU utilization, computed as IQR = Q3 - Q1.
  * When workload volatility rises, IQR expands, causing the threshold to automatically drop
  * to trigger proactive migrations before saturation occurs.
@@ -64,8 +64,8 @@ public class BaselineIQRSimulation {
     private static final int CLOUDLETS = 8;
     private static final long CLOUDLET_LENGTH = 20_000_000; // MI per PE: long enough (~11 h) to span many 5-min scheduling intervals
 
-    // Safety parameter s for dynamic IQR thresholding (standard 1.5)
-    private static final double SAFETY_PARAMETER = 1.5;
+    // IQR is approximately twice MAD for normal data; 0.75 IQR matches the 1.5 MAD buffer.
+    private static final double SAFETY_PARAMETER = 0.75;
 
     private final CloudSimPlus simulation;
     private DatacenterBroker broker;
@@ -124,8 +124,15 @@ public class BaselineIQRSimulation {
         // Power model: Linear interpolation between static power (175W) and peak (250W).
         // =========================================================================
         double totalEnergyJoules = 0;
+        double energyWindowStart = Double.POSITIVE_INFINITY;
+        double energyWindowEnd = Double.NEGATIVE_INFINITY;
         for (Host host : hostList) {
             totalEnergyJoules += calculateEnergyConsumption(host);
+            List<HostStateHistoryEntry> history = host.getStateHistory();
+            if (!history.isEmpty()) {
+                energyWindowStart = Math.min(energyWindowStart, history.get(0).time());
+                energyWindowEnd = Math.max(energyWindowEnd, history.get(history.size() - 1).time());
+            }
         }
         double energyKwh = totalEnergyJoules / 3600000.0; // 1 kWh = 3.6 x 10^6 Joules
 
@@ -150,7 +157,7 @@ public class BaselineIQRSimulation {
                 if (prev.active()) {
                     hostActiveTime += interval;
                     // Strict saturation condition: CPU usage >= 100% (1.0)
-                    if (prev.percentUsage() >= 0.999) {
+                    if (HostCpuUtilization.fractionOfCapacity(host, prev) >= 0.999) {
                         hostSaturationTime += interval;
                     }
                 }
@@ -214,6 +221,8 @@ public class BaselineIQRSimulation {
         System.out.println("║                BASELINE MAD/IQR - SIMULATION METRICS                   ║");
         System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
         System.out.printf("║  Energy Consumption                   : %10.2f J (%6.4f kWh)    ║\n", totalEnergyJoules, energyKwh);
+        System.out.printf("║  Energy History Window (seconds)      : %10.1f - %10.1f          ║\n",
+            energyWindowStart, energyWindowEnd);
         System.out.printf("║  SLATAH (SLA Time per Active Host)    : %14.6f                ║\n", slatah);
         System.out.printf("║  PDM (Degradation due to Migration)   : %14.9e             ║\n", pdm);
         System.out.printf("║  SLAV (Overall SLA Violation: S * P)  : %14.9e             ║\n", slav);
@@ -276,7 +285,7 @@ public class BaselineIQRSimulation {
                     DescriptiveStatistics stats = new DescriptiveStatistics();
                     for (HostStateHistoryEntry entry : history) {
                         if (entry.active()) {
-                            stats.addValue(entry.percentUsage());
+                            stats.addValue(HostCpuUtilization.fractionOfCapacity(host, entry));
                         }
                     }
                     if (stats.getN() < 2) {
@@ -284,7 +293,7 @@ public class BaselineIQRSimulation {
                     }
                     double q3 = stats.getPercentile(75);
                     double q1 = stats.getPercentile(25);
-                    return Math.max(0.0, q3 - q1);
+                    return q3 - q1;
                 }
             };
 
@@ -348,7 +357,9 @@ public class BaselineIQRSimulation {
             HostStateHistoryEntry previous = history.get(i - 1);
             HostStateHistoryEntry current = history.get(i);
             if (previous.active()) {
-                double averageUtilization = (previous.percentUsage() + current.percentUsage()) / 2.0;
+                double averageUtilization =
+                    (HostCpuUtilization.fractionOfCapacity(host, previous)
+                        + HostCpuUtilization.fractionOfCapacity(host, current)) / 2.0;
                 energy += host.getPowerModel().getPower(averageUtilization)
                     * (current.time() - previous.time());
             }

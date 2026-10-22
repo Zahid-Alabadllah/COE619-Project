@@ -124,8 +124,15 @@ public class BaselineReactiveSimulation {
         // Power model: Linear interpolation between static power (175W) and peak (250W).
         // =========================================================================
         double totalEnergyJoules = 0;
+        double energyWindowStart = Double.POSITIVE_INFINITY;
+        double energyWindowEnd = Double.NEGATIVE_INFINITY;
         for (Host host : hostList) {
             totalEnergyJoules += calculateEnergyConsumption(host);
+            List<HostStateHistoryEntry> history = host.getStateHistory();
+            if (!history.isEmpty()) {
+                energyWindowStart = Math.min(energyWindowStart, history.get(0).time());
+                energyWindowEnd = Math.max(energyWindowEnd, history.get(history.size() - 1).time());
+            }
         }
         double energyKwh = totalEnergyJoules / 3600000.0; // 1 kWh = 3.6 x 10^6 Joules
 
@@ -150,7 +157,7 @@ public class BaselineReactiveSimulation {
                 if (prev.active()) {
                     hostActiveTime += interval;
                     // Strict saturation condition: CPU usage >= 100% (1.0)
-                    if (prev.percentUsage() >= 0.999) {
+                    if (HostCpuUtilization.fractionOfCapacity(host, prev) >= 0.999) {
                         hostSaturationTime += interval;
                     }
                 }
@@ -218,6 +225,8 @@ public class BaselineReactiveSimulation {
         System.out.println("║                  BASELINE THR - SIMULATION METRICS                     ║");
         System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
         System.out.printf("║  Energy Consumption                   : %10.2f J (%6.4f kWh)    ║\n", totalEnergyJoules, energyKwh);
+        System.out.printf("║  Energy History Window (seconds)      : %10.1f - %10.1f          ║\n",
+            energyWindowStart, energyWindowEnd);
         System.out.printf("║  SLATAH (SLA Time per Active Host)    : %14.6f                ║\n", slatah);
         System.out.printf("║  PDM (Degradation due to Migration)   : %14.9e             ║\n", pdm);
         System.out.printf("║  SLAV (Overall SLA Violation: S * P)  : %14.9e             ║\n", slav);
@@ -333,7 +342,9 @@ public class BaselineReactiveSimulation {
             HostStateHistoryEntry previous = history.get(i - 1);
             HostStateHistoryEntry current = history.get(i);
             if (previous.active()) {
-                double averageUtilization = (previous.percentUsage() + current.percentUsage()) / 2.0;
+                double averageUtilization =
+                    (HostCpuUtilization.fractionOfCapacity(host, previous)
+                        + HostCpuUtilization.fractionOfCapacity(host, current)) / 2.0;
                 energy += host.getPowerModel().getPower(averageUtilization)
                     * (current.time() - previous.time());
             }
