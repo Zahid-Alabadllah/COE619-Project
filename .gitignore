@@ -41,3 +41,11 @@ buildNumber.properties
 .project
 .classpath
 .settings/
+
+# LaTeX build artifacts
+*.aux
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
