@@ -97,19 +97,19 @@ This report documents the completion of the first phase of the COE 619 project. 
 \begin{itemize}[leftmargin=1.8em, itemsep=2pt]
   \item \textbf{Simulation Framework:} A modern Java/Maven simulation platform utilizing CloudSim Plus 8.0.0~\cite{cloudsimplus} with JDK 25.
   \item \textbf{Baseline Consolidation Policies:} Fully operational implementations of Static Threshold (THR) and dynamic Interquartile Range (IQR) policies~\cite{beloglazov2012ccpe}.
-  \item \textbf{Comprehensive Evaluation Metrics:} Rigorous calculation and output tracking for Data Center Energy Consumption, SLA Time per Active Host (SLATAH), Performance Degradation due to Migration (PDM), Overall SLA Violations (SLAV), Number of VM Migrations, and Energy--SLA Violations product (ESV).
+  \item \textbf{Evaluation Metrics:} Implementation and output of Data Center Energy Consumption, SLA Time per Active Host (SLATAH), Performance Degradation due to Migration (PDM), Overall SLA Violations (SLAV), Number of VM Migrations, and Energy--SLA Violations product (ESV).
   \item \textbf{Resource Accounting \& Metric Formulations:} Resolution of host RAM/bandwidth reservation inconsistencies during migration evaluation and normalization of host CPU capacity utilization.
 \end{itemize}
 
 \section{Problem and Objectives}
-Modern cloud data centers host diverse computational workloads requiring substantial electrical power. Servers running at low or idle utilization frequently draw over 60--70\% of their peak rated power~\cite{beloglazov2012ccpe}. Dynamic Virtual Machine (VM) consolidation utilizes live migration~\cite{clark2005} to aggregate active workloads onto the minimum feasible subset of physical hosts, allowing underutilized physical servers to transition into low-power sleep states.
+Modern cloud data centers host diverse computational workloads requiring substantial electrical power. A lightly loaded server still draws a large share of its peak power~\cite{beloglazov2012ccpe}. Dynamic Virtual Machine (VM) consolidation utilizes live migration~\cite{clark2005} to aggregate active workloads onto the minimum feasible subset of physical hosts, allowing underutilized physical servers to transition into low-power sleep states.
 
-However, aggressively packing VMs introduces significant performance risks. Sudden workload surges can fully saturate available host CPU processing capacity, preventing VMs from obtaining their requested execution cycles and resulting in contractual Service Level Agreement (SLA) violations. 
+However, aggressively packing VMs introduces significant performance risks. Sudden workload surges can fully saturate available host CPU processing capacity, so VMs may receive less CPU capacity than they request (unmet demand), which can violate the Service Level Agreement (SLA) between provider and customer.
 
-Standard reactive heuristics trigger VM migrations only \emph{after} a physical host has already exceeded a predefined threshold. The primary objective of this project is to develop and evaluate an intelligent, lightweight \emph{predictive} consolidation policy that anticipates CPU utilization spikes and migrates VMs proactively \emph{before} overload conditions manifest. To rigorously evaluate this prospective technique, the objective of Phase I was to build, calibrate, and verify the reactive reference baselines.
+Standard reactive heuristics trigger VM migrations only \emph{after} a physical host has already exceeded a predefined threshold. The primary objective of this project is to develop and evaluate an intelligent, lightweight \emph{predictive} consolidation policy that anticipates CPU utilization spikes and migrates VMs proactively \emph{before} overload conditions manifest. No claim is made at this stage that prediction will improve on the baselines. The objective of Phase I was to build, calibrate, and verify the reactive reference baselines.
 
 \section{Background and Related Work}
-\paragraph{Virtualization and Live Migration} Hypervisors (Virtual Machine Monitors) enable concurrent, isolated virtual machine execution over shared physical compute resources~\cite{marinescu2023}. Live migration transfers active VM memory state across physical hosts with negligible downtime. The conventional \emph{pre-copy} protocol copies memory pages iteratively across the network while the virtual machine continues computation, followed by a brief stop-and-copy pause phase~\cite{clark2005}. Because pre-copy operations introduce memory-dirtying overhead and consume CPU cycles and interconnect bandwidth, VM application performance experiences transient degradation. Voorsluys et al.~\cite{voorsluys2009} empirically quantified this degradation, demonstrating that migrating applications observe an approximate 10\% reduction in effective CPU capacity during the migration duration, an empirical model adopted by Beloglazov and Buyya~\cite{beloglazov2012ccpe}.
+\paragraph{Virtualization and Live Migration} Hypervisors (Virtual Machine Monitors) enable concurrent, isolated virtual machine execution over shared physical compute resources~\cite{marinescu2023}. Live migration moves a running VM between physical hosts. The conventional \emph{pre-copy} protocol copies memory pages iteratively across the network while the virtual machine continues computation, followed by a brief stop-and-copy pause phase~\cite{clark2005}. Because pre-copy operations introduce memory-dirtying overhead and consume CPU cycles and interconnect bandwidth, VM application performance experiences transient degradation. Voorsluys et al.~\cite{voorsluys2009} measured this degradation for a web workload, and Beloglazov and Buyya~\cite{beloglazov2012ccpe} adopted an estimate of about 10\% of the VM's CPU capacity during migration. In this project the 10\% figure is a modeling assumption, not a measurement.
 
 \paragraph{Reactive Consolidation Heuristics} Beloglazov and Buyya~\cite{beloglazov2012ccpe} decoupled dynamic VM consolidation into four distinct sub-problems: (i)~host overload detection, (ii)~host underload detection, (iii)~VM selection for migration, and (iv)~target host placement. For host overload detection, they analyzed static utilization thresholds (THR) against adaptive statistical heuristics, including Median Absolute Deviation (MAD) and Interquartile Range (IQR), as well as regression-based techniques (Local Regression and Robust Local Regression). Their benchmark suite utilized CloudSim~\cite{calheiros2011} driven by real-world CoMon PlanetLab CPU traces~\cite{park2006comon}. This project establishes a direct baseline comparison against these classical heuristics prior to introducing forward-looking predictive models.
 
@@ -144,9 +144,9 @@ where $Q_1$ and $Q_3$ denote the 25th and 75th percentiles (first and third quar
 \textbf{Simulation Parameter} & \textbf{Configured Value} \\ \midrule
 Simulation Platform & CloudSim Plus 8.0.0~\cite{cloudsimplus}, JDK 25 \\
 Physical Hosts & 4 hosts; 8 PEs $\times$ 1000 MIPS (32{,}000 MIPS total datacenter capacity) \\
-Host Memory / Bandwidth & 16{,}384 MB (16 GB) RAM; 10{,}000 Mbps bandwidth; 1 TB Storage \\
+Host Memory / Bandwidth & 16{,}384 MB RAM; 10{,}000 bandwidth units \\
 Power Model & Linear: $P_{\text{idle}} = 175$~W (static power), $P_{\max} = 250$~W (peak power) \\
-Virtual Machines & 8 VMs; 2 PEs $\times$ 1000 MIPS; 2048 MB RAM; 1000 Mbps bandwidth \\
+Virtual Machines & 8 VMs; 2 PEs $\times$ 1000 MIPS; 2048 MB RAM; 1000 bandwidth units \\
 Cloudlets (Workloads) & 8 cloudlets; 20{,}000{,}000 MI per PE (40{,}000{,}000 MI total work per VM) \\
 Workload Profile & Synthetic 24-hour diurnal traces formatted to PlanetLab specifications \\
 Scheduling Interval & 300 seconds (5 minutes, matching trace sampling period) \\
@@ -176,13 +176,13 @@ where $P(u) = 175 + 75\cdot u$, and $\bar u_{h,k}$ represents the average utiliz
 \begin{equation}
 \mathrm{SLATAH} = \frac{1}{N}\sum_{i=1}^{N}\frac{T_{s_i}}{T_{a_i}},
 \end{equation}
-where $N$ is the active host count, $T_{a_i}$ is active host duration, and $T_{s_i}$ denotes the duration where host utilization $u \ge 0.999$. Saturation reflects zero remaining host compute headroom.
+where $N$ is the active host count, $T_{a_i}$ is active host duration, and $T_{s_i}$ denotes the duration where host utilization $u \ge 0.999$. The original definition uses 100\% utilization~\cite{beloglazov2012ccpe}; $0.999$ tolerates floating-point rounding. Saturation means no remaining CPU headroom; on its own it does not prove that demand was unmet. Policy thresholds (0.80 for THR, about 0.72 for IQR) trigger migrations below saturation, so SLATAH can be zero even when migrations occur.
 
 \paragraph{PDM (Performance Degradation due to Migrations)} Workload execution degradation induced by live migration memory copying:
 \begin{equation}
 \mathrm{PDM} = \frac{1}{M}\sum_{j=1}^{M}\frac{C_{d_j}}{C_{r_j}}, \qquad C_{d_j} = 0.10 \cdot \text{MIPS}_j \cdot t_{m_j},
 \end{equation}
-where $M=8$ VMs, $\text{MIPS}_j = 2000$ MIPS (2 PEs $\times$ 1000 MIPS), $t_{m_j}$ is total migration duration in seconds, and $C_{r_j} = 40{,}000{,}000$ MI represents the total requested instruction work of the cloudlet across all PEs.
+where $M=8$ VMs, $\text{MIPS}_j = 2000$ MIPS (2 PEs $\times$ 1000 MIPS), $t_{m_j}$ is total migration duration in seconds, and $C_{r_j} = 40{,}000{,}000$ MI is the completed requested cloudlet work across all PEs. Using completed work is the project's approximation of the requested-capacity denominator in~\cite{beloglazov2012ccpe}.
 
 \paragraph{SLAV (Overall SLA Violation)} Composite metric capturing both saturation and migration overhead:
 \begin{equation}
@@ -233,13 +233,14 @@ Cloudlets Completed / Expected & 8 / 8            & 8 / 8               \\
 \end{figure}
 
 \paragraph{Discussion}
-Both baseline simulations completed successfully with 100\% task and VM accounting. Each policy executed exactly two VM live migrations in response to diurnal demand peaks. Total energy consumption exhibits negligible difference ($\sim 199.48$~J or 0.000565\%), attributable to subtle differences in migration dispatch timing ($T_u = 0.80$ for THR vs. $T_u \approx 0.72$--$0.73$ for IQR). Because physical hosts operated with sufficient capacity buffer below saturation, SLATAH, SLAV, and ESV registered zero. Meanwhile, non-zero PDM ($4.096\times 10^{-6}$) reflects the exact operational penalty of the observed migrations.
+Both baseline simulations completed successfully with 100\% task and VM accounting. Each policy performed two VM live migrations. Energy differs by about 199.48~J (0.000565\%); the cause of this small difference has not been established, and repeated runs of equivalent code have also shown last-digit variation. No host reached saturation, so SLATAH, SLAV, and ESV are zero; these are computed values, not forced. PDM is positive because two migrations occurred, under the assumed 10\% penalty. A single run per policy does not show that either policy is better.
 
 \section{Limitations}
 \begin{itemize}[leftmargin=1.8em, itemsep=2pt]
   \item \textbf{Workload Scale:} Evaluations utilized synthetic diurnal curves across 4 hosts; statistical generalization requires large-scale real-world PlanetLab traces.
   \item \textbf{Energy Integration Window:} Reported energy reflects the active execution window ($\sim 12.92$ hours) rather than an extrapolated 24-hour idle baseline.
   \item \textbf{Single-Run Baseline:} Reported figures represent single-run operational verification; multi-run statistical distributions are necessary for definitive conclusions.
+  \item \textbf{Metric Approximations:} SLATAH uses $u \ge 0.999$ as the saturation condition. PDM relies on an assumed 10\% migration penalty and uses completed cloudlet work as its denominator. SLAV and ESV are composite research metrics~\cite{beloglazov2012ccpe}, not contractual SLA measures.
 \end{itemize}
 
 \section{Progress Against Plan and Next Steps}
@@ -252,8 +253,8 @@ Both baseline simulations completed successfully with 100\% task and VM accounti
 \textbf{Task Description} & \textbf{Proposal Plan} & \textbf{Status} & \textbf{Milestone} \\ \midrule
 Literature review \& simulation setup   & Term 261, Week 6  & Completed   & CloudSim Plus verified \\
 Baseline implementation \& validation   & Term 261, Week 9  & Completed   & THR and IQR operational \\
-Progress Report I                       & Term 261, Week 10 & Completed   & Submitted deliverable \\
-Predictive model mathematical design    & Term 261, Week 13 & In Progress & Algorithm formulation \\
+Progress Report I                       & Term 261, Week 10 & This report & Baseline results \\
+Predictive model mathematical design    & Term 261, Week 13 & Next        & Algorithm formulation \\
 Progress Report II                      & Term 261, Week 15 & Planned     & Algorithm design report \\
 Predictive algorithm implementation     & Term 262, Week 4  & Planned     & CloudSim Plus module \\
 Final Prototype and Demonstration       & Term 262, Week 12 & Planned     & Live demonstration \\
