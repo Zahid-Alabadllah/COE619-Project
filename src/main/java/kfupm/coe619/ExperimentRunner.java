@@ -30,6 +30,7 @@ import java.util.function.ToDoubleFunction;
 public final class ExperimentRunner {
     private static final Path DIURNAL = Path.of("src/main/resources/planetlab/diurnal");
     private static final Path PLANETLAB = Path.of("src/main/resources/planetlab/real/20110303");
+    private static final Path PLANETLAB_HEAVY = Path.of("src/main/resources/planetlab/heavy");
     private static final Path OUT_DIR = Path.of("results");
     private static final double IDLE_SHUTDOWN_SECONDS = 0;
 
@@ -47,7 +48,7 @@ public final class ExperimentRunner {
             }
         }
         if (scenarios.isEmpty()) {
-            scenarios.addAll(List.of("diurnal", "planetlab"));
+            scenarios.addAll(List.of("diurnal", "planetlab", "planetlab_stressed"));
         }
 
         final List<Result> results = new ArrayList<>();
@@ -88,6 +89,9 @@ public final class ExperimentRunner {
             case "planetlab" -> new Config(scenario, policy,
                 ConsolidationExperiment.sampleTraces(PLANETLAB, 20, seed),
                 10, 20_000_000, 86_400, IDLE_SHUTDOWN_SECONDS, seed);
+            case "planetlab_stressed" -> new Config(scenario, policy,
+                ConsolidationExperiment.sampleTraces(PLANETLAB_HEAVY, 16, seed),
+                6, 20_000_000, 86_400, IDLE_SHUTDOWN_SECONDS, seed);
             default -> throw new IllegalArgumentException("Unknown scenario: " + scenario);
         };
     }
