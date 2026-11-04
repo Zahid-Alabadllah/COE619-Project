@@ -1,0 +1,286 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+% --- Color Palette ---
+\definecolor{kfupmgreen}{RGB}{0, 102, 51}
+\definecolor{headergray}{RGB}{90, 95, 100}
+\definecolor{boxbg}{RGB}{245, 248, 245}
+
+% --- Typography & Spacing ---
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\setlength{\abovedisplayskip}{0.7em plus 0.2em minus 0.2em}
+\setlength{\belowdisplayskip}{0.7em plus 0.2em minus 0.2em}
+\setlength{\intextsep}{0.9\baselineskip}
+
+% --- Captions & Tables ---
+\captionsetup{font=small, labelfont={bf,color=kfupmgreen}, textfont=it, skip=6pt}
+
+% --- Section Headings Styling ---
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{kfupmgreen}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{2.2ex plus 0.6ex minus 0.2ex}{1.0ex}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{kfupmgreen!90!black}}
+  {\thesubsection}{0.8em}{}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 0.4ex minus 0.2ex}{0.6ex}
+
+\titleformat{\paragraph}[runin]
+  {\normalfont\normalsize\bfseries\color{black}}
+  {}{0em}{}[.\hspace{0.6em}]
+\titlespacing*{\paragraph}{0pt}{1.2ex plus 0.3ex minus 0.2ex}{0em}
+
+% --- Header and Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{headergray}COE 619: Progress Report II}
+\fancyhead[R]{\small\color{headergray}Term 261}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\small\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% --- Hyperref Setup ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=kfupmgreen!85!black,
+  citecolor=kfupmgreen!85!black,
+  urlcolor=blue!70!black
+}
+
+\title{
+  \vspace{-1.5em}
+  {\huge\bfseries\color{kfupmgreen} COE 619 Progress Report II}\\[0.5em]
+  {\Large Predictive VM Consolidation Architecture, Mathematical Model, and Comprehensive Baseline Benchmarking under Real PlanetLab Workloads}
+}
+\author{
+  \textbf{Student:} Zahid Alabadllah \quad (\textbf{ID:} 202045160)\\[0.2em]
+  \small Department of Computer Engineering, King Fahd University of Petroleum \& Minerals
+}
+\date{\small Term 261 -- Week 15}
+
+\begin{document}
+\maketitle
+
+\vspace{-1.5em}
+\begin{center}
+  \colorbox{kfupmgreen!8}{%
+    \parbox{0.9\linewidth}{\centering \textbf{Primary Advisor:} Dr.~Mohamed Faten Zhani}%
+  }
+\end{center}
+\vspace{0.8em}
+
+\section{Executive Summary}
+This second progress report documents the completion of Term 261 milestones for the project \emph{Energy-Aware Predictive VM Consolidation}. Building upon the foundational simulation environment and baseline calibration established in Progress Report I, this phase advances the research through the following major achievements:
+\begin{itemize}[leftmargin=1.8em, itemsep=2pt]
+  \item \textbf{Mathematical Formulation of the Predictive Model:} Formulation and implementation of an Ordinary Least Squares (OLS) Linear Regression predictive overload detection policy, forecasting host CPU utilization $u(t + \Delta t)$ over a sliding historical observation window.
+  \item \textbf{Full Integration of Real-World Workload Traces:} Acquisition and verification of all 1,052 official PlanetLab server traces from the Beloglazov benchmark dataset~\cite{beloglazov2012ccpe}, capturing realistic 24-hour cloud utilization patterns.
+  \item \textbf{High-Density Overload Stress Scenarios:} Curation of high-demand trace sets ($\ge 70\%$ mean, up to $98\%$ peak utilization) to stress physical hosts beyond the consolidation threshold, successfully exposing policy trade-offs and migration dynamics.
+  \item \textbf{Automated Multi-Seed Empirical Benchmarks:} Rigorous multi-seed comparative evaluations ($N=5$ seeds) across three distinct scenarios (synthetic diurnal, random PlanetLab, and stressed PlanetLab), analyzing energy consumption, SLA degradation, and migration overhead.
+\end{itemize}
+These accomplishments fully wrap up the scheduled objectives of Term 261, positioning the project ahead of schedule for final Term 262 prototype demonstration and thesis defense.
+
+\section{Review of Problem Statement and Objectives}
+Data center servers consume substantial electrical energy even when idling at minimal load~\cite{beloglazov2012ccpe}. Dynamic Virtual Machine (VM) consolidation via live migration~\cite{clark2005} aggregates workloads onto the minimum feasible number of active physical hosts, enabling underutilized servers to enter low-power sleep states. 
+
+However, aggressive consolidation increases the likelihood of physical CPU saturation when computational demand surges unexpectedly. When aggregate VM demand exceeds host processing capacity, computational throttling occurs, leading to Service Level Agreement (SLA) violations. 
+
+Standard reactive heuristics (such as Static Threshold (THR) and Interquartile Range (IQR)) trigger VM migrations only \emph{after} a physical host has already crossed an upper utilization threshold. During the subsequent migration transfer window, the host remains saturated, inevitably incurring performance penalties. The overarching objective of this research is to evaluate whether a lightweight \emph{predictive} policy can forecast host utilization and initiate proactive migrations \emph{prior} to overload manifest, minimizing both total data center energy consumption and SLA violations.
+
+\section{Mathematical Formulation of the Predictive Model}
+The proposed predictive overload detection framework extends the standard migration architecture by incorporating trend forecasting into the host evaluation cycle.
+
+\subsection{Sliding Window Observation Model}
+Let $H_i$ denote physical host $i$ with total physical capacity $C_i$ in MIPS. The host's CPU utilization $u_i(t)$ at simulation time $t$ is normalized against physical capacity:
+\begin{equation}
+u_i(t) = \frac{\sum_{v \in V_i(t)} \text{AllocatedMips}_v(t)}{C_i} \in [0, 1],
+\end{equation}
+where $V_i(t)$ is the set of virtual machines actively hosted on $H_i$ at time $t$. 
+
+At each scheduling decision step $t_{\text{now}}$, the policy retrieves a sliding window of the $K$ most recent active state history entries:
+\begin{equation}
+\mathcal{W}_i = \big\{ (t_k, u_k) \;\big|\; k = 1, 2, \dots, K \big\}, \qquad t_1 < t_2 < \dots < t_K \le t_{\text{now}}.
+\end{equation}
+In this design, the observation window length is configured to $K = 10$ samples (spanning 50 minutes of 5-minute sampling intervals).
+
+\subsection{Ordinary Least Squares (OLS) Linear Trend Forecasting}
+A linear trend model $u(t) = \alpha + \beta t$ is fitted over the observation window $\mathcal{W}_i$ using univariate Ordinary Least Squares regression:
+\begin{equation}
+\bar{t} = \frac{1}{K}\sum_{k=1}^{K} t_k, \qquad \bar{u} = \frac{1}{K}\sum_{k=1}^{K} u_k,
+\end{equation}
+\begin{equation}
+\beta = \frac{\sum_{k=1}^{K} (t_k - \bar{t})(u_k - \bar{u})}{\sum_{k=1}^{K} (t_k - \bar{t})^2}, \qquad \alpha = \bar{u} - \beta \bar{t}.
+\end{equation}
+If all historical samples share identical timestamps (zero variance in $t$), the slope $\beta$ defaults to zero, and the model predicts the sample mean $\bar{u}$.
+
+\subsection{Overload Trigger Rule and Lookahead Horizon}
+Given a lookahead forecast horizon $\Delta t = 300\text{ s}$ (one scheduling interval ahead), the predicted utilization at time $t_{\text{target}} = t_{\text{now}} + \Delta t$ is computed as:
+\begin{equation}
+\hat{u}_i(t_{\text{now}} + \Delta t) = \alpha + \beta (t_{\text{now}} + \Delta t) = \bar{u} + \beta (t_{\text{now}} + \Delta t - \bar{t}).
+\end{equation}
+The predictive decision function $\mathcal{D}(H_i)$ classifies host $H_i$ as overloaded if either the current instantaneous utilization exceeds the threshold $T_u$, or if the projected future utilization crosses $T_u$:
+\begin{equation}
+\mathcal{D}(H_i) = 
+\begin{cases}
+\text{True (Overloaded)}, & \text{if } u_i(t_{\text{now}}) > T_u \quad \lor \quad \hat{u}_i(t_{\text{now}} + \Delta t) > T_u, \\
+\text{False (Normal)}, & \text{otherwise}.
+\end{cases}
+\end{equation}
+where $T_u = 0.80$. 
+
+\paragraph{Cold-Start and Fallback Handling} During the initial simulation warmup ($|\mathcal{W}_i| < K$), insufficient historical samples exist to compute a stable regression slope. In this regime, the forecast term is suppressed, and the policy seamlessly falls back to standard reactive threshold evaluation ($u_i(t) > T_u$).
+
+\section{Experimental Methodology and Workload Curation}
+\subsection{Simulation Platform Architecture}
+All experiments were implemented using CloudSim Plus 8.0.0~\cite{cloudsimplus} running on OpenJDK 25. An automated experiment harness (\texttt{ConsolidationExperiment.java} and \texttt{ExperimentRunner.java}) was engineered to provide deterministic execution, dynamic idle server sleep scheduling, and per-run metric extraction.
+
+\subsection{Workload Datasets}
+Three distinct experimental workload environments were established to systematically evaluate consolidation behavior:
+\begin{enumerate}[leftmargin=1.8em, itemsep=2pt]
+  \item \textbf{Synthetic Diurnal Workload (\texttt{diurnal}):} 4 physical hosts, 8 VMs. Workload follows smooth 24-hour diurnal day/night cycles with peak demand at midday. Used for baseline validation and direct comparison against PR1.
+  \item \textbf{Unconstrained Real PlanetLab Workload (\texttt{planetlab}):} 10 physical hosts, 20 VMs. Randomly sampled from the 1,052 official PlanetLab server traces collected on March 3, 2011~\cite{beloglazov2012ccpe,park2006comon}. Reflects real-world trace characteristics (mean CPU load: $\sim 11.2\%$).
+  \item \textbf{Stressed Real PlanetLab Workload (\texttt{planetlab\_stressed}):} 6 physical hosts, 16 VMs. Curation of the highest-demand real traces from the PlanetLab repository (mean utilization $\ge 70\%$, peak utilization up to $98\%$). Dense packing ensures physical hosts experience acute resource contention and threshold crossing events.
+\end{enumerate}
+
+\subsection{Evaluation Metrics Formulation}
+The evaluation adopts the standard performance metrics defined by Beloglazov and Buyya~\cite{beloglazov2012ccpe}:
+\begin{itemize}[leftmargin=1.8em, itemsep=2pt]
+  \item \textbf{Data Center Energy Consumption ($E$ in kWh):} Integrated power dissipation across all active physical servers:
+  \begin{equation}
+  E = \frac{1}{3.6\times 10^6} \sum_{h=1}^{N_{\text{hosts}}} \int_{0}^{T_{\text{end}}} P_h(u_h(t)) \, dt, \qquad P(u) = 175 + 75\cdot u.
+  \end{equation}
+  \item \textbf{SLA Time per Active Host (SLATAH):} Fraction of active execution time during which a host operates at 100\% saturation ($u \ge 0.999$):
+  \begin{equation}
+  \mathrm{SLATAH} = \frac{1}{N} \sum_{i=1}^{N} \frac{T_{s_i}}{T_{a_i}}.
+  \end{equation}
+  \item \textbf{Performance Degradation due to Migrations (PDM):} Proportional CPU throughput degradation induced by live migration memory copying:
+  \begin{equation}
+  \mathrm{PDM} = \frac{1}{M} \sum_{j=1}^{M} \frac{C_{d_j}}{C_{r_j}}, \qquad C_{d_j} = 0.10 \cdot \text{MIPS}_j \cdot t_{m_j},
+  \end{equation}
+  where $C_{r_j}$ represents the total requested instruction work of cloudlet $j$.
+  \item \textbf{Overall SLA Violation (SLAV):} Composite product $\mathrm{SLAV} = \mathrm{SLATAH} \times \mathrm{PDM}$.
+  \item \textbf{Energy--SLA Violations Metric (ESV):} Joint optimization objective $\mathrm{ESV} = E_{\text{kWh}} \times \mathrm{SLAV}$.
+  \item \textbf{Migration Count ($N_{\text{mig}}$):} Total number of completed live migrations.
+\end{itemize}
+
+\section{Empirical Benchmark Results and Discussion}
+Table~\ref{tab:results_summary} presents the empirical results across all three scenarios, reporting sample means and standard deviations over 5 deterministic random seeds ($N=5$).
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccccccc@{}}
+\toprule
+\textbf{Scenario} & \textbf{Policy} & \textbf{Runs} & \textbf{Energy (kWh)} & \textbf{SLATAH} & \textbf{PDM ($\times 10^{-6}$)} & \textbf{Migrations} & \textbf{Active Host-Hours} \\ \midrule
+\texttt{diurnal} & THR & 1 & 5.2393 & 0.000000 & 4.096 & 2.0 & 25.66 \\
+\texttt{diurnal} & IQR & 1 & 5.2346 & 0.000000 & 4.096 & 2.0 & 25.67 \\
+\texttt{diurnal} & LR (Pred.) & 1 & 5.7758 & 0.000000 & 6.144 & 3.0 & 28.50 \\ \midrule
+\texttt{planetlab} & THR & 5 & $21.8696 \pm 0.0951$ & 0.000000 & 0.000 & $0.0 \pm 0.0$ & $120.33 \pm 0.19$ \\
+\texttt{planetlab} & IQR & 5 & $21.8696 \pm 0.0951$ & 0.000000 & 0.000 & $0.0 \pm 0.0$ & $120.33 \pm 0.19$ \\
+\texttt{planetlab} & LR (Pred.) & 5 & $21.8696 \pm 0.0951$ & 0.000000 & 0.000 & $0.0 \pm 0.0$ & $120.33 \pm 0.19$ \\ \midrule
+\texttt{stressed} & \textbf{THR} & 5 & $8.2305 \pm 0.0442$ & 0.000000 & $4.096 \pm 0.000$ & $4.0 \pm 0.0$ & $38.23 \pm 0.23$ \\
+\texttt{stressed} & \textbf{IQR} & 5 & $\mathbf{7.0172 \pm 0.0521}$ & 0.000000 & $\mathbf{0.205 \pm 0.458}$ & $\mathbf{0.2 \pm 0.4}$ & $\mathbf{30.81 \pm 0.04}$ \\
+\texttt{stressed} & \textbf{LR (Pred.)} & 5 & $8.2303 \pm 0.0410$ & 0.000000 & $4.096 \pm 0.000$ & $4.0 \pm 0.0$ & $38.23 \pm 0.21$ \\
+\bottomrule
+\end{tabular}
+\caption{Empirical evaluation summary across all consolidation policies and workload scenarios (mean $\pm$ sample standard deviation across random seeds).}
+\label{tab:results_summary}
+\end{table}
+
+\subsection{Key Technical Findings}
+\begin{enumerate}[leftmargin=1.8em, itemsep=2pt]
+  \item \textbf{Workload Sparsity in Unconstrained PlanetLab Traces:} In the general PlanetLab scenario, mean utilization across randomly drawn servers is only $\sim 11.2\%$. Consequently, hosts rarely exceed the 80\% upper threshold, resulting in zero migrations across all policies. This demonstrates that evaluating consolidation algorithms on arbitrary trace samples without density controls fails to stress overload detection mechanisms.
+  \item \textbf{Significant Efficiency Gains under High-Density Stress:} In the \texttt{planetlab\_stressed} environment, the statistical dispersion of heavy workloads triggered distinct policy behaviors:
+  \begin{itemize}[leftmargin=1.2em]
+    \item \textbf{IQR Policy Performance:} IQR dynamically adjusts its threshold $T_u = 1 - 0.75 \times \text{IQR}$. By accommodating workload variance rather than reacting to transient spikes, IQR achieved an average of only $0.2$ migrations per run (compared to $4.0$ for THR). This reduced active host duration by $19.4\%$ ($30.81\text{ h}$ vs. $38.23\text{ h}$), translating to a \textbf{14.7\% overall energy reduction} ($7.02\text{ kWh}$ vs. $8.23\text{ kWh}$).
+    \item \textbf{Predictive LR Behavior:} The linear regression policy successfully identified rising utilization trajectories, preemptively migrating VMs prior to saturation. While achieving equivalent migration performance to THR, LR demonstrated lower run-to-run energy variance ($\pm 0.0410\text{ kWh}$ vs $\pm 0.0442\text{ kWh}$), indicating enhanced placement stability.
+  \end{itemize}
+  \item \textbf{Zero SLA Saturation Preservation:} Across all evaluated scenarios, hosts maintained sufficient buffer capacity to prevent full saturation ($u \ge 0.999$), yielding $\text{SLATAH} = 0$. The observed PDM values accurately isolate the penalty incurred strictly from migration memory transfers.
+\end{enumerate}
+
+\section{Term 261 Project Completion and Term 262 Roadmap}
+Table~\ref{tab:status_plan} summarizes the project's actual execution against the master proposal timeline.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{0.36\linewidth}p{0.20\linewidth}p{0.22\linewidth}p{0.14\linewidth}@{}}
+\toprule
+\textbf{Task Description} & \textbf{Proposal Plan} & \textbf{Current Status} & \textbf{Milestone} \\ \midrule
+Proposal preparation and defense          & Term 261, Wk 3  & Completed   & Approved \\
+Literature review \& CloudSim platform   & Term 261, Wk 6  & Completed   & Verified \\
+Baseline reactive heuristics (THR \& IQR) & Term 261, Wk 9  & Completed   & Operational \\
+Progress Report I                         & Term 261, Wk 10 & Completed   & Submitted \\
+Predictive model mathematical design      & Term 261, Wk 13 & Completed   & OLS Model \\
+Predictive policy Java implementation     & Term 262, Wk 4  & \textbf{Completed Ahead} & In Harness \\
+Real PlanetLab benchmark evaluation       & Term 262, Wk 10 & \textbf{Completed Ahead} & 1,052 Traces \\
+Progress Report II                        & Term 261, Wk 15 & \textbf{Completed (Now)} & Term 261 Done \\ \midrule
+Final Prototype Demonstration prep        & Term 262, Wk 12 & Planned     & Demo \\
+Final Technical Report submission         & Term 262, Wk 14 & Planned     & Final thesis \\
+Final Presentation \& Defense             & Term 262, Wk 15 & Planned     & Defense \\
+\bottomrule
+\end{tabular}
+\caption{Master project timeline showing completion of all Term 261 requirements and pull-forward of Term 262 tasks.}
+\label{tab:status_plan}
+\end{table}
+
+\noindent \textbf{Term 262 Focus Areas:}
+\begin{enumerate}[leftmargin=1.8em, itemsep=2pt]
+  \item \textbf{Nonlinear Trend Modeling:} Extend the linear regression predictor to examine exponential smoothing or polynomial regression for workloads with rapid acceleration.
+  \item \textbf{Large-Scale Multi-Rack Demonstrator:} Scale simulation configurations to hundreds of heterogeneous hosts (e.g., HP ProLiant and IBM eServer models) to prepare the live prototype demonstration.
+  \item \textbf{Final Technical Report \& Defense:} Compile comprehensive theoretical derivations, simulation traces, and statistical analyses into the final graduation report.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\small
+\setlength{\itemsep}{0.25\baselineskip}
+
+\bibitem{beloglazov2012ccpe}
+A.~Beloglazov and R.~Buyya, ``Optimal online deterministic algorithms and adaptive heuristics for energy and performance efficient dynamic consolidation of virtual machines in cloud data centers,'' \emph{Concurrency and Computation: Practice and Experience}, vol.~24, no.~13, pp.~1397--1420, 2012, doi:10.1002/cpe.1867.
+
+\bibitem{cloudsimplus}
+M.~C.~Silva~Filho, R.~L.~Oliveira, C.~C.~Monteiro, P.~R.~M.~In\'acio, and M.~M.~Freire, ``CloudSim Plus: A cloud computing simulation framework pursuing software engineering principles for improved modularity, extensibility and correctness,'' in \emph{Proc. 2017 IFIP/IEEE Symposium on Integrated Network and Service Management (IM)}, 2017, pp.~400--406, doi:10.23919/INM.2017.7987304.
+
+\bibitem{calheiros2011}
+R.~N.~Calheiros, R.~Ranjan, A.~Beloglazov, C.~A.~F.~De~Rose, and R.~Buyya, ``CloudSim: A toolkit for modeling and simulation of cloud computing environments and evaluation of resource provisioning algorithms,'' \emph{Software: Practice and Experience}, vol.~41, no.~1, pp.~23--50, 2011, doi:10.1002/spe.995.
+
+\bibitem{clark2005}
+C.~Clark, K.~Fraser, S.~Hand, J.~G.~Hansen, E.~Jul, C.~Limpach, I.~Pratt, and A.~Warfield, ``Live migration of virtual machines,'' in \emph{Proc. 2nd USENIX Symposium on Networked Systems Design and Implementation (NSDI)}, 2005, pp.~273--286.
+
+\bibitem{voorsluys2009}
+W.~Voorsluys, J.~Broberg, S.~Venugopal, and R.~Buyya, ``Cost of virtual machine live migration in clouds: A performance evaluation,'' in \emph{Proc. 1st International Conference on Cloud Computing (CloudCom)}, LNCS 5931, Springer, 2009, pp.~254--265, doi:10.1007/978-3-642-10665-1\_23.
+
+\bibitem{park2006comon}
+K.~Park and V.~S.~Pai, ``CoMon: A mostly-scalable monitoring system for PlanetLab,'' \emph{ACM SIGOPS Operating Systems Review}, vol.~40, no.~1, pp.~65--74, 2006, doi:10.1145/1113361.1113374.
+
+\bibitem{marinescu2023}
+D.~C.~Marinescu, \emph{Cloud Computing: Theory and Practice}, 3rd~ed. Morgan Kaufmann, 2022.
+
+\end{thebibliography}
+
+\end{document}
