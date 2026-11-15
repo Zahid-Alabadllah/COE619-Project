@@ -68,14 +68,22 @@ For the project's SLATAH, calculate this percentage for each server, then averag
 \textbf{Code note:} we count CPU at 99.9\% or higher as fully used. If you see $T_s/T_a$, Ts means fully-busy seconds and Ta means switched-on seconds. This division is what ``ratio'' means. Zero means no fully-busy time was counted; it does not prove migration prevented it.
 
 \textbf{PDM: work lost while moving VMs.}
-\textbf{Moving a virtual machine between servers can slow it down. PDM estimates the computing work lost during that move, divided by the total work used for comparison.}
-\[\text{For one VM: }\frac{\text{estimated computing work lost while moving}}{\text{total computing work used for comparison}}.\]
-\textbf{Example only:} losing 2 units of computing work out of 100 gives $2/100=0.02=2\%$ lost work. The project averages these values across VMs. A VM that did not move contributes zero. \textbf{Lower means less estimated work lost.}
+Moving a virtual machine (VM) can slow it down. PDM means \textbf{performance degradation due to migration}: the estimated work lost during moves, divided by the work used for comparison.
+\[\text{PDM for one VM}=\frac{\text{estimated work lost during migration}}{\text{total work used for comparison}}.\]
+\[\text{Estimated lost work}=0.10\times\text{VM processing capacity}\times\text{time spent migrating}.\]
+\textbf{What each part means:} 0.10 is the assumed 10\% slowdown during migration. Capacity is how much work the VM can do per second, across all its CPU cores. Migration time is the total seconds spent in completed moves.
 
-\textbf{Code note:} lost work is estimated using 10\% of a VM's processing capacity during migration. The total-work figure is completed-task work; if no task finished, we estimate it from capacity and running time. This is a model, not a measured real-server slowdown. The assumed 10\% penalty is not the final PDM value.
+Capacity is measured in \textbf{MIPS} (million instructions per second). Multiplying by seconds gives \textbf{MI} (million instructions), an amount of work. Both the top and bottom of the PDM division are work in MI, so the result has no unit.
+
+\textbf{Example only:} a VM can process 2,000 MI per second and spends 10 seconds migrating. Estimated lost work is $0.10\times2{,}000\times10=2{,}000$ MI. If its total work is 1,000,000 MI:
+\[\text{PDM for that VM}=\frac{2{,}000}{1{,}000{,}000}=0.002=0.2\%.\]
+\textbf{Hot take:} we assumed a 10\% slowdown \emph{during the move}, but the estimated work lost over the whole task is only 0.2\% in this example.
+
+\textbf{Project PDM:} calculate the value for each eligible VM, then average the values. A VM that never moved contributes zero. Lower PDM means less estimated migration-related work loss.
+
+\textbf{Code note:} the total-work figure is the total instruction length of completed tasks. If no task finished, the code estimates it as VM capacity times execution time. Only VMs with a positive total-work figure are averaged. This fallback is an approximation, not measured CPU demand; the 10\% is a model assumption, not a universal real-server penalty.
 \paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. Research convention, not a formal standard.\par
 
-\newpage
 \textbf{SLAV: one score combining the two costs.}
 \textbf{Multiply SLATAH (time fully busy) by PDM (work lost while moving).}
 \[\mathrm{SLAV}=\mathrm{SLATAH}\times\mathrm{PDM}.\]
