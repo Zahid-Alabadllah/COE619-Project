@@ -115,7 +115,7 @@ IQR used 14.6\% less energy than THR in this stressed verification batch.
 
 \textbf{Stressed:} IQR made fewer moves and used fewer active-host hours. Low dispersion can raise its threshold above 80\%, allowing denser packing. This is a supported interpretation of the rule and observations, not proof that every avoided move was unnecessary. Placement strategy also differs: IQR uses a dynamic first-fit policy, so this is not a perfectly isolated detector comparison.
 
-LR recorded zero predictive triggers in this stressed batch. Its current-load branch can fire before forecasting is attempted. It matched THR's migration count, but equal counts do not prove identical timing or placement. No claim of better prediction accuracy or placement stability is supported.
+LR recorded one forecast flag in stressed seed 5 and zero in seeds 1--4. Its current-load branch can fire before forecasting is attempted. It matched THR's migration count, but equal counts do not prove identical timing or placement. No claim of better prediction accuracy or placement stability is supported.
 
 All recorded SLATAH and SLAV values are zero. Some stressed runs have nonzero sampled unmet demand. Thus zero SLAV must not be described as zero performance loss. Only 2 of 20 cloudlets finish in the random PlanetLab runs before the time limit; all 20 VMs were created. Completion is a separate check from VM creation.
 
@@ -123,7 +123,7 @@ All recorded SLATAH and SLAV values are zero. Some stressed runs have nonzero sa
 \enlargethispage{2\baselineskip}
 \textbf{Why these parameters?} They are transparent starting settings: 80\% warning, 10 observations, one-interval forecast, IQR factor 0.75. They have not been optimized.
 
-\textbf{Did prediction help?} Not convincingly yet. It activated in diurnal checks but cost more energy, and did not activate in the stressed batch.
+\textbf{Did prediction help?} Not convincingly yet. It activated in diurnal checks but cost more energy, and rarely flagged forecasts under stress.
 
 \textbf{Why keep zero metrics?} To document the research formulation, while explaining its blind spot and showing separate measurements.
 
