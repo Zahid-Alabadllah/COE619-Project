@@ -1,0 +1,40 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Compare all fixed workloads",
+            "request": "launch",
+            "mainClass": "kfupm.coe619.ExperimentRunner",
+            "args": "--output results/demo",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Compare day-night workload",
+            "request": "launch",
+            "mainClass": "kfupm.coe619.ExperimentRunner",
+            "args": "diurnal --output results/demo",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Compare heavy workload",
+            "request": "launch",
+            "mainClass": "kfupm.coe619.ExperimentRunner",
+            "args": "heavy --output results/demo",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Inspect workload statistics",
+            "request": "launch",
+            "mainClass": "kfupm.coe619.TraceStats",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

@@ -37,7 +37,10 @@ buildNumber.properties
 # IDE specific files
 .idea/
 *.iml
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
 .project
 .classpath
 .settings/

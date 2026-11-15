@@ -19,7 +19,7 @@ We evaluate whether simple CPU trend prediction improves energy/performance trad
 - `HostCpuUtilization`: allocated MIPS / physical capacity.
 - `HostLocalResourceProvisioner`: per-host resource accounting workaround.
 - `TraceStats`: dataset statistics.
-- `Baseline*Simulation`: historical baseline programs retained for PR1 reproducibility.
+- `archive/pr1/`: the three older standalone programs, outside the active Maven source tree.
 
 ## Simple workflow
 
@@ -38,3 +38,11 @@ Exact ordered trace paths are committed under src/main/resources/workloads. All 
 Each result row is one case/policy observation. Inspect all cases rather than pooling unlike scenarios. Fixed inputs do not eliminate all simulator iteration-order variability. Repeat runs when needed to establish a specific result's reliability. Previous seed-based evidence is preserved under results/archive/seed-workflow. Historical PR1 and handoffs are records, not current run instructions.
 
 The active and old top-level 20110303 subsets are unused by the current runner; they are retained for history. Current inputs are diurnal, real/20110303, heavy, plus workload manifests. The project focus is validating the existing simple predictor, not adding algorithm or infrastructure complexity.
+
+## VS Code layout
+
+The active Java package contains five core classes plus the optional TraceStats utility. Historical programs are under archive/pr1, not src. THR and IQR remain in the current common harness.
+
+Use **Terminal > Run Build Task** (Ctrl+Shift+B) for the complete fixed-workload comparison. **Terminal > Run Task** also offers day/night, heavy and workload-statistics tasks. These tasks use the verified PowerShell helper and preserve report results. **Run and Debug** offers the same current programs through the Java extension. Local JDK paths belong in personal VS Code settings, not shared launch files.
+
+Generated build files and LaTeX intermediates are hidden in this checkout's Explorer. PDFs nest under their editable LaTeX sources. The archive remains available for historical reference.
