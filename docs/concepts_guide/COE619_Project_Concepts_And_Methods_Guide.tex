@@ -59,24 +59,37 @@ Here u is CPU fraction: 0 means idle and 1 means fully used. Off-host power is m
 These are chosen simplified model parameters, not measurements of our laptop or a calibrated hardware claim. Energy is integrated over recorded active-host history until simulation end, not only cloudlet execution. The configured horizon is 86,400 s; recorded end times can exceed it slightly. Cooling, network equipment and measured predictor energy are not included.
 
 \textbf{SLATAH: SLA time per active host.}
-\[\text{one host's ratio}=T_s/T_a.\]
-Ts is recorded saturation time in seconds; Ta is active time in seconds. Compute this ratio for each host with positive active time, then average those ratios. A host saturated for 60 of 600 active seconds has a ratio of 0.10. This is not the same as pooling time across all hosts.
-\hot{What fraction of each active server's time was spent at the saturation cutoff?}
-The code counts history intervals whose starting utilization is at least 0.999. Brief events between recorded states may be missed. Zero means no counted saturation, not proof that migrations prevented it.
+SLATAH measures how much of a server's active time was spent at the saturation cutoff (at least 99.9\% CPU).
+\[\text{One host's saturation fraction}=\frac{T_s}{T_a}.\]
+\textbf{Ts} = seconds spent saturated. \textbf{Ta} = total seconds the host was active (powered on).
+
+\textbf{What does ``ratio'' mean?} One amount divided by another. Here it tells us the share of active time spent saturated. Example: $60/600=0.10=10\%$. The host was saturated for 60 of its 600 active seconds.
+
+\textbf{Our reported SLATAH:} calculate this fraction for each host with active time, then take their average. Each included host has equal weight, even if hosts ran for different lengths of time.
+\hot{SLATAH answers: ``How much of the servers' active time was spent saturated?'' Lower is better.}
+The code counts recorded intervals starting at the cutoff. A zero means no counted saturation; brief events may be missed, and zero does not prove migrations prevented overload.
 
 \textbf{PDM: performance degradation due to migration.}
-\[\text{VM penalty}=\frac{0.10\times\text{VM capacity}\times\text{migration seconds}}{\text{work denominator}}.\]
-Capacity is total MIPS across VM PEs; multiplying it by seconds gives MI. The numerator is an assumed 10\% lost-work estimate during completed migrations. The code divides by finished-cloudlet total length in MI, or capacity times execution time if no cloudlet finished. It averages eligible VM ratios, including zero-migration VMs.
-\hot{Estimated work lost while moving, divided by a work baseline. The final PDM is not simply 10\%.}
-The fallback denominator is an approximation, not an integral of actual requested work. The 10\% is a model assumption, not a universal real-server penalty.
+PDM measures the estimated share of processing work lost because VMs were moved.
+\[\text{One VM's lost-work fraction}=\frac{0.10\times\text{VM capacity}\times\text{migration seconds}}{\text{work baseline}}.\]
+The top estimates lost work in MI: 10\% of VM capacity (total MIPS across its cores), multiplied by migration seconds. The bottom is finished-task work in MI; if none finished, the code uses capacity times execution time instead.
+
+\textbf{Example only:} 2 MI lost out of 100 MI gives $2/100=0.02=2\%$. Reported PDM averages the eligible VMs' fractions, including zero for VMs that did not migrate.
+\hot{PDM answers: ``What share of work was estimated lost during migration?'' Lower is better.}
+The 10\% is our model assumption, not the final PDM score. The fallback work baseline is an approximation, not measured total CPU demand.
 \paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. Research convention, not a formal standard.\par
 
 \newpage
 \textbf{SLAV: composite SLA violation score.}
+SLAV combines the saturation score (SLATAH) and the migration-loss score (PDM):
 \[\mathrm{SLAV}=\mathrm{SLATAH}\times\mathrm{PDM}.\]
-Both factors and the result are dimensionless fractions. ESV (energy and SLA violations) is energy in kWh multiplied by SLAV; its resulting unit is kWh scaled by that score.
-\hot{If either factor is zero, both SLAV and ESV collapse to zero. They cannot rank these runs alone.}
-Keep them for comparison with the chosen research formulation, but also show energy, migrations, active-host hours and unmet demand. They are research conventions, not formal SLA compliance certificates.
+\textbf{Example only:} if SLATAH is 0.10 and PDM is 0.02, then SLAV is $0.10\times0.02=0.002$. This is a combined research score, not a measured percentage of customer requests that failed.
+\hot{SLAV answers: ``What is the combined saturation-and-migration score?'' Lower is better, but a zero can hide a cost.}
+In our results, SLATAH is zero, so SLAV is zero even when PDM is positive. Zero SLAV therefore does not mean there was no migration cost or performance loss.
+
+\textbf{ESV: energy and SLA violations.} ESV multiplies energy in kWh by SLAV. It is energy scaled by the combined score. Since our SLAV is zero, ESV is also zero and cannot distinguish these runs.
+
+\textbf{How to read these together:} SLATAH = saturation time; PDM = estimated work lost while moving; SLAV = their product. Also show energy, migrations, active-host hours and unmet demand. These are research conventions, not formal SLA compliance certificates.
 
 \textbf{Unmet demand.} At roughly 300-second intervals, compare running VMs' requested and allocated MIPS. Sum positive shortfalls times 300 seconds and divide by sampled requested MIPS times 300 seconds.
 \hot{What share of sampled requested CPU work was not supplied?}
