@@ -125,7 +125,6 @@ The workloads folder contains only lists of paths, not duplicate trace data. rea
 
 \textbf{From the repository's VS Code PowerShell terminal:}
 \begin{verbatim}
-./scripts/run.ps1 -Stats
 ./scripts/run.ps1 -Scenario diurnal
 ./scripts/run.ps1 -Scenario heavy
 ./scripts/run.ps1 -Scenario real_a
@@ -133,7 +132,7 @@ The workloads folder contains only lists of paths, not duplicate trace data. rea
 \end{verbatim}
 The last command runs all five cases and all three policies, giving 15 result rows. real b and real c can also be run by name. Demo output goes to results/demo. Use -OutputDir results only to deliberately replace the report evidence and then update the tables. The helper builds in target/meeting-build to keep command-line output separate from the IDE's compiled files.
 
-\textbf{Code roles.} ExperimentRunner reads the lists and compares policies. ConsolidationExperiment builds the simulation and calculates metrics. PredictiveLinearRegressionPolicy fits the OLS line. TraceStats describes input data. Baseline programs preserve PR1 history.
+\textbf{Code roles.} ExperimentRunner reads the lists and compares policies. ConsolidationExperiment builds the simulation and calculates metrics. PredictiveLinearRegressionPolicy fits the OLS line. Baseline programs preserve PR1 history.
 
 \textbf{Advisor answers.} ``I compare three policies on the same fixed workloads. Energy measures the cost of running hosts; migrations measure movement; SLA and unmet-demand fields describe modelled performance impact. Prediction has not established a general advantage. Next I will validate the current approach before expanding it.''
 \end{document}

@@ -92,17 +92,16 @@ Open the repository folder COE619-Project-Code. Use its integrated PowerShell te
 \begin{tabularx}{\linewidth}{@{}p{0.20\linewidth}p{0.35\linewidth}X@{}}\toprule
 Progress to explain & Open or run & What to point out\\\midrule
 Earlier baselines & BaselineReactiveSimulation.java and BaselineIQRSimulation.java & Historical PR1 implementations; current harness adds idle shutdown.\\[5pt]
-Workload integration & src/main/resources/planetlab; run command A below & Synthetic versus real CPU histories; each value is CPU percent, one per five minutes.\\[5pt]
+Workload integration & src/main/resources/planetlab; inspect inputs in step A below & Synthetic versus real CPU histories; each value is CPU percent, one per five minutes.\\[5pt]
 Predictor implemented & PredictiveLinearRegressionPolicy.java & isOverloaded checks current CPU first, then the forecast; forecast fits OLS.\\[5pt]
 Common experiment setup & ConsolidationExperiment.java & createPolicy, host/VM configuration, idle shutdown and computeResult.\\[5pt]
 Automated comparisons & ExperimentRunner.java & Fixed manifests shared across policies; five named cases and CSV output.\\[5pt]
 Verified findings & results/summary.md and experiments.csv & 15 saved rows; show energy, moves, host-hours, unmet demand and forecast flags.\\[5pt]
 Live demonstration & Command B below; optional C & Show terminal summary and results/demo. Explain one result rather than scrolling through every log.\\\bottomrule
 \end{tabularx}\end{center}
-\textbf{A. Inspect workload statistics (does not run simulations)}
-\begin{verbatim}
-./scripts/run.ps1 -Stats
-\end{verbatim}
+\textbf{A. Inspect workload inputs}\par
+Open src/main/resources/workloads/diurnal.txt to show the fixed trace list, then open one referenced trace to show CPU percentages.
+\par
 \textbf{B. Short day/night comparison}
 \begin{verbatim}
 ./scripts/run.ps1 -Scenario diurnal

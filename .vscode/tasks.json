@@ -55,23 +55,6 @@
                 "panel": "dedicated",
                 "clear": true
             }
-        },
-        {
-            "label": "Inspect workload statistics",
-            "type": "shell",
-            "command": "./scripts/run.ps1",
-            "args": [
-                "-Stats"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated",
-                "clear": true
-            }
         }
     ]
 }

@@ -27,14 +27,6 @@
             "args": "heavy --output results/demo",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
-        },
-        {
-            "type": "java",
-            "name": "Inspect workload statistics",
-            "request": "launch",
-            "mainClass": "kfupm.coe619.TraceStats",
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
         }
     ]
 }

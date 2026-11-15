@@ -18,12 +18,11 @@ We evaluate whether simple CPU trend prediction improves energy/performance trad
 - `PredictiveLinearRegressionPolicy`: ten-reading OLS forecast with static fallback.
 - `HostCpuUtilization`: allocated MIPS / physical capacity.
 - `HostLocalResourceProvisioner`: per-host resource accounting workaround.
-- `TraceStats`: dataset statistics.
 - `archive/pr1/`: the three older standalone programs, outside the active Maven source tree.
 
 ## Simple workflow
 
-Run `./scripts/run.ps1` for all five fixed cases, or `./scripts/run.ps1 -Scenario diurnal` / `-Scenario heavy` / `-Scenario real_a` for one case. Each compares THR, IQR and LR. Use `./scripts/run.ps1 -Stats` for workload statistics. There is no seed setting or averaging across workloads.
+Run `./scripts/run.ps1` for all five fixed cases, or `./scripts/run.ps1 -Scenario diurnal` / `-Scenario heavy` / `-Scenario real_a` for one case. Each compares THR, IQR and LR. There is no seed setting or averaging across workloads.
 
 Demo output is written to results/demo. Add `-OutputDir results` only when deliberately regenerating the report evidence. JDK 25 is used locally; Maven targets Java 17. The helper uses target/meeting-build to avoid IDE output collisions.
 
@@ -41,8 +40,8 @@ The active and old top-level 20110303 subsets are unused by the current runner; 
 
 ## VS Code layout
 
-The active Java package contains five core classes plus the optional TraceStats utility. Historical programs are under archive/pr1, not src. THR and IQR remain in the current common harness.
+The active Java package contains five core classes. Historical programs are under archive/pr1, not src. THR and IQR remain in the current common harness.
 
-Use **Terminal > Run Build Task** (Ctrl+Shift+B) for the complete fixed-workload comparison. **Terminal > Run Task** also offers day/night, heavy and workload-statistics tasks. These tasks use the verified PowerShell helper and preserve report results. **Run and Debug** offers the same current programs through the Java extension. Local JDK paths belong in personal VS Code settings, not shared launch files.
+Use **Terminal > Run Build Task** (Ctrl+Shift+B) for the complete fixed-workload comparison. **Terminal > Run Task** also offers day/night and heavy tasks. These tasks use the verified PowerShell helper and preserve report results. **Run and Debug** offers the same current programs through the Java extension. Local JDK paths belong in personal VS Code settings, not shared launch files.
 
 Generated build files and LaTeX intermediates are hidden in this checkout's Explorer. PDFs nest under their editable LaTeX sources. The archive remains available for historical reference.
