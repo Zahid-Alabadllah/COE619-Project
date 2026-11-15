@@ -36,7 +36,7 @@ Exact ordered trace paths are committed under src/main/resources/workloads. All 
 
 Each result row is one case/policy observation. Inspect all cases rather than pooling unlike scenarios. Fixed inputs do not eliminate all simulator iteration-order variability. Repeat runs when needed to establish a specific result's reliability. Previous seed-based evidence is preserved under results/archive/seed-workflow. Historical PR1 and handoffs are records, not current run instructions.
 
-The active and old top-level 20110303 subsets are unused by the current runner; they are retained for history. Current inputs are diurnal, real/20110303, heavy, plus workload manifests. The project focus is validating the existing simple predictor, not adding algorithm or infrastructure complexity.
+The unused active subset has been removed. The old top-level 20110303 samples remain as historical inputs. Current inputs are diurnal, real/20110303, heavy, plus workload manifests. The project focus is validating the existing simple predictor, not adding algorithm or infrastructure complexity.
 
 ## VS Code layout
 

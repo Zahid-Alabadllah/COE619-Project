@@ -119,7 +119,7 @@ In this batch LR used more energy than THR in both diurnal and heavy cases. The 
 Older seed-based runs are retained in results/archive/seed-workflow for provenance. Their numbers belong to an older input-selection/order design and must not be mixed with this table.
 \newpage
 \section{What to run and what the folders mean}
-Traces are input text files, not programs. Each value is CPU percentage for a five-minute sample. diurnal holds synthetic day/night traces; real/20110303 holds all 1,052 real traces; heavy holds the 16 high-demand traces. These three folders support current experiments. active (114 traces) and top-level 20110303 (four old samples) are historical subsets, unused by the current runner.
+Traces are input text files, not programs. Each value is CPU percentage for a five-minute sample. diurnal holds synthetic day/night traces; real/20110303 holds all 1,052 real traces; heavy holds the 16 high-demand traces. These three folders support current experiments. The unused active subset has been removed. The top-level 20110303 folder contains four historical samples, unused by the current runner.
 
 The workloads folder contains only lists of paths, not duplicate trace data. real a, b and c name the fixed groups in those lists. Seeds and averages are no longer part of the current workflow. They remain in the historical experiment archive, where a seed controlled random selection/order and an average combined repeated runs.
 
