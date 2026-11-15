@@ -44,10 +44,15 @@ import java.util.stream.Stream;
  * <ul>
  *   <li>Idle hosts are shut down after {@link Config#idleShutdownSeconds}, so consolidation can
  *       actually save idle power. The original baselines never power hosts off.</li>
- *   <li>PDM uses the time-integrated <em>requested</em> CPU (MIPS x seconds) of each VM as its
- *       denominator, matching the published definition, instead of completed cloudlet length.</li>
- *   <li>Unmet demand is measured directly: requested minus allocated MIPS, integrated over time.</li>
+ *   <li>PDM denominator: total length of the VM's finished cloudlets; if none finished (full-day
+ *       PlanetLab runs), VM MIPS capacity x VM execution time is used instead.</li>
+ *   <li>Unmet demand: once per scheduling interval, each running VM's trace demand
+ *       (trace utilization x VM MIPS) is compared with the CPU its host actually gave it; the
+ *       shortfall is summed and reported as a fraction of total demand. This captures CPU
+ *       throttling that SLATAH (time at 100% host allocation) can miss.</li>
  * </ul>
+ *
+ * <p>Run with {@code -Dcoe619.trace=true} to print migrations and host power events.</p>
  */
 public final class ConsolidationExperiment {
 
@@ -59,6 +64,14 @@ public final class ConsolidationExperiment {
     public static final double SCHEDULING_INTERVAL = 300;
     public static final double MIGRATION_PENALTY = 0.10;
     public static final double SATURATION = 0.999;
+
+    private static final boolean TRACE = Boolean.getBoolean("coe619.trace");
+
+    private static void trace(final String fmt, final Object... args) {
+        if (TRACE) {
+            System.out.println("  [trace] " + String.format(Locale.ROOT, fmt, args));
+        }
+    }
 
     private static final int HOST_PES = 8;
     private static final int HOST_MIPS = 1000;
@@ -116,12 +129,11 @@ public final class ConsolidationExperiment {
     private final Map<Vm, Double> migrationTime = new HashMap<>();
     private int migrations;
 
-    // Per-VM time integrals (MIPS x seconds), left Riemann sums over clock ticks.
-    private double[] requestedIntegral;
-    private double[] allocatedIntegral;
-    private double[] lastRequested;
-    private double[] lastAllocated;
-    private double lastTick;
+    // Demand sampling (once per scheduling interval): MIPS x seconds summed over all VMs.
+    private double demandMipsSeconds;
+    private double unmetMipsSeconds;
+    private double nextSample = SCHEDULING_INTERVAL;
+    private List<Cloudlet> cloudletList = List.of();
 
     private VmAllocationPolicyMigration allocationPolicy;
     private DatacenterBroker broker;
@@ -155,10 +167,8 @@ public final class ConsolidationExperiment {
         broker.submitCloudletList(cloudlets);
 
         final int n = vms.size();
-        requestedIntegral = new double[n];
-        allocatedIntegral = new double[n];
-        lastRequested = new double[n];
-        lastAllocated = new double[n];
+        cloudletList = cloudlets;
+        simulation.addOnClockTickListener(info -> sampleDemand(info.getTime()));
 
         simulation.start();
 
@@ -169,8 +179,27 @@ public final class ConsolidationExperiment {
         return computeResult(dc, cloudlets);
     }
 
+    /**
+     * Once per scheduling interval, compares each running VM's trace demand with the MIPS
+     * its host actually allocated. Guarded so the cost is one pass over the VMs per interval,
+     * not per clock tick.
+     */
     private void sampleDemand(final double now) {
-        // Obsolete: fine-grained tick sampling causes high overhead during long simulations
+        if (now < nextSample) {
+            return;
+        }
+        nextSample += SCHEDULING_INTERVAL;
+        for (int i = 0; i < vms.size(); i++) {
+            final Vm vm = vms.get(i);
+            final Cloudlet c = cloudletList.get(i);
+            if (c.getStatus() != Cloudlet.Status.INEXEC || vm.getHost() == Host.NULL) {
+                continue;
+            }
+            final double demand = vm.getCpuPercentRequested() * vm.getTotalMipsCapacity();
+            final double allocated = vm.getHost().getVmScheduler().getTotalAllocatedMipsForVm(vm);
+            demandMipsSeconds += demand * SCHEDULING_INTERVAL;
+            unmetMipsSeconds += Math.max(0, demand - allocated) * SCHEDULING_INTERVAL;
+        }
     }
 
     private Result computeResult(final DatacenterSimple dc, final List<Cloudlet> cloudlets) {
@@ -207,8 +236,6 @@ public final class ConsolidationExperiment {
 
         double pdmSum = 0;
         int pdmVms = 0;
-        double requestedTotal = 0;
-        double unmetTotal = 0;
         for (int i = 0; i < vms.size(); i++) {
             final Vm vm = vms.get(i);
             double requestedInstructions = 0;
@@ -218,7 +245,6 @@ public final class ConsolidationExperiment {
             if (requestedInstructions <= 0) {
                 requestedInstructions = vm.getTotalMipsCapacity() * vm.getTotalExecutionTime();
             }
-            requestedTotal += requestedInstructions;
             if (requestedInstructions > 0) {
                 final double degraded = MIGRATION_PENALTY * vm.getTotalMipsCapacity()
                     * migrationTime.getOrDefault(vm, 0.0);
@@ -229,7 +255,7 @@ public final class ConsolidationExperiment {
         final double pdm = pdmVms > 0 ? pdmSum / pdmVms : 0;
         final double slav = slatah * pdm;
         final double energyKwh = energy / 3_600_000.0;
-        final double unmet = 0.0;
+        final double unmet = demandMipsSeconds > 0 ? unmetMipsSeconds / demandMipsSeconds : 0;
 
         long predictions = 0;
         long triggers = 0;
@@ -279,7 +305,14 @@ public final class ConsolidationExperiment {
                 migrations++;
                 migrationTime.merge(vm, info.getTime() - start, Double::sum);
             }
+            trace("t=%.0f migrated VM %d -> host %d", info.getTime(), vm.getId(), info.getVm().getHost().getId());
         });
+        if (TRACE) {
+            for (final Host h : hosts) {
+                h.addOnShutdownListener(e -> trace("t=%.0f host %d shut down", e.getTime(), e.getHost().getId()));
+                h.addOnStartupListener(e -> trace("t=%.0f host %d started", e.getTime(), e.getHost().getId()));
+            }
+        }
         return dc;
     }
 
@@ -305,6 +338,13 @@ public final class ConsolidationExperiment {
                         throw new IllegalStateException("Insufficient active-host samples for IQR");
                     }
                     return stats.getPercentile(75) - stats.getPercentile(25);
+                }
+
+                @Override
+                public double getOverUtilizationThreshold(final Host host) {
+                    final double t = super.getOverUtilizationThreshold(host);
+                    trace("t=%.0f host %d IQR threshold=%.3f", host.getSimulation().clock(), host.getId(), t);
+                    return t;
                 }
             };
         };

@@ -1,30 +1,28 @@
-# COE 619 Project: Energy-Aware Predictive VM Consolidation
+# COE619: Energy-Aware Predictive VM Consolidation
 
-This repository contains the implementation of the project "Energy-Aware Predictive VM Consolidation for Reducing Energy Consumption and SLA Violations in Cloud Data Centers," submitted for the COE 619-03 course at KFUPM.
+MSc HPCC project by Zahid Alabadllah (202045160), KFUPM. Advisor: Dr. Mohamed Faten Zhani.
 
-## Project Overview
+We evaluate whether simple CPU trend prediction improves energy/performance trade-offs. Predictive superiority has not been demonstrated. Reactive THR warns at 80%, not 100%.
 
-Traditional reactive Virtual Machine (VM) consolidation algorithms in cloud data centers initiate migrations only *after* a physical host becomes overloaded (reaching 100% CPU utilization). This causes unavoidable Service Level Agreement (SLA) violations while the migration takes place. 
+## Start here
 
-This project explores a **Predictive Approach** that uses lightweight forecasting techniques to anticipate CPU spikes and migrate VMs *before* the host reaches saturation. 
+- [Project Understanding Guide](docs/concepts_guide/COE619_Project_Concepts_And_Methods_Guide.pdf): definitions, simple formulas, evidence and limitations.
+- [Corrected PR2](docs/progress_report_2/PR2_Progress_Report_II.pdf)
+- [Results](results/summary.md), generated from [raw runs](results/experiments.csv).
+- PR1 and older handoffs describe historical versions; current code and corrected PR2 take precedence.
 
-### Key Objectives:
-1. **Reduce SLA Violations:** Preemptively avoid host overload states.
-2. **Minimize Energy Consumption:** Optimize VM placement to keep the maximum number of hosts in sleep mode.
-3. **Keep Overhead Low:** Prove that lightweight prediction algorithms can balance energy savings and SLA compliance without the massive processing overhead of heavy Deep Learning models.
+## Code map
 
-## Technology Stack
-- **Language:** Java (JDK 25+)
-- **Simulation Framework:** [CloudSim Plus](https://cloudsimplus.org/) (a modernized, highly extensible fork of CloudSim 3/4)
-- **Dependency Management:** Apache Maven
-- **Workloads:** Real-world PlanetLab CPU utilization traces
+- `ConsolidationExperiment`: hosts, VMs, workload setup and metric calculation.
+- `ExperimentRunner`: THR/IQR/LR scenarios and CSV output.
+- `PredictiveLinearRegressionPolicy`: ten-reading OLS forecast with static fallback.
+- `HostCpuUtilization`: allocated MIPS / physical capacity.
+- `HostLocalResourceProvisioner`: per-host resource accounting workaround.
+- `TraceStats`: dataset statistics.
+- `Baseline*Simulation`: historical baseline programs retained for PR1 reproducibility.
 
-## Repository Structure
-- `src/main/java/` : Contains the core Java simulation code, predictive models, and power management logic.
-- `pom.xml` : Maven configuration file managing project dependencies.
+## Run from this repository in PowerShell
 
-## Setup Instructions
-1. Ensure Java (JDK 25 or higher) and Maven are installed on your system.
-2. Clone this repository.
-3. Run `mvn clean install` to download dependencies and build the project.
-4. Run the main simulation class from your preferred Java IDE (Eclipse, IntelliJ).
+Use `./scripts/run.ps1` for the five-seed batch, or `./scripts/run.ps1 -Scenario diurnal -Seeds 1` for a short example. This regenerates results/experiments.csv and summary.md. Use `./scripts/run.ps1 -Stats` to inspect trace statistics. JDK 25 is used locally; Maven targets Java 17 bytecode. CloudSim Plus is pinned to 8.0.0.
+
+The heavy folder contains exactly 16 traces; stressed seeds reorder that same set. Five seeds do not mean five independent workload days. Fixed seeds may not remove simulator tie-order variation. Detailed limitations are in the guide.

@@ -1,0 +1,134 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,booktabs,tabularx,xcolor,hyperref,fancyhdr}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small COE619 | Zahid Alabadllah | 202045160}\fancyfoot[C]{\thepage}
+\newcommand{\hot}[1]{\par\textbf{Hot take:} #1\par}
+\begin{document}
+\section*{COE619 Project Understanding Guide}
+Energy-Aware Predictive VM Consolidation in Cloud Data Centers\\
+Advisor: Dr. Mohamed Faten Zhani | Evidence checked: 15 November 2026
+
+\textbf{Purpose.} Explain the project through PR2 without memorizing long derivations. Each formula below keeps only what is needed to explain the implementation. The research question is whether simple prediction improves the balance between energy and performance. A positive answer has not yet been demonstrated.
+
+\section{The project in everyday words}
+A physical host is a server. A virtual machine (VM) is a software-defined computer sharing that server. Consolidation means putting VMs on fewer hosts so empty hosts can turn off. Live migration moves a running VM between hosts. It has a cost, so moving earlier is not automatically better.
+
+\hot{An active but idle host still consumes 175 W in our model. Turning an empty host off saves more than merely lowering its CPU use.}
+
+A cloudlet is a simulated task, not a real application deployment. A processing element (PE) represents a CPU core. MI means million instructions, an amount of work. MIPS means million instructions per second, a processing rate, not electrical power. RAM is working memory; bandwidth is network transfer capacity; storage is disk capacity. SLA means service level agreement. Our SLA scores are simulation proxies, not measured application response times.
+
+\href{https://www.usenix.org/conference/nsdi-05/live-migration-virtual-machines}{Clark et al. (2005): live migration}. \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus: simulation entities}.
+
+\section{What the code checks}
+\textbf{Overload detection: CPU only.} Host utilization is allocated MIPS divided by physical host MIPS. Our host has 8 PEs at 1,000 MIPS each, so its capacity is 8,000 MIPS. Allocating 6,400 MIPS gives 80\% utilization.
+
+\textbf{Placement: multiple resources.} A destination must have suitable CPU, RAM, bandwidth and storage. Detection asks whether a host should shed load; placement asks where a VM can fit. Forecast checks can also influence destination acceptance. A trigger is a policy decision, not proof that a migration completed.
+
+\textbf{Requested CPU} is what a VM asks for. \textbf{Allocated CPU} is what it receives. A gap is unmet demand. The overload threshold (80\% for THR) is an early warning. Saturation accounting uses at least 99.9\% allocated host capacity. These are different quantities.
+
+\hot{An 80\% warning gives headroom; workload jumps, migration time and sampling mean it cannot guarantee prevention of saturation.}
+
+\newpage
+\section{The three policies}
+\textbf{THR: static threshold.} Flag overload when current utilization exceeds 0.80. It reacts to the present reading, not necessarily to a saturated server.
+
+\textbf{IQR: interquartile range.} Sort the historical utilization readings. Q1 is the 25th percentile and Q3 is the 75th percentile. IQR is the spread of their middle half:
+\[\mathrm{IQR}=Q3-Q1,\qquad \text{threshold}=1-0.75\,\mathrm{IQR}.\]
+All quantities are fractions, not percentages. Example: IQR = 0.10 gives threshold = 0.925, or 92.5\%. More spread lowers the threshold. Less spread raises it. The implementation uses all active history entries, with static fallback if history is insufficient. The factor 0.75 is a chosen safety setting, not a proven optimum.
+\hot{IQR changes the warning level according to past variability. It does not forecast the next reading.}
+\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods, not a formal SLA standard.\par
+
+\textbf{Our LR: ordinary least squares (OLS) linear regression.} It fits the straight line that minimizes squared errors over the last 10 active host-history readings. The fitted line has a slope (change in utilization per second) and an intercept (line height at time zero). We evaluate it at current time plus 300 seconds:
+\[\text{forecast}=\text{fitted line evaluated 5 minutes ahead}.\]
+\hot{Extend the recent trend forward. If current CPU or the forecast exceeds 80\%, flag overload.}
+Before 10 readings exist it behaves like THR. Ten regularly spaced 5-minute readings span 45 minutes from first to last, and represent roughly 50 minutes of observations. Host-history events can be irregular, so the code uses actual timestamps; the window is not guaranteed to cover exactly 50 minutes. K=10 and the 5-minute horizon are initial choices, not tuned optima.
+
+This is unweighted OLS, not Beloglazov's locally weighted regression (LOESS). Do not describe prediction itself as new to VM consolidation. Our contribution must be established through a careful implementation and evaluation. A lightweight formula also does not prove negligible execution overhead.
+
+\textbf{Which VM moves?} All three policies use minimum migration time (MMT) selection. In this model, less RAM generally means less transfer time. Equal-size VMs limit how informative that choice is. Bandwidth and the simulator's migration settings affect transfer duration; this is not a packet-level implementation of real pre-copy migration.
+
+\newpage
+\section{Energy and performance scores}
+\textbf{Power and energy.} For an active host:
+\[P(u)=175+75u\quad\text{watts}.\]
+Here u is CPU fraction: 0 means idle and 1 means fully used. Off-host power is modelled as zero. Watts measure current power; kWh measures energy accumulated over time. One kWh is 3,600,000 joules.
+\hot{Idle is 175 W, full CPU is 250 W; running at 200 W for two hours consumes 0.4 kWh.}
+These are chosen simplified model parameters, not measurements of our laptop or a calibrated hardware claim. Energy is integrated over recorded active-host history until simulation end, not only cloudlet execution. The configured horizon is 86,400 s; recorded end times can exceed it slightly. Cooling, network equipment and measured predictor energy are not included.
+
+\textbf{SLATAH: SLA time per active host.}
+\[\text{one host's ratio}=T_s/T_a.\]
+Ts is recorded saturation time in seconds; Ta is active time in seconds. Compute this ratio for each host with positive active time, then average those ratios. A host saturated for 60 of 600 active seconds has a ratio of 0.10. This is not the same as pooling time across all hosts.
+\hot{What fraction of each active server's time was spent at the saturation cutoff?}
+The code counts history intervals whose starting utilization is at least 0.999. Brief events between recorded states may be missed. Zero means no counted saturation, not proof that migrations prevented it.
+
+\textbf{PDM: performance degradation due to migration.}
+\[\text{VM penalty}=\frac{0.10\times\text{VM capacity}\times\text{migration seconds}}{\text{work denominator}}.\]
+Capacity is total MIPS across VM PEs; multiplying it by seconds gives MI. The numerator is an assumed 10\% lost-work estimate during completed migrations. The code divides by finished-cloudlet total length in MI, or capacity times execution time if no cloudlet finished. It averages eligible VM ratios, including zero-migration VMs.
+\hot{Estimated work lost while moving, divided by a work baseline. The final PDM is not simply 10\%.}
+The fallback denominator is an approximation, not an integral of actual requested work. The 10\% is a model assumption, not a universal real-server penalty.
+\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods, not a formal SLA standard.\par
+
+\newpage
+\textbf{SLAV: composite SLA violation score.}
+\[\mathrm{SLAV}=\mathrm{SLATAH}\times\mathrm{PDM}.\]
+Both factors and the result are dimensionless fractions. ESV (energy and SLA violations) is energy in kWh multiplied by SLAV; its resulting unit is kWh scaled by that score.
+\hot{If either factor is zero, both SLAV and ESV collapse to zero. They cannot rank these runs alone.}
+Keep them for comparison with the chosen research formulation, but also show energy, migrations, active-host hours and unmet demand. They are research conventions, not formal SLA compliance certificates.
+
+\textbf{Unmet demand.} At roughly 300-second intervals, compare running VMs' requested and allocated MIPS. Sum positive shortfalls times 300 seconds and divide by sampled requested MIPS times 300 seconds.
+\hot{What share of sampled requested CPU work was not supplied?}
+The result is dimensionless. Multiplying by 100 expresses it as a percentage. This is coarse sampling, not exact continuous integration or application latency. A zero estimate can miss short events. The current code measures it; an older version hardcoded zero.
+
+\textbf{Migration count} counts completed moves. \textbf{Active-host hours} sums all hosts' active seconds and divides by 3,600. Two active hosts for three hours contribute six host-hours. \textbf{Predictive trigger count} counts overload-check calls returning true from the forecast, including possible destination checks. Five triggers do not mean five distinct migrations.
+
+\section{Experimental setup and evidence}
+CloudSim Plus 8.0.0 with Maven; verification used OpenJDK 25. The Maven compiler targets Java 17 bytecode. Hosts: 8 cores, 16,384 MB RAM, bandwidth 10,000, storage 1,000,000 in simulator units. VMs: 2 cores, 2,048 MB RAM, bandwidth 1,000, storage 10,000. Host idle-shutdown deadline is zero.
+
+\textbf{Diurnal:} 4 hosts, 8 VMs, synthetic day/night traces, one fixed run. \textbf{PlanetLab:} 10 hosts, 20 sampled VMs, five seeds. \textbf{Stressed:} 6 hosts, 16 heavy VMs, five seeds. Each policy receives the same traces/order for a given seed.
+
+The real source pool contains 1,052 traces from 2011-03-03, each with 288 five-minute CPU percentage samples. The pool's mean is 12.31\%. The curated heavy pool has 16 traces, average 78.34\%, minimum trace mean 68.12\%. We acquired the full pool but did not simulate all 1,052 VMs together. \href{https://github.com/beloglazov/planetlab-workload-traces}{PlanetLab trace source}.
+
+Seeds change random selection in the full pool. In the heavy scenario all 16 traces are used every time: seeds change ordering, not independent workload days. Fixed seeds do not guarantee bit-identical results because simulator iteration or tie ordering may vary.
+
+\newpage
+\section{What the verified results support}
+The table is generated from the current 33 CSV rows: one diurnal run and five runs per real scenario, for each policy. Values are means. Full sample standard deviations and performance columns are in results/summary.md; raw observations are in results/experiments.csv.
+\begin{center}\small\begin{tabular}{llrrrr}\toprule Scenario & Policy & Runs & kWh & Moves & Host-hours\\\midrule
+diurnal & THR & 1 & 5.2393 & 2.0 & 25.66\\
+diurnal & IQR & 1 & 5.2310 & 2.0 & 25.67\\
+diurnal & LR & 1 & 5.7744 & 3.0 & 28.47\\
+planetlab & THR & 5 & 21.8696 & 0.0 & 120.33\\
+planetlab & IQR & 5 & 21.8696 & 0.0 & 120.33\\
+planetlab & LR & 5 & 21.8696 & 0.0 & 120.33\\
+planetlab stressed & THR & 5 & 8.2131 & 4.0 & 38.14\\
+planetlab stressed & IQR & 5 & 7.0172 & 0.2 & 30.81\\
+planetlab stressed & LR & 5 & 8.2271 & 4.0 & 38.21\\
+\bottomrule\end{tabular}\end{center}
+IQR used 14.6\% less energy than THR in this stressed verification batch.
+
+\textbf{Diurnal:} LR used about 10\% more energy and completed 3 moves versus 2 for THR/IQR. Earlier movement can keep another host active longer. Prediction did not win here.
+
+\textbf{Random PlanetLab:} all policies used similar energy and made no moves. The sparse workload did not meaningfully challenge the overload detectors.
+
+\textbf{Stressed:} IQR made fewer moves and used fewer active-host hours. Low dispersion can raise its threshold above 80\%, allowing denser packing. This is a supported interpretation of the rule and observations, not proof that every avoided move was unnecessary. Placement strategy also differs: IQR uses a dynamic first-fit policy, so this is not a perfectly isolated detector comparison.
+
+LR recorded zero predictive triggers in this stressed batch. Its current-load branch can fire before forecasting is attempted. It matched THR's migration count, but equal counts do not prove identical timing or placement. No claim of better prediction accuracy or placement stability is supported.
+
+All recorded SLATAH and SLAV values are zero. Some stressed runs have nonzero sampled unmet demand. Thus zero SLAV must not be described as zero performance loss. Only 2 of 20 cloudlets finish in the random PlanetLab runs before the time limit; all 20 VMs were created. Completion is a separate check from VM creation.
+
+\section{What to explain to Dr. Zhani}
+\enlargethispage{2\baselineskip}
+\textbf{Why these parameters?} They are transparent starting settings: 80\% warning, 10 observations, one-interval forecast, IQR factor 0.75. They have not been optimized.
+
+\textbf{Did prediction help?} Not convincingly yet. It activated in diurnal checks but cost more energy, and did not activate in the stressed batch.
+
+\textbf{Why keep zero metrics?} To document the research formulation, while explaining its blind spot and showing separate measurements.
+
+\textbf{What remains?} Repeated-run stability, controlled rising/bursty workloads, forecast error and runtime overhead, better demand integration/PDM normalization, and a fair detector comparison with common placement logic. Try more complex predictors only after those checks. Exponential smoothing need not be a nonlinear model.
+
+\textbf{Advisor feedback addressed:} terminology, units, detection versus placement, assumptions, research references and honest result interpretation are now explicit. Practice explaining these points aloud.
+
+\end{document}

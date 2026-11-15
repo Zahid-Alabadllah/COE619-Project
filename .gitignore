@@ -49,3 +49,7 @@ buildNumber.properties
 *.fls
 *.fdb_latexmk
 
+
+# Generated local helpers
+cp.txt
+*.toc

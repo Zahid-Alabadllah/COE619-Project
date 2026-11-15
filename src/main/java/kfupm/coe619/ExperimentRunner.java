@@ -24,7 +24,7 @@ import java.util.function.ToDoubleFunction;
  *   <li>{@code diurnal}: PR1 setting (4 hosts, 8 synthetic diurnal traces, finite cloudlets,
  *       idle shutdown enabled). One seed, since the trace set is fixed.</li>
  *   <li>{@code planetlab}: real PlanetLab traces of 2011-03-03; each seed draws a different
- *       random sample of 40 VMs onto 20 hosts for a full 24-hour run.</li>
+ *       random sample of 20 VMs onto 10 hosts for a full 24-hour run.</li>
  * </ul>
  */
 public final class ExperimentRunner {
