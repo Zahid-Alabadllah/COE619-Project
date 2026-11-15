@@ -58,45 +58,51 @@ Here u is CPU fraction: 0 means idle and 1 means fully used. Off-host power is m
 \hot{Idle is 175 W, full CPU is 250 W; running at 200 W for two hours consumes 0.4 kWh.}
 These are chosen simplified model parameters, not measurements of our laptop or a calibrated hardware claim. Energy is integrated over recorded active-host history until simulation end, not only cloudlet execution. The configured horizon is 86,400 s; recorded end times can exceed it slightly. Cooling, network equipment and measured predictor energy are not included.
 
-\textbf{SLATAH: SLA time per active host.}
-SLATAH measures how much of a server's active time was spent at the saturation cutoff (at least 99.9\% CPU).
-\[\text{One host's saturation fraction}=\frac{T_s}{T_a}.\]
-\textbf{Ts} = seconds spent saturated. \textbf{Ta} = total seconds the host was active (powered on).
+\textbf{SLATAH: time spent fully busy.}
+\textbf{Saturation means the server's CPU is fully used, at 100\%. Active time means the time the server was switched on.}
+\[\text{For one server: }\frac{\text{time at 100\% CPU}}{\text{total time switched on}}.\]
+\textbf{Example:} a server was on for 600 seconds and fully busy for 60 seconds. $60/600=0.10=10\%$: it was fully busy for 10\% of its on-time.
 
-\textbf{What does ``ratio'' mean?} One amount divided by another. Here it tells us the share of active time spent saturated. Example: $60/600=0.10=10\%$. The host was saturated for 60 of its 600 active seconds.
+For the project's SLATAH, calculate this percentage for each server, then average the percentages. A server that was never on is left out. \textbf{Lower means less time fully busy.}
 
-\textbf{Our reported SLATAH:} calculate this fraction for each host with active time, then take their average. Each included host has equal weight, even if hosts ran for different lengths of time.
-\hot{SLATAH answers: ``How much of the servers' active time was spent saturated?'' Lower is better.}
-The code counts recorded intervals starting at the cutoff. A zero means no counted saturation; brief events may be missed, and zero does not prove migrations prevented overload.
+\textbf{Code note:} we count CPU at 99.9\% or higher as fully used. If you see $T_s/T_a$, Ts means fully-busy seconds and Ta means switched-on seconds. This division is what ``ratio'' means. Zero means no fully-busy time was counted; it does not prove migration prevented it.
 
-\textbf{PDM: performance degradation due to migration.}
-PDM measures the estimated share of processing work lost because VMs were moved.
-\[\text{One VM's lost-work fraction}=\frac{0.10\times\text{VM capacity}\times\text{migration seconds}}{\text{work baseline}}.\]
-The top estimates lost work in MI: 10\% of VM capacity (total MIPS across its cores), multiplied by migration seconds. The bottom is finished-task work in MI; if none finished, the code uses capacity times execution time instead.
+\textbf{PDM: work lost while moving VMs.}
+\textbf{Moving a virtual machine between servers can slow it down. PDM estimates the computing work lost during that move, divided by the total work used for comparison.}
+\[\text{For one VM: }\frac{\text{estimated computing work lost while moving}}{\text{total computing work used for comparison}}.\]
+\textbf{Example only:} losing 2 units of computing work out of 100 gives $2/100=0.02=2\%$ lost work. The project averages these values across VMs. A VM that did not move contributes zero. \textbf{Lower means less estimated work lost.}
 
-\textbf{Example only:} 2 MI lost out of 100 MI gives $2/100=0.02=2\%$. Reported PDM averages the eligible VMs' fractions, including zero for VMs that did not migrate.
-\hot{PDM answers: ``What share of work was estimated lost during migration?'' Lower is better.}
-The 10\% is our model assumption, not the final PDM score. The fallback work baseline is an approximation, not measured total CPU demand.
+\textbf{Code note:} lost work is estimated using 10\% of a VM's processing capacity during migration. The total-work figure is completed-task work; if no task finished, we estimate it from capacity and running time. This is a model, not a measured real-server slowdown. The assumed 10\% penalty is not the final PDM value.
 \paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. Research convention, not a formal standard.\par
 
 \newpage
-\textbf{SLAV: composite SLA violation score.}
-SLAV combines the saturation score (SLATAH) and the migration-loss score (PDM):
+\textbf{SLAV: one score combining the two costs.}
+\textbf{Multiply SLATAH (time fully busy) by PDM (work lost while moving).}
 \[\mathrm{SLAV}=\mathrm{SLATAH}\times\mathrm{PDM}.\]
-\textbf{Example only:} if SLATAH is 0.10 and PDM is 0.02, then SLAV is $0.10\times0.02=0.002$. This is a combined research score, not a measured percentage of customer requests that failed.
-\hot{SLAV answers: ``What is the combined saturation-and-migration score?'' Lower is better, but a zero can hide a cost.}
-In our results, SLATAH is zero, so SLAV is zero even when PDM is positive. Zero SLAV therefore does not mean there was no migration cost or performance loss.
+\textbf{Example only:} SLATAH of 0.10 and PDM of 0.02 give $0.10\times0.02=0.002$. This is a comparison score, not the percentage of customers whose service failed.
 
-\textbf{ESV: energy and SLA violations.} ESV multiplies energy in kWh by SLAV. It is energy scaled by the combined score. Since our SLAV is zero, ESV is also zero and cannot distinguish these runs.
+\textbf{Important:} zero multiplied by anything is zero. Our SLATAH is zero, so our SLAV is zero even when migration caused estimated work loss. Read the two separate values as well.
 
-\textbf{How to read these together:} SLATAH = saturation time; PDM = estimated work lost while moving; SLAV = their product. Also show energy, migrations, active-host hours and unmet demand. These are research conventions, not formal SLA compliance certificates.
+\textbf{ESV: combine electricity use with the SLAV score.}
+\[\mathrm{ESV}=\text{energy in kWh}\times\mathrm{SLAV}.\]
+\textbf{Example only:} 5 kWh and SLAV of 0.002 give ESV of 0.01. A lower score is preferred in this comparison. But our zero SLAV makes every ESV zero, so ESV cannot tell these runs apart.
 
-\textbf{Unmet demand.} At roughly 300-second intervals, compare running VMs' requested and allocated MIPS. Sum positive shortfalls times 300 seconds and divide by sampled requested MIPS times 300 seconds.
-\hot{What share of sampled requested CPU work was not supplied?}
-The result is dimensionless. Multiplying by 100 expresses it as a percentage. This is coarse sampling, not exact continuous integration or application latency. A zero estimate can miss short events. The current code measures it; an older version hardcoded zero.
+\textbf{Unmet demand: computing power requested but not received.}
+\[\frac{\text{computing work not supplied}}{\text{computing work requested}}.\]
+\textbf{Example only:} a VM asks for 10 units but receives 8. It is missing 2: $2/10=20\%$ unmet demand.
 
-\textbf{Migration count} counts completed moves. \textbf{Active-host hours} sums all hosts' active seconds and divides by 3,600. Two active hosts for three hours contribute six host-hours. \textbf{Predictive trigger count} counts overload-check calls returning true from the forecast, including possible destination checks. Five triggers do not mean five distinct migrations.
+\textbf{Code note:} our program estimates this by checking running VMs about every five minutes and adding their requested work and shortages over time. It can miss short shortages. Zero in this estimate does not prove that every request was always met.
 
+\textbf{Migration count: how many VM moves finished.}
+\textbf{Example:} 3 means three completed moves. It does not mean three different VMs; one VM could move more than once.
+
+\textbf{Active-host hours: total time servers were switched on.}
+Add every server's on-time. \textbf{Example:} two servers on for three hours each give six active-host hours.
+
+\textbf{Predictive trigger count: how many checks raised a forecast warning.}
+\textbf{Example:} 5 means the predictor flagged a host during five checks. It does not mean five moves happened. Some checks are used to decide whether a destination server is suitable.
+
+\textbf{Remember:} SLATAH = fully-busy time; PDM = work lost during moves; SLAV = the two multiplied. These are research comparison measures, not certificates that a customer service agreement was met.
 \newpage
 \section{Simple experimental design}
 We compare THR, IQR and our OLS predictor on five fixed cases. The exact trace paths and VM order are saved in src/main/resources/workloads. Every policy receives the same list for a case. There is no runtime trace sampling, seed loop or averaging across cases.
