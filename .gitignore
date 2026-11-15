@@ -53,3 +53,6 @@ buildNumber.properties
 # Generated local helpers
 cp.txt
 *.toc
+
+# Meeting demonstration output
+results/demo/

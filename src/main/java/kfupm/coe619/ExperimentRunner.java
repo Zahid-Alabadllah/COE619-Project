@@ -19,7 +19,7 @@ import java.util.function.ToDoubleFunction;
  * Runs THR, IQR, and the predictive LR policy on the configured scenarios and writes
  * every run to {@code results/experiments.csv} plus a mean / standard-deviation summary.
  *
- * <p>Usage: {@code ExperimentRunner [scenario ...] [--seeds N]}. Scenarios:
+ * <p>Usage: {@code ExperimentRunner [scenario ...] [--seeds N] [--output DIR]}. Scenarios:
  * <ul>
  *   <li>{@code diurnal}: PR1 setting (4 hosts, 8 synthetic diurnal traces, finite cloudlets,
  *       idle shutdown enabled). One seed, since the trace set is fixed.</li>
@@ -40,9 +40,12 @@ public final class ExperimentRunner {
     public static void main(final String[] args) throws IOException {
         final List<String> scenarios = new ArrayList<>();
         int seeds = 5;
+        Path outputDir = OUT_DIR;
         for (int i = 0; i < args.length; i++) {
             if ("--seeds".equals(args[i])) {
                 seeds = Integer.parseInt(args[++i]);
+            } else if ("--output".equals(args[i])) {
+                outputDir = Path.of(args[++i]);
             } else {
                 scenarios.add(args[i]);
             }
@@ -68,15 +71,15 @@ public final class ExperimentRunner {
             }
         }
 
-        Files.createDirectories(OUT_DIR);
+        Files.createDirectories(outputDir);
         final List<String> lines = new ArrayList<>();
         lines.add(Result.csvHeader());
         results.forEach(r -> lines.add(r.toCsv()));
-        final Path csv = OUT_DIR.resolve("experiments.csv");
+        final Path csv = outputDir.resolve("experiments.csv");
         Files.write(csv, lines);
 
         final String summary = summarize(results);
-        Files.writeString(OUT_DIR.resolve("summary.md"), summary);
+        Files.writeString(outputDir.resolve("summary.md"), summary);
         System.out.println();
         System.out.println(summary);
         System.out.println("Wrote " + csv.toAbsolutePath());

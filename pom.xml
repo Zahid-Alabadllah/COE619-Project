@@ -10,6 +10,7 @@
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
+        <coe619.build.directory>target</coe619.build.directory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -30,6 +31,7 @@
     </dependencies>
 
     <build>
+        <directory>${coe619.build.directory}</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

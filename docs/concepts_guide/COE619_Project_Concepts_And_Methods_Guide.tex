@@ -39,7 +39,7 @@ A cloudlet is a simulated task, not a real application deployment. A processing 
 \[\mathrm{IQR}=Q3-Q1,\qquad \text{threshold}=1-0.75\,\mathrm{IQR}.\]
 All quantities are fractions, not percentages. Example: IQR = 0.10 gives threshold = 0.925, or 92.5\%. More spread lowers the threshold. Less spread raises it. The implementation uses all active history entries, with static fallback if history is insufficient. The factor 0.75 is a chosen safety setting, not a proven optimum.
 \hot{IQR changes the warning level according to past variability. It does not forecast the next reading.}
-\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods, not a formal SLA standard.\par
+\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. Research convention, not a formal standard.\par
 
 \textbf{Our LR: ordinary least squares (OLS) linear regression.} It fits the straight line that minimizes squared errors over the last 10 active host-history readings. The fitted line has a slope (change in utilization per second) and an intercept (line height at time zero). We evaluate it at current time plus 300 seconds:
 \[\text{forecast}=\text{fitted line evaluated 5 minutes ahead}.\]
@@ -69,7 +69,7 @@ The code counts history intervals whose starting utilization is at least 0.999. 
 Capacity is total MIPS across VM PEs; multiplying it by seconds gives MI. The numerator is an assumed 10\% lost-work estimate during completed migrations. The code divides by finished-cloudlet total length in MI, or capacity times execution time if no cloudlet finished. It averages eligible VM ratios, including zero-migration VMs.
 \hot{Estimated work lost while moving, divided by a work baseline. The final PDM is not simply 10\%.}
 The fallback denominator is an approximation, not an integral of actual requested work. The 10\% is a model assumption, not a universal real-server penalty.
-\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods, not a formal SLA standard.\par
+\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. Research convention, not a formal standard.\par
 
 \newpage
 \textbf{SLAV: composite SLA violation score.}
@@ -130,5 +130,36 @@ All recorded SLATAH and SLAV values are zero. Some stressed runs have nonzero sa
 \textbf{What remains?} Repeated-run stability, controlled rising/bursty workloads, forecast error and runtime overhead, better demand integration/PDM normalization, and a fair detector comparison with common placement logic. Try more complex predictors only after those checks. Exponential smoothing need not be a nonlinear model.
 
 \textbf{Advisor feedback addressed:} terminology, units, detection versus placement, assumptions, research references and honest result interpretation are now explicit. Practice explaining these points aloud.
+
+
+\newpage
+\section{Workload folders, seeds and running the project}
+A trace is a text file of CPU percentages over time. These files are simulation inputs, not extra algorithms. The runner reads them; you do not execute a trace file.
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{0.24\linewidth}X p{0.18\linewidth}@{}}\toprule
+Folder & Meaning & Current use\\\midrule
+diurnal & Eight artificial day/night patterns. Easy controlled example. & Used\\[4pt]
+real/20110303 & All 1,052 real traces for 3 March 2011. The planetlab scenario samples 20. & Used\\[4pt]
+heavy & Sixteen selected high-load real traces. The stressed scenario uses all 16. & Used\\[4pt]
+active & A 114-trace intermediate subset with more activity. & Not used by current runner\\[4pt]
+20110303 at top level & Four older sample files, separate from the full real pool. & Not used by current runner\\\bottomrule
+\end{tabularx}\end{center}
+Keep diurnal, real and heavy for current reproducibility. The other two subsets are historical inputs, not requirements for the current runner. They are retained rather than deleting experiment history without checking all older consumers.
+
+\textbf{What is a seed?} A starting number for the random generator. Seeds 1, 2, 3, 4 and 5 give five configured selections/orders. For planetlab they select 20 traces from the full pool; for stressed they shuffle the same 16 heavy traces.
+
+\textbf{Five-seed average} means add the five results for one policy/scenario and divide by five. If the energy values were 7, 8, 9, 8 and 8 kWh, the average would be 8 kWh. A mean migration count of 0.2 can mean one move across five runs; it is not a fractional move within one run. The value after plus/minus in summary.md is sample standard deviation: how spread out the results are, not a confidence interval. Diurnal has one fixed run, so it has no five-seed average.
+
+\textbf{What runs what?} ExperimentRunner chooses traces, seeds and policies. ConsolidationExperiment builds the simulated hosts and VMs and measures results. PredictiveLinearRegressionPolicy performs OLS forecasting. TraceStats only describes the input data. The PowerShell helper builds the Java code and calls the selected program.
+
+\textbf{Run from the repository's VS Code PowerShell terminal:}
+\begin{verbatim}
+./scripts/run.ps1 -Stats
+./scripts/run.ps1 -Scenario diurnal -Seeds 1
+./scripts/run.ps1 -Scenario planetlab -Seeds 1
+./scripts/run.ps1 -Scenario planetlab_stressed -Seeds 1
+./scripts/run.ps1
+\end{verbatim}
+Each simulation command compares THR, IQR and LR. The last command runs the complete batch: 3 diurnal rows plus 15 random-PlanetLab rows plus 15 stressed rows = 33. Demo results go to results/demo; the report evidence is preserved. See PR2's walkthrough table for the order to show files in the meeting.
 
 \end{document}

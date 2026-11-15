@@ -23,6 +23,6 @@ We evaluate whether simple CPU trend prediction improves energy/performance trad
 
 ## Run from this repository in PowerShell
 
-Use `./scripts/run.ps1` for the five-seed batch, or `./scripts/run.ps1 -Scenario diurnal -Seeds 1` for a short example. This regenerates results/experiments.csv and summary.md. Use `./scripts/run.ps1 -Stats` to inspect trace statistics. JDK 25 is used locally; Maven targets Java 17 bytecode. CloudSim Plus is pinned to 8.0.0.
+Use `./scripts/run.ps1` for the five-seed batch, or `./scripts/run.ps1 -Scenario diurnal -Seeds 1` for a short example. Demo runs write to results/demo and preserve the report evidence. Use -OutputDir results only when intentionally replacing the report batch. Use `./scripts/run.ps1 -Stats` to inspect trace statistics. JDK 25 is used locally; Maven targets Java 17 bytecode. CloudSim Plus is pinned to 8.0.0.
 
 The heavy folder contains exactly 16 traces; stressed seeds reorder that same set. Five seeds do not mean five independent workload days. Fixed seeds may not remove simulator tie-order variation. Detailed limitations are in the guide.

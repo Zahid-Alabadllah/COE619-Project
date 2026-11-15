@@ -41,5 +41,67 @@ Power is a chosen linear model: 175 W idle, 250 W full, zero off. Energy covers 
 Establish repeatability, use controlled rising workloads, measure forecast error and predictor runtime, improve metric integration, and isolate detector changes from placement. The implementation and report exist; final academic acceptance and later project deliverables remain subject to advisor review.
 
 For definitions, examples, assumptions and advisor questions, see the accompanying Project Understanding Guide.
-\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods and simulator choices, not a formal SLA standard.
+\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods and simulator choices, not a formal SLA standard.
+
+\newpage
+\section{Essential equations and what they mean}
+\textbf{Utilization and the THR warning}
+\[u=\frac{\text{allocated MIPS}}{\text{host capacity MIPS}},\qquad u>0.80.\]
+Here u is the CPU fraction, so 0.80 means 80\%. MIPS is million instructions per second. Example: 6,400/8,000 = 0.80.
+\hot{THR warns when the host crosses 80\% of its processing capacity.}
+
+\textbf{OLS forecast: retain the line, omit the long derivation}
+\[\widehat{u}(t+300)=a+b(t+300).\]
+The hat means predicted utilization. t is current simulation time in seconds; 300 is the five-minute lookahead. a is the fitted intercept, and b is the fitted change in CPU fraction per second. Both are fitted from the last ten active readings, rather than chosen by hand. For example, a forecast of 0.84 flags overload even if current CPU is 0.76. No guarantee of avoiding saturation follows.
+\hot{Fit a line to recent readings, extend it five minutes, and compare with 80\%.}
+
+\textbf{IQR warning level}
+\[T=1-0.75(Q3-Q1).\]
+T is the threshold; Q1 and Q3 are the 25th and 75th utilization percentiles. A spread of 0.10 gives T=0.925 (92.5\%). The coefficient 0.75 is the chosen safety setting.
+\hot{Less variation allows a higher warning level; more variation lowers it.}
+
+\textbf{Energy and SLA composite}
+\[P(u)=175+75u\;\mathrm{W},\qquad E_{\mathrm{kWh}}=E_{\mathrm{joules}}/3{,}600{,}000.\]
+P is active-host power, E is accumulated energy. Off hosts use zero power in this model.
+\[\mathrm{SLATAH}=\text{average across active hosts of }T_s/T_a,\]
+\[\mathrm{SLAV}=\mathrm{SLATAH}\times\mathrm{PDM},\qquad
+\mathrm{ESV}=E_{\mathrm{kWh}}\times\mathrm{SLAV}.\]
+Ts is counted saturation seconds and Ta is active seconds. PDM is the average estimated migration lost-work fraction, with the denominator approximation described earlier. All SLA factors are dimensionless; ESV scales kWh by that composite.
+\hot{These scores summarize different costs. A zero product can hide nonzero migration or unmet-demand costs.}
+Research definitions: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya, 2012} (\href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free PDF}). Our OLS forecast and power parameters are implementation choices, not exact reproductions of all paper methods.
+
+\newpage
+\section{Meeting walkthrough: progress linked to VS Code}
+Open the repository folder COE619-Project-Code. Use its integrated PowerShell terminal. The commands below run all three policies for the named scenario. Start with the saved evidence, then demonstrate one short run.
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{0.20\linewidth}p{0.35\linewidth}X@{}}\toprule
+Progress to explain & Open or run & What to point out\\\midrule
+Earlier baselines & BaselineReactiveSimulation.java and BaselineIQRSimulation.java & Historical PR1 implementations; current harness adds idle shutdown.\\[5pt]
+Workload integration & src/main/resources/planetlab; run command A below & Synthetic versus real CPU histories; each value is CPU percent, one per five minutes.\\[5pt]
+Predictor implemented & PredictiveLinearRegressionPolicy.java & isOverloaded checks current CPU first, then the forecast; forecast fits OLS.\\[5pt]
+Common experiment setup & ConsolidationExperiment.java & createPolicy, host/VM configuration, idle shutdown and computeResult.\\[5pt]
+Automated comparisons & ExperimentRunner.java & Same traces/order per policy for a seed; three scenarios and CSV output.\\[5pt]
+Verified findings & results/summary.md and experiments.csv & 33 saved rows; show energy, moves, host-hours, unmet demand and forecast flags.\\[5pt]
+Live demonstration & Command B below; optional C & Show terminal summary and results/demo. Explain one result rather than scrolling through every log.\\\bottomrule
+\end{tabularx}\end{center}
+\textbf{A. Inspect workload statistics (does not run simulations)}
+\begin{verbatim}
+./scripts/run.ps1 -Stats
+\end{verbatim}
+\textbf{B. Short day/night comparison}
+\begin{verbatim}
+./scripts/run.ps1 -Scenario diurnal -Seeds 1
+\end{verbatim}
+\textbf{C. Optional stressed comparison}
+\begin{verbatim}
+./scripts/run.ps1 -Scenario planetlab_stressed -Seeds 1
+\end{verbatim}
+\textbf{Full five-seed batch, if needed}
+\begin{verbatim}
+./scripts/run.ps1
+\end{verbatim}
+The helper compiles first and uses the local JDK 25 installation when present. Demo output goes to results/demo, leaving the report's results/experiments.csv unchanged. Each demo invocation replaces only its demo outputs. To deliberately replace the report results, specify -OutputDir results and regenerate the report tables afterward. A rerun may differ slightly even with the same seed.
+
+\textbf{Closing statement:} ``The implementation and comparison pipeline work. The predictor has not shown a clear benefit yet. Next I will test controlled rising workloads and separate prediction effects from placement effects.''
+
 \end{document}
