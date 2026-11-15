@@ -45,3 +45,7 @@ The active Java package contains five core classes. Historical programs are unde
 Use **Terminal > Run Build Task** (Ctrl+Shift+B) for the complete fixed-workload comparison. **Terminal > Run Task** also offers day/night and heavy tasks. These tasks use the verified PowerShell helper and preserve report results. **Run and Debug** offers the same current programs through the Java extension. Local JDK paths belong in personal VS Code settings, not shared launch files.
 
 Generated build files and LaTeX intermediates are hidden in this checkout's Explorer. PDFs nest under their editable LaTeX sources. The archive remains available for historical reference.
+
+## Academic documents and cleanup
+
+Open ../Course_Documents/README.md for current academic deliverables. After verified artifact work run `./scripts/maintain_documents.ps1 -Clean` to sync course copies and remove known temporary output. Preview with `-Clean -DryRun`. Generated simulation files rebuild as needed.
