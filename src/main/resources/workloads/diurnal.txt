@@ -1,0 +1,8 @@
+src/main/resources/planetlab/diurnal/trace_0.txt
+src/main/resources/planetlab/diurnal/trace_1.txt
+src/main/resources/planetlab/diurnal/trace_2.txt
+src/main/resources/planetlab/diurnal/trace_3.txt
+src/main/resources/planetlab/diurnal/trace_4.txt
+src/main/resources/planetlab/diurnal/trace_5.txt
+src/main/resources/planetlab/diurnal/trace_6.txt
+src/main/resources/planetlab/diurnal/trace_7.txt

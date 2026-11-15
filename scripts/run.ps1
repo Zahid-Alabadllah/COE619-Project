@@ -1,4 +1,4 @@
-param([string]$Scenario = "", [int]$Seeds = 5, [switch]$Stats, [string]$OutputDir = "results/demo")
+param([string]$Scenario = "", [switch]$Stats, [string]$OutputDir = "results/demo")
 $ErrorActionPreference = "Stop"
 Push-Location (Split-Path $PSScriptRoot -Parent)
 try {
@@ -8,8 +8,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Maven failed" }
     $cp = "target/meeting-build/classes;" + (Get-Content target/meeting-build/classpath.txt -Raw).Trim()
     if ($Stats) { & java -cp $cp kfupm.coe619.TraceStats }
-    elseif ($Scenario) { & java -cp $cp kfupm.coe619.ExperimentRunner $Scenario --seeds $Seeds --output $OutputDir }
-    else { & java -cp $cp kfupm.coe619.ExperimentRunner --seeds $Seeds --output $OutputDir }
+    elseif ($Scenario) { & java -cp $cp kfupm.coe619.ExperimentRunner $Scenario --output $OutputDir }
+    else { & java -cp $cp kfupm.coe619.ExperimentRunner --output $OutputDir }
     if ($LASTEXITCODE -ne 0) { throw "Java failed" }
 } finally { Pop-Location }
-

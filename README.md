@@ -21,8 +21,20 @@ We evaluate whether simple CPU trend prediction improves energy/performance trad
 - `TraceStats`: dataset statistics.
 - `Baseline*Simulation`: historical baseline programs retained for PR1 reproducibility.
 
-## Run from this repository in PowerShell
+## Simple workflow
 
-Use `./scripts/run.ps1` for the five-seed batch, or `./scripts/run.ps1 -Scenario diurnal -Seeds 1` for a short example. Demo runs write to results/demo and preserve the report evidence. Use -OutputDir results only when intentionally replacing the report batch. Use `./scripts/run.ps1 -Stats` to inspect trace statistics. JDK 25 is used locally; Maven targets Java 17 bytecode. CloudSim Plus is pinned to 8.0.0.
+Run `./scripts/run.ps1` for all five fixed cases, or `./scripts/run.ps1 -Scenario diurnal` / `-Scenario heavy` / `-Scenario real_a` for one case. Each compares THR, IQR and LR. Use `./scripts/run.ps1 -Stats` for workload statistics. There is no seed setting or averaging across workloads.
 
-The heavy folder contains exactly 16 traces; stressed seeds reorder that same set. Five seeds do not mean five independent workload days. Fixed seeds may not remove simulator tie-order variation. Detailed limitations are in the guide.
+Demo output is written to results/demo. Add `-OutputDir results` only when deliberately regenerating the report evidence. JDK 25 is used locally; Maven targets Java 17. The helper uses target/meeting-build to avoid IDE output collisions.
+
+## Fixed workload cases
+
+- diurnal: 8 synthetic day/night VMs on 4 hosts.
+- real_a, real_b, real_c: three disjoint groups, each 20 real-trace VMs on 10 hosts.
+- heavy: the 16 curated high-demand VMs on 6 hosts.
+
+Exact ordered trace paths are committed under src/main/resources/workloads. All policies use the same manifest per case. The real groups were frozen once from a shuffled list (Python Random(619)); runtime does not sample or shuffle anything. They are illustrative cases, not a representative statistical sample of all cloud workloads.
+
+Each result row is one case/policy observation. Inspect all cases rather than pooling unlike scenarios. Fixed inputs do not eliminate all simulator iteration-order variability. Repeat runs when needed to establish a specific result's reliability. Previous seed-based evidence is preserved under results/archive/seed-workflow. Historical PR1 and handoffs are records, not current run instructions.
+
+The active and old top-level 20110303 subsets are unused by the current runner; they are retained for history. Current inputs are diurnal, real/20110303, heavy, plus workload manifests. The project focus is validating the existing simple predictor, not adding algorithm or infrastructure complexity.

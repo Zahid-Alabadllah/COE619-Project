@@ -84,82 +84,56 @@ The result is dimensionless. Multiplying by 100 expresses it as a percentage. Th
 
 \textbf{Migration count} counts completed moves. \textbf{Active-host hours} sums all hosts' active seconds and divides by 3,600. Two active hosts for three hours contribute six host-hours. \textbf{Predictive trigger count} counts overload-check calls returning true from the forecast, including possible destination checks. Five triggers do not mean five distinct migrations.
 
-\section{Experimental setup and evidence}
-CloudSim Plus 8.0.0 with Maven; verification used OpenJDK 25. The Maven compiler targets Java 17 bytecode. Hosts: 8 cores, 16,384 MB RAM, bandwidth 10,000, storage 1,000,000 in simulator units. VMs: 2 cores, 2,048 MB RAM, bandwidth 1,000, storage 10,000. Host idle-shutdown deadline is zero.
-
-\textbf{Diurnal:} 4 hosts, 8 VMs, synthetic day/night traces, one fixed run. \textbf{PlanetLab:} 10 hosts, 20 sampled VMs, five seeds. \textbf{Stressed:} 6 hosts, 16 heavy VMs, five seeds. Each policy receives the same traces/order for a given seed.
-
-The real source pool contains 1,052 traces from 2011-03-03, each with 288 five-minute CPU percentage samples. The pool's mean is 12.31\%. The curated heavy pool has 16 traces, average 78.34\%, minimum trace mean 68.12\%. We acquired the full pool but did not simulate all 1,052 VMs together. \href{https://github.com/beloglazov/planetlab-workload-traces}{PlanetLab trace source}.
-
-Seeds change random selection in the full pool. In the heavy scenario all 16 traces are used every time: seeds change ordering, not independent workload days. Fixed seeds do not guarantee bit-identical results because simulator iteration or tie ordering may vary.
-
 \newpage
-\section{What the verified results support}
-The table is generated from the current 33 CSV rows: one diurnal run and five runs per real scenario, for each policy. Values are means. Full sample standard deviations and performance columns are in results/summary.md; raw observations are in results/experiments.csv.
-\begin{center}\small\begin{tabular}{llrrrr}\toprule Scenario & Policy & Runs & kWh & Moves & Host-hours\\\midrule
-diurnal & THR & 1 & 5.2393 & 2.0 & 25.66\\
-diurnal & IQR & 1 & 5.2310 & 2.0 & 25.67\\
-diurnal & LR & 1 & 5.7744 & 3.0 & 28.47\\
-planetlab & THR & 5 & 21.8696 & 0.0 & 120.33\\
-planetlab & IQR & 5 & 21.8696 & 0.0 & 120.33\\
-planetlab & LR & 5 & 21.8696 & 0.0 & 120.33\\
-planetlab stressed & THR & 5 & 8.2131 & 4.0 & 38.14\\
-planetlab stressed & IQR & 5 & 7.0172 & 0.2 & 30.81\\
-planetlab stressed & LR & 5 & 8.2271 & 4.0 & 38.21\\
+\section{Simple experimental design}
+We compare THR, IQR and our OLS predictor on five fixed cases. The exact trace paths and VM order are saved in src/main/resources/workloads. Every policy receives the same list for a case. There is no runtime trace sampling, seed loop or averaging across cases.
+\begin{center}\small\begin{tabular}{lrrl}\toprule Case & Hosts & VMs & Purpose\\\midrule
+diurnal & 4 & 8 & Controlled day/night example\\
+real a, real b, real c & 10 & 20 each & Three fixed real-trace selections\\
+heavy & 6 & 16 & High-demand real-trace example\\\bottomrule\end{tabular}\end{center}
+The real groups are three disjoint selections frozen once from the 1,052-trace pool, using a shuffled list with generator initialization 619 during manifest preparation. This is provenance, not a setting used when running the project. They are not claimed to be statistically representative. The heavy case uses the same 16 curated traces in a fixed name-sorted order. The full pool mean is 12.31\%; the heavy pool mean is 78.34\%, with minimum trace mean 68.12\%.
+
+The experiment now answers: ``What happens on these clearly specified workloads?'' It does not establish an average improvement across all data centers. A fixed input list also cannot guarantee bit-identical simulation output: tie/iteration ordering can vary. Additional repetitions or workload days should be added only where needed to support a specific final claim.
+
+\section{Current results, one row per case and policy}
+The table comes from the current 15-row results/experiments.csv. There are no five-seed averages. Full SLA, unmet-demand and forecast-check fields are retained in the CSV and results/summary.md.
+\begin{center}\small\begin{tabular}{llrrr}\toprule Case & Policy & kWh & Moves & Host-hours\\\midrule
+diurnal & THR & 5.2488 & 2 & 25.67\\
+diurnal & IQR & 5.2285 & 2 & 25.67\\
+diurnal & LR & 5.7720 & 3 & 28.50\\
+real a & THR & 21.9444 & 0 & 120.42\\
+real a & IQR & 21.9444 & 0 & 120.42\\
+real a & LR & 21.9444 & 0 & 120.42\\
+real b & THR & 21.8661 & 0 & 120.42\\
+real b & IQR & 21.8661 & 0 & 120.42\\
+real b & LR & 21.8661 & 0 & 120.42\\
+real c & THR & 21.5899 & 0 & 120.42\\
+real c & IQR & 21.5899 & 0 & 120.42\\
+real c & LR & 21.5899 & 0 & 120.42\\
+heavy & THR & 8.2520 & 4 & 38.34\\
+heavy & IQR & 7.0405 & 0 & 30.83\\
+heavy & LR & 9.5788 & 5 & 45.39\\
 \bottomrule\end{tabular}\end{center}
-IQR used 14.6\% less energy than THR in this stressed verification batch.
+In this batch LR used more energy than THR in both diurnal and heavy cases. The three real groups produced no migrations and equal policy energy within each group. Heavy IQR used less energy and fewer active-host hours. These are case-specific observations, not universal rankings.\par Read the rows directly: lower kWh is less simulated energy; moves counts completed migrations; host-hours sums server active time. The predictor must earn its benefit against the baselines. A forecast flag is an overload-check result, not proof of a completed proactive migration. These results do not establish general predictive superiority.
 
-\textbf{Diurnal:} LR used about 10\% more energy and completed 3 moves versus 2 for THR/IQR. Earlier movement can keep another host active longer. Prediction did not win here.
-
-\textbf{Random PlanetLab:} all policies used similar energy and made no moves. The sparse workload did not meaningfully challenge the overload detectors.
-
-\textbf{Stressed:} IQR made fewer moves and used fewer active-host hours. Low dispersion can raise its threshold above 80\%, allowing denser packing. This is a supported interpretation of the rule and observations, not proof that every avoided move was unnecessary. Placement strategy also differs: IQR uses a dynamic first-fit policy, so this is not a perfectly isolated detector comparison.
-
-LR recorded one forecast flag in stressed seed 5 and zero in seeds 1--4. Its current-load branch can fire before forecasting is attempted. It matched THR's migration count, but equal counts do not prove identical timing or placement. No claim of better prediction accuracy or placement stability is supported.
-
-All recorded SLATAH and SLAV values are zero. Some stressed runs have nonzero sampled unmet demand. Thus zero SLAV must not be described as zero performance loss. Only 2 of 20 cloudlets finish in the random PlanetLab runs before the time limit; all 20 VMs were created. Completion is a separate check from VM creation.
-
-\section{What to explain to Dr. Zhani}
-\enlargethispage{2\baselineskip}
-\textbf{Why these parameters?} They are transparent starting settings: 80\% warning, 10 observations, one-interval forecast, IQR factor 0.75. They have not been optimized.
-
-\textbf{Did prediction help?} Not convincingly yet. It activated in diurnal checks but cost more energy, and rarely flagged forecasts under stress.
-
-\textbf{Why keep zero metrics?} To document the research formulation, while explaining its blind spot and showing separate measurements.
-
-\textbf{What remains?} Repeated-run stability, controlled rising/bursty workloads, forecast error and runtime overhead, better demand integration/PDM normalization, and a fair detector comparison with common placement logic. Try more complex predictors only after those checks. Exponential smoothing need not be a nonlinear model.
-
-\textbf{Advisor feedback addressed:} terminology, units, detection versus placement, assumptions, research references and honest result interpretation are now explicit. Practice explaining these points aloud.
-
-
+Older seed-based runs are retained in results/archive/seed-workflow for provenance. Their numbers belong to an older input-selection/order design and must not be mixed with this table.
 \newpage
-\section{Workload folders, seeds and running the project}
-A trace is a text file of CPU percentages over time. These files are simulation inputs, not extra algorithms. The runner reads them; you do not execute a trace file.
-\begin{center}\small
-\begin{tabularx}{\linewidth}{@{}p{0.24\linewidth}X p{0.18\linewidth}@{}}\toprule
-Folder & Meaning & Current use\\\midrule
-diurnal & Eight artificial day/night patterns. Easy controlled example. & Used\\[4pt]
-real/20110303 & All 1,052 real traces for 3 March 2011. The planetlab scenario samples 20. & Used\\[4pt]
-heavy & Sixteen selected high-load real traces. The stressed scenario uses all 16. & Used\\[4pt]
-active & A 114-trace intermediate subset with more activity. & Not used by current runner\\[4pt]
-20110303 at top level & Four older sample files, separate from the full real pool. & Not used by current runner\\\bottomrule
-\end{tabularx}\end{center}
-Keep diurnal, real and heavy for current reproducibility. The other two subsets are historical inputs, not requirements for the current runner. They are retained rather than deleting experiment history without checking all older consumers.
+\section{What to run and what the folders mean}
+Traces are input text files, not programs. Each value is CPU percentage for a five-minute sample. diurnal holds synthetic day/night traces; real/20110303 holds all 1,052 real traces; heavy holds the 16 high-demand traces. These three folders support current experiments. active (114 traces) and top-level 20110303 (four old samples) are historical subsets, unused by the current runner.
 
-\textbf{What is a seed?} A starting number for the random generator. Seeds 1, 2, 3, 4 and 5 give five configured selections/orders. For planetlab they select 20 traces from the full pool; for stressed they shuffle the same 16 heavy traces.
+The workloads folder contains only lists of paths, not duplicate trace data. real a, b and c name the fixed groups in those lists. Seeds and averages are no longer part of the current workflow. They remain in the historical experiment archive, where a seed controlled random selection/order and an average combined repeated runs.
 
-\textbf{Five-seed average} means add the five results for one policy/scenario and divide by five. If the energy values were 7, 8, 9, 8 and 8 kWh, the average would be 8 kWh. A mean migration count of 0.2 can mean one move across five runs; it is not a fractional move within one run. The value after plus/minus in summary.md is sample standard deviation: how spread out the results are, not a confidence interval. Diurnal has one fixed run, so it has no five-seed average.
-
-\textbf{What runs what?} ExperimentRunner chooses traces, seeds and policies. ConsolidationExperiment builds the simulated hosts and VMs and measures results. PredictiveLinearRegressionPolicy performs OLS forecasting. TraceStats only describes the input data. The PowerShell helper builds the Java code and calls the selected program.
-
-\textbf{Run from the repository's VS Code PowerShell terminal:}
+\textbf{From the repository's VS Code PowerShell terminal:}
 \begin{verbatim}
 ./scripts/run.ps1 -Stats
-./scripts/run.ps1 -Scenario diurnal -Seeds 1
-./scripts/run.ps1 -Scenario planetlab -Seeds 1
-./scripts/run.ps1 -Scenario planetlab_stressed -Seeds 1
+./scripts/run.ps1 -Scenario diurnal
+./scripts/run.ps1 -Scenario heavy
+./scripts/run.ps1 -Scenario real_a
 ./scripts/run.ps1
 \end{verbatim}
-Each simulation command compares THR, IQR and LR. The last command runs the complete batch: 3 diurnal rows plus 15 random-PlanetLab rows plus 15 stressed rows = 33. Demo results go to results/demo; the report evidence is preserved. See PR2's walkthrough table for the order to show files in the meeting.
+The last command runs all five cases and all three policies, giving 15 result rows. real b and real c can also be run by name. Demo output goes to results/demo. Use -OutputDir results only to deliberately replace the report evidence and then update the tables. The helper builds in target/meeting-build to keep command-line output separate from the IDE's compiled files.
 
+\textbf{Code roles.} ExperimentRunner reads the lists and compares policies. ConsolidationExperiment builds the simulation and calculates metrics. PredictiveLinearRegressionPolicy fits the OLS line. TraceStats describes input data. Baseline programs preserve PR1 history.
+
+\textbf{Advisor answers.} ``I compare three policies on the same fixed workloads. Energy measures the cost of running hosts; migrations measure movement; SLA and unmet-demand fields describe modelled performance impact. Prediction has not established a general advantage. Next I will validate the current approach before expanding it.''
 \end{document}

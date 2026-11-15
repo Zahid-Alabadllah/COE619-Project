@@ -28,12 +28,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Stream;
 
 /**
@@ -378,13 +376,4 @@ public final class ConsolidationExperiment {
         }
     }
 
-    /** Deterministic random sample of {@code count} traces for a given seed. */
-    public static List<Path> sampleTraces(final Path dir, final int count, final long seed) {
-        final List<Path> all = new ArrayList<>(listTraces(dir));
-        if (all.size() < count) {
-            throw new IllegalArgumentException("Need " + count + " traces, found " + all.size());
-        }
-        Collections.shuffle(all, new Random(seed));
-        return List.copyOf(all.subList(0, count));
-    }
 }

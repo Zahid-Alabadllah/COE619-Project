@@ -7,42 +7,57 @@
 \pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small COE619 | Zahid Alabadllah | 202045160}\fancyfoot[C]{\thepage}
 \newcommand{\hot}[1]{\par\textbf{Hot take:} #1\par}
 \begin{document}
-\section*{COE619 Progress Report II: corrected evidence edition}
+\section*{COE619 Progress Report II}
+Energy-Aware Predictive VM Consolidation in Cloud Data Centers\\
 Zahid Alabadllah (202045160) | Advisor: Dr. Mohamed Faten Zhani\\
-15 November 2026 | Term 261
-\section{Progress}
-Implemented THR and dynamic IQR baselines, an unweighted OLS trend predictor, a common experiment harness with idle shutdown, and integration of the 1,052-trace PlanetLab source pool. PR1 records the earlier baseline setup without host shutdown; its energy numbers should not be compared directly with the current harness.
-\section{Method in plain English}
-OLS fits a straight line to ten active host-history readings and evaluates it 300 seconds ahead. Current or forecast CPU above 80\% flags overload. With insufficient history, only the current threshold is used. This is not LOESS. Ten regular five-minute timestamps span 45 minutes, and actual history spacing can vary.
+Updated 15 November 2026 | Term 261
+\section{Completed progress}
+Implemented the static 80\% threshold (THR), adaptive IQR threshold, and an unweighted ordinary least squares (OLS) predictor. Integrated real PlanetLab traces and built a common harness for host shutdown, migration accounting and energy/performance measurements. The current workflow uses fixed workloads so its behavior is easier to reproduce and explain. PR1 preserves the older baseline setup without idle-host shutdown; its energy figures are not directly comparable.
+\section{What the predictor does}
+Fit a straight line to ten active CPU readings, then look 300 seconds ahead. Flag overload if current or forecast utilization exceeds 80\%. Before enough history exists, use THR alone. This is simple OLS, not Beloglazov's locally weighted regression (LOESS). Ten regularly spaced five-minute readings span 45 minutes between first and last; actual host-history event spacing can vary.
+\section{Simple experimental design}
+We compare THR, IQR and our OLS predictor on five fixed cases. The exact trace paths and VM order are saved in src/main/resources/workloads. Every policy receives the same list for a case. There is no runtime trace sampling, seed loop or averaging across cases.
+\begin{center}\small\begin{tabular}{lrrl}\toprule Case & Hosts & VMs & Purpose\\\midrule
+diurnal & 4 & 8 & Controlled day/night example\\
+real a, real b, real c & 10 & 20 each & Three fixed real-trace selections\\
+heavy & 6 & 16 & High-demand real-trace example\\\bottomrule\end{tabular}\end{center}
+The real groups are three disjoint selections frozen once from the 1,052-trace pool, using a shuffled list with generator initialization 619 during manifest preparation. This is provenance, not a setting used when running the project. They are not claimed to be statistically representative. The heavy case uses the same 16 curated traces in a fixed name-sorted order. The full pool mean is 12.31\%; the heavy pool mean is 78.34\%, with minimum trace mean 68.12\%.
 
-IQR uses threshold = 1 - 0.75 times (Q3 - Q1). Q1 and Q3 are utilization percentiles. Low spread raises the threshold; high spread lowers it. CPU triggers overload evaluation; placement checks CPU, RAM, bandwidth and storage. All policies use minimum migration time VM selection, but IQR's first-fit placement differs from the static base policy.
-\section{Current reproducible evidence}
-The previous report's five-seed averages lacked matching saved raw records in the migration snapshot. Those nine seed-1 rows are preserved in results/archive/pre-audit-seed1.csv. A fresh verification batch produced 33 rows, summarized below. Real scenarios have five seeds; diurnal has one. Heavy seeds reorder the same 16 traces, not independent workload samples. The real pool averages 12.31\% CPU; the heavy pool's minimum trace mean is 68.12\%.
-\begin{center}\small\begin{tabular}{llrrrr}\toprule Scenario & Policy & Runs & kWh & Moves & Host-hours\\\midrule
-diurnal & THR & 1 & 5.2393 & 2.0 & 25.66\\
-diurnal & IQR & 1 & 5.2310 & 2.0 & 25.67\\
-diurnal & LR & 1 & 5.7744 & 3.0 & 28.47\\
-planetlab & THR & 5 & 21.8696 & 0.0 & 120.33\\
-planetlab & IQR & 5 & 21.8696 & 0.0 & 120.33\\
-planetlab & LR & 5 & 21.8696 & 0.0 & 120.33\\
-planetlab stressed & THR & 5 & 8.2131 & 4.0 & 38.14\\
-planetlab stressed & IQR & 5 & 7.0172 & 0.2 & 30.81\\
-planetlab stressed & LR & 5 & 8.2271 & 4.0 & 38.21\\
+The experiment now answers: ``What happens on these clearly specified workloads?'' It does not establish an average improvement across all data centers. A fixed input list also cannot guarantee bit-identical simulation output: tie/iteration ordering can vary. Additional repetitions or workload days should be added only where needed to support a specific final claim.
+
+\section{Current results, one row per case and policy}
+The table comes from the current 15-row results/experiments.csv. There are no five-seed averages. Full SLA, unmet-demand and forecast-check fields are retained in the CSV and results/summary.md.
+\begin{center}\small\begin{tabular}{llrrr}\toprule Case & Policy & kWh & Moves & Host-hours\\\midrule
+diurnal & THR & 5.2488 & 2 & 25.67\\
+diurnal & IQR & 5.2285 & 2 & 25.67\\
+diurnal & LR & 5.7720 & 3 & 28.50\\
+real a & THR & 21.9444 & 0 & 120.42\\
+real a & IQR & 21.9444 & 0 & 120.42\\
+real a & LR & 21.9444 & 0 & 120.42\\
+real b & THR & 21.8661 & 0 & 120.42\\
+real b & IQR & 21.8661 & 0 & 120.42\\
+real b & LR & 21.8661 & 0 & 120.42\\
+real c & THR & 21.5899 & 0 & 120.42\\
+real c & IQR & 21.5899 & 0 & 120.42\\
+real c & LR & 21.5899 & 0 & 120.42\\
+heavy & THR & 8.2520 & 4 & 38.34\\
+heavy & IQR & 7.0405 & 0 & 30.83\\
+heavy & LR & 9.5788 & 5 & 45.39\\
 \bottomrule\end{tabular}\end{center}
-\section{Findings and limitations}
-LR used about 10\% more energy than THR on diurnal data and recorded one forecast flag in stressed seed 5 and zero in seeds 1--4. Equal stressed migration counts do not imply identical behavior. The data do not establish predictive superiority, better accuracy, lower computational overhead or enhanced placement stability.
+In this batch LR used more energy than THR in both diurnal and heavy cases. The three real groups produced no migrations and equal policy energy within each group. Heavy IQR used less energy and fewer active-host hours. These are case-specific observations, not universal rankings.\par Read the rows directly: lower kWh is less simulated energy; moves counts completed migrations; host-hours sums server active time. The predictor must earn its benefit against the baselines. A forecast flag is an overload-check result, not proof of a completed proactive migration. These results do not establish general predictive superiority.
 
-IQR used fewer migrations and active-host hours under stress. Its higher threshold for low-spread history is a plausible mechanism; placement differences also matter. Generalization beyond this day and topology is untested.
+Older seed-based runs are retained in results/archive/seed-workflow for provenance. Their numbers belong to an older input-selection/order design and must not be mixed with this table.
+\enlargethispage{3\baselineskip}
+\section{What the measurements can and cannot show}
+An 80\% warning provides headroom, not a saturation guarantee. SLATAH averages each active host's fraction of time at the 99.9\% cutoff. A zero value means no counted saturation, not proof of prevention. SLAV and ESV become zero whenever SLATAH is zero and cannot rank such runs alone.
 
-SLATAH is the average per-active-host saturation-time fraction at the 99.9\% cutoff. Its zero value does not prove prevention. SLAV = SLATAH times PDM, so it and ESV are zero and cannot rank these runs. PDM is a 10\% capacity-based lost-work estimate divided by completed task work, with capacity-times-execution-time fallback. That fallback is not integrated requested demand. Unmet demand is sampled every 300 seconds and can miss short shortages; some stressed rows are nonzero. Only 2/20 random-workload tasks finish by the horizon, although 20/20 VMs are created.
+PDM uses an assumed 10\% capacity-based lost-work estimate divided by completed task work, or capacity times execution time if none finished. This fallback is not integrated requested work. Unmet demand samples requested versus allocated CPU about every 300 seconds and can miss brief shortages. VM creation and task completion are separate checks; real workloads can remain unfinished at the time limit.
 
-Power is a chosen linear model: 175 W idle, 250 W full, zero off. Energy covers recorded active host histories until simulation end, which can slightly exceed the configured day. Simulator results can vary despite fixed seeds. Full mean and sample-standard-deviation columns remain in results/summary.md.
-\section{Next work}
-Establish repeatability, use controlled rising workloads, measure forecast error and predictor runtime, improve metric integration, and isolate detector changes from placement. The implementation and report exist; final academic acceptance and later project deliverables remain subject to advisor review.
+Active-host power is modelled as 175+75u watts, with zero off-host power. Energy covers recorded active host histories until simulation end. It excludes cooling/network equipment and measured predictor overhead. IQR uses first-fit placement, so comparison does not isolate overload detection alone.
+\section{Remaining work}
+Explain and validate the existing model before adding algorithms. Test repeatability where differences matter, forecast error on controlled rising workloads, and improve measurement only where needed. No deep learning, large cluster or dashboard is required by the present technical scope. Final academic scope remains subject to advisor agreement.
 
-For definitions, examples, assumptions and advisor questions, see the accompanying Project Understanding Guide.
-\paragraph{Reference.} Research convention: \href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}; \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. Implementation: \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research methods and simulator choices, not a formal SLA standard.
-
+\href{https://doi.org/10.1002/cpe.1867}{Beloglazov and Buyya (2012)}: \href{https://beloglazov.info/papers/2012-optimal-algorithms-ccpe.pdf}{free full-paper PDF}. \href{https://javadoc.io/doc/org.cloudsimplus/cloudsim-plus/8.0.0/index.html}{CloudSim Plus 8.0.0 API}. These are research conventions and implementation choices, not formal SLA certification.
 \newpage
 \section{Essential equations and what they mean}
 \textbf{Utilization and the THR warning}
@@ -80,8 +95,8 @@ Earlier baselines & BaselineReactiveSimulation.java and BaselineIQRSimulation.ja
 Workload integration & src/main/resources/planetlab; run command A below & Synthetic versus real CPU histories; each value is CPU percent, one per five minutes.\\[5pt]
 Predictor implemented & PredictiveLinearRegressionPolicy.java & isOverloaded checks current CPU first, then the forecast; forecast fits OLS.\\[5pt]
 Common experiment setup & ConsolidationExperiment.java & createPolicy, host/VM configuration, idle shutdown and computeResult.\\[5pt]
-Automated comparisons & ExperimentRunner.java & Same traces/order per policy for a seed; three scenarios and CSV output.\\[5pt]
-Verified findings & results/summary.md and experiments.csv & 33 saved rows; show energy, moves, host-hours, unmet demand and forecast flags.\\[5pt]
+Automated comparisons & ExperimentRunner.java & Fixed manifests shared across policies; five named cases and CSV output.\\[5pt]
+Verified findings & results/summary.md and experiments.csv & 15 saved rows; show energy, moves, host-hours, unmet demand and forecast flags.\\[5pt]
 Live demonstration & Command B below; optional C & Show terminal summary and results/demo. Explain one result rather than scrolling through every log.\\\bottomrule
 \end{tabularx}\end{center}
 \textbf{A. Inspect workload statistics (does not run simulations)}
@@ -90,17 +105,17 @@ Live demonstration & Command B below; optional C & Show terminal summary and res
 \end{verbatim}
 \textbf{B. Short day/night comparison}
 \begin{verbatim}
-./scripts/run.ps1 -Scenario diurnal -Seeds 1
+./scripts/run.ps1 -Scenario diurnal
 \end{verbatim}
 \textbf{C. Optional stressed comparison}
 \begin{verbatim}
-./scripts/run.ps1 -Scenario planetlab_stressed -Seeds 1
+./scripts/run.ps1 -Scenario heavy
 \end{verbatim}
-\textbf{Full five-seed batch, if needed}
+\textbf{All five named cases, if needed}
 \begin{verbatim}
 ./scripts/run.ps1
 \end{verbatim}
-The helper compiles first and uses the local JDK 25 installation when present. Demo output goes to results/demo, leaving the report's results/experiments.csv unchanged. Each demo invocation replaces only its demo outputs. To deliberately replace the report results, specify -OutputDir results and regenerate the report tables afterward. A rerun may differ slightly even with the same seed.
+The helper compiles first and uses the local JDK 25 installation when present. Demo output goes to results/demo, leaving the report's results/experiments.csv unchanged. Each demo invocation replaces only its demo outputs. To deliberately replace the report results, specify -OutputDir results and regenerate the report tables afterward. A rerun may differ slightly with unchanged inputs.
 
 \textbf{Closing statement:} ``The implementation and comparison pipeline work. The predictor has not shown a clear benefit yet. Next I will test controlled rising workloads and separate prediction effects from placement effects.''
 

@@ -1,0 +1,16 @@
+src/main/resources/planetlab/heavy/aladdin_planetlab_extranet_uni-passau_de_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/dschinni_planetlab_extranet_uni-passau_de_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/planet12_csc_ncsu_edu_yale_p4p
+src/main/resources/planetlab/heavy/planet1_zib_de_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/planetlab-2_pdl_nudt_edu_cn_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/planetlab1_clemson_edu_princeton_snap
+src/main/resources/planetlab/heavy/planetlab1_cs_umass_edu_ethzple_bufsize
+src/main/resources/planetlab/heavy/planetlab1_cs_uml_edu_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/planetlab2_ecs_vuw_ac_nz_ucr_slice2
+src/main/resources/planetlab/heavy/planetlab2_jhu_edu_poly_cao
+src/main/resources/planetlab/heavy/planetlab2_unl_edu_arizona_gacksnm
+src/main/resources/planetlab/heavy/pli1-pa-4_hpl_hp_com_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/plink_cs_uwaterloo_ca_yale_p4p
+src/main/resources/planetlab/heavy/ricepl-5_cs_rice_edu_yale_p4p
+src/main/resources/planetlab/heavy/ttu1-1_nodes_planet-lab_org_ rnp_dcc_ufjf
+src/main/resources/planetlab/heavy/ttu2-1_nodes_planet-lab_org_nus_proxaudio
