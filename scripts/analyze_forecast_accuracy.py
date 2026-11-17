@@ -7,7 +7,9 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--log",default="accuracy-replay.log")
 parser.add_argument("--output",default="forecast_accuracy.json")
 parser.add_argument("--locked",action="store_true",help="Use the previously selected 10-point, half-trend model without tuning")
+parser.add_argument("--all-heldout",action="store_true",help="Evaluate every segment on a fresh workload day; requires locked settings")
 args=parser.parse_args()
+if args.all_heldout and not args.locked: parser.error("--all-heldout requires --locked")
 inputs={}; observations=[];case=None
 log=ROOT/args.log
 if not log.exists(): log=Path(str(log)+".gz")
@@ -43,9 +45,9 @@ training=[x for x in training if x[1]<cutoff]
 # Lock the choice before examining other cases or the later time portion.
 candidates=[(k,g) for k in [3,5,10] for g in [0,.25,.5,.75,1]]
 best=(10,0.5) if args.locked else min(candidates,key=lambda kg:score(training,*kg)["mae_pp"])
-report={"selection":"locked from earlier tuning" if args.locked else "minimum MAE on early 70% of real_a targets only", "cutoff_s":cutoff,"chosen_window":best[0],"chosen_trend_weight":best[1],"training":score(training,*best),"validation":{}}
+report={"selection":"locked from earlier tuning" if args.locked else "minimum MAE on early 70% of real_a targets only", "cutoff_s":cutoff,"chosen_window":best[0],"chosen_trend_weight":best[1],"reference_subset" if args.locked else "training":score(training,*best),"validation":{}}
 for c in ["diurnal","real_a","real_b","real_c","heavy"]:
-    rows=[x for x in observations if x[0]==c and (c!="real_a" or x[1]>=cutoff)]
+    rows=[x for x in observations if x[0]==c and (args.all_heldout or c!="real_a" or x[1]>=cutoff)]
     if rows:report["validation"][c]={"persistence":score(rows,10,0),"original_ols":score(rows,10,1),"selected":score(rows,*best)}
 (ROOT/args.output).write_text(json.dumps(report,indent=2))
 print(json.dumps(report,indent=2))

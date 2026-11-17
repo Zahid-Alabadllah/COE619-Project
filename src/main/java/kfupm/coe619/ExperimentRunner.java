@@ -67,7 +67,8 @@ public final class ExperimentRunner {
         if (!CASES.contains(scenario)) {
             throw new IllegalArgumentException("Choose one of " + CASES + "; unknown case: " + scenario);
         }
-        final List<Path> traces = Files.readAllLines(MANIFESTS.resolve(scenario + ".txt")).stream()
+        final Path manifestRoot = Path.of(System.getProperty("coe619.researchWorkloads", MANIFESTS.toString()));
+        final List<Path> traces = Files.readAllLines(manifestRoot.resolve(scenario + ".txt")).stream()
             .map(String::trim).filter(line -> !line.isEmpty()).map(Path::of).toList();
         if (traces.isEmpty() || traces.stream().anyMatch(path -> !Files.isRegularFile(path))) {
             throw new IllegalStateException("Empty manifest or missing trace for " + scenario);

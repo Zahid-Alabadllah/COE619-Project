@@ -33,3 +33,7 @@ Run scripts/analyze_forecast_accuracy.py for the original replay, or use --log d
 Verified the Java forecast math on an exact line with irregular times, reversed sample order and repeated timestamps. The irregular-time fit is mathematically valid; history selection is an evaluated design choice, not an arithmetic correction.
 
 Next: fresh workload days, threshold-crossing precision/recall, rolling validation, prediction timing separate from destination probes, and a framework repair before end-to-end promotion. A forecast gain alone does not guarantee an energy gain.
+
+## Follow-up
+
+A narrow opt-in repair now restores the normal underloaded-host path. A different-day validation has also completed without retuning. See FRAMEWORK_REPAIR.md for regression checks, fresh-day accuracy and unresolved energy results. Earlier isolated results remain historical rather than being overwritten.

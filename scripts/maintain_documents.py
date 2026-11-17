@@ -42,7 +42,7 @@ def main():
                     b.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(a,b)
     if not args.clean: return
     target=CODE/"target"
-    candidates=[target/n for n in ("meeting-deck","source-check","meeting-build","classes","maven-status","generated-sources","test-classes")]
+    candidates=[target/n for n in ("meeting-deck","framework-patch","source-check","meeting-build","classes","maven-status","generated-sources","test-classes")]
     if target.exists():
         candidates += [p for p in target.iterdir() if p.is_file() and (p.suffix==".png" or p.name.endswith("-build.txt") or p.name=="demo-verification.log")]
     candidates+=list(ROOT.glob(".chart-data-*"))

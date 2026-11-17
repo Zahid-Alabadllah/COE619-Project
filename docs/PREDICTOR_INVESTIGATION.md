@@ -17,3 +17,5 @@ Observed diagnostic windows in the spaced run cover at least 2700 seconds (45 mi
 Next: verify repeated-run stability, attribute forecast flags to actual source migrations versus destination checks, inspect history across VM moves, and measure forecast error before comparing a different predictor. Raw results and logs remain under results/predictor_investigation. Unrelated untracked files were left untouched.
 
 Follow-up: confirmation, migration-history reset and adaptive-threshold ablations are saved separately. Adaptive predictor and forecast-disabled control had identical results; energy gain cannot be attributed to forecasting. See FORECAST_ACCURACY.md for tuning split, matched forecast accuracy, exceptions and the framework defect. No settings promoted to default.
+
+Paused at user request. The repaired normal-consolidation batch completed and wrote results/predictor_investigation/damped_normal_repaired/experiments.csv. Full verification is pending. The generated patched class was removed at the pause checkpoint to prevent accidental use in baseline runs. See docs/RESUME_PREDICTOR.md for next steps.
