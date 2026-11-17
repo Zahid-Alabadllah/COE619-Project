@@ -42,7 +42,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     private final Map<Long, Double> historyCutoff = new HashMap<>();
     private final Map<Long, Long> lastWarningBucket = new HashMap<>();
     private final Map<Long, Integer> warningStreak = new HashMap<>();
-    private record Pending(double target, double estimate, double naive, double raw, long generation) { }
+    private record Pending(double target, double estimate, double naive, double raw,
+                           double trendEstimate, double pairEstimate, long generation) { }
     private final Map<Long, Long> generation = new HashMap<>();
     private final Map<Long, List<Pending>> pending = new HashMap<>();
     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
@@ -51,15 +52,21 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
 
     /** Research-only learner: use resolved past errors to choose how much trend to trust. */
     static final class OnlineBlend {
-        private record Error(double target, double trend, double change) { }
+        private record Error(double target, double trend, double change, double latest, double actual,
+                             double trendEstimate, double pairEstimate) { }
         private final Deque<Error> ready = new ArrayDeque<>();
         private final Deque<Error> history = new ArrayDeque<>();
 
         void observe(final double target, final double raw, final double latest, final double actual) {
-            ready.addLast(new Error(target, raw - latest, actual - latest));
+            observe(target, raw, latest, actual, Double.NaN, Double.NaN);
         }
 
-        double weight(final double issueTime) {
+        void observe(final double target, final double raw, final double latest, final double actual,
+                     final double trendEstimate, final double pairEstimate) {
+            ready.addLast(new Error(target, raw - latest, actual - latest, latest, actual, trendEstimate, pairEstimate));
+        }
+
+        private void update(final double issueTime) {
             final var iterator = ready.iterator();
             while (iterator.hasNext()) {
                 final Error error = iterator.next();
@@ -69,6 +76,10 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                 if (history.size() > 20) history.removeFirst();
                 iterator.remove();
             }
+        }
+
+        double weight(final double issueTime) {
+            update(issueTime);
             if (history.size() < 10) return 0.5;
             double denominator = 0;
             double numerator = 0;
@@ -77,6 +88,43 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                 numerator += error.trend() * error.change();
             }
             return denominator > 1e-12 ? Math.max(0, Math.min(1, numerator / denominator)) : 0.5;
+        }
+
+        /** Fit next CPU against current CPU from resolved pairs, not against future time. */
+        double pairForecast(final double issueTime, final double latest) {
+            update(issueTime);
+            if (history.size() < 10) return latest;
+            double meanX = 0;
+            double meanY = 0;
+            for (final Error error : history) {
+                meanX += error.latest();
+                meanY += error.actual();
+            }
+            meanX /= history.size();
+            meanY /= history.size();
+            double variance = 0;
+            double covariance = 0;
+            for (final Error error : history) {
+                variance += Math.pow(error.latest() - meanX, 2);
+                covariance += (error.latest() - meanX) * (error.actual() - meanY);
+            }
+            if (variance <= 1e-12) return latest;
+            final double slope = Math.max(0, Math.min(1, covariance / variance));
+            return Math.max(0, Math.min(1, meanY + slope * (latest - meanX)));
+        }
+
+        double selectForecast(final double issueTime, final double trend, final double pair) {
+            update(issueTime);
+            double trendError = 0;
+            double pairError = 0;
+            int count = 0;
+            for (final Error error : history) {
+                if (!Double.isFinite(error.trendEstimate()) || !Double.isFinite(error.pairEstimate())) continue;
+                trendError += Math.abs(error.trendEstimate() - error.actual());
+                pairError += Math.abs(error.pairEstimate() - error.actual());
+                count++;
+            }
+            return count >= 10 && pairError < trendError ? pair : trend;
         }
     }
 
@@ -146,7 +194,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
             }
             return super.isOverloaded(host);
         }
-        final boolean online = Boolean.getBoolean("coe619.onlineForecast");
+        final boolean pairs = Boolean.getBoolean("coe619.pairForecast");
+        final boolean selected = Boolean.getBoolean("coe619.selectForecast");
+        final boolean online = Boolean.getBoolean("coe619.onlineForecast") || pairs || selected;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
         final boolean reactive = super.isOverloaded(host);
         if (reactive) {
@@ -165,20 +215,24 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         // Experimental damped trend: setting selected on early real_a only.
         final double weight = online ? onlineBlends.computeIfAbsent(host.getId(), id -> new OnlineBlend()).weight(now)
             : Boolean.getBoolean("coe619.dampedForecast") ? 0.5 : 1;
-        final double forecast = online || Boolean.getBoolean("coe619.dampedForecast")
+        final double trendEstimate = online || Boolean.getBoolean("coe619.dampedForecast")
             ? samples.get(0)[1] + weight * (rawForecast - samples.get(0)[1]) : rawForecast;
+        final double pairEstimate = online ? onlineBlends.get(host.getId()).pairForecast(now, samples.get(0)[1]) : samples.get(0)[1];
+        final double forecast = selected ? onlineBlends.get(host.getId()).selectForecast(now, trendEstimate, pairEstimate)
+            : pairs ? pairEstimate : trendEstimate;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
             final double target = now + horizonSeconds;
             if (queue.stream().noneMatch(item -> Math.abs(item.target() - target) < 1e-6)) {
-                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, generation.getOrDefault(host.getId(), 0L)));
+                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, trendEstimate, pairEstimate,
+                    generation.getOrDefault(host.getId(), 0L)));
                 if (Boolean.getBoolean("coe619.evaluateForecast")) {
                     final String input = samples.stream().map(sample -> sample[0] + ":" + sample[1])
                         .collect(java.util.stream.Collectors.joining(";"));
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_INPUT host=%d target=%.3f samples=%s%n",
                         host.getId(), target, input);
-                    System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s%n",
-                        host.getId(), target, weight, online);
+                    System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s model=%s%n",
+                        host.getId(), target, weight, online, selected ? "selected" : pairs ? "recent_pairs" : "trend");
                 }
             }
         }
@@ -222,9 +276,10 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                 for (final HostStateHistoryEntry entry : host.getStateHistory()) {
                     if (entry.active() && Math.abs(entry.time() - item.target()) <= 1) {
                         final double observed = HostCpuUtilization.fractionOfCapacity(host, entry);
-                        if (Boolean.getBoolean("coe619.onlineForecast")) {
+                        if (Boolean.getBoolean("coe619.onlineForecast") || Boolean.getBoolean("coe619.pairForecast")
+                            || Boolean.getBoolean("coe619.selectForecast")) {
                             onlineBlends.computeIfAbsent(host.getId(), id -> new OnlineBlend())
-                                .observe(item.target(), item.raw(), item.naive(), observed);
+                                .observe(item.target(), item.raw(), item.naive(), observed, item.trendEstimate(), item.pairEstimate());
                         }
                         if (Boolean.getBoolean("coe619.evaluateForecast")) {
                             System.out.printf(java.util.Locale.ROOT,

@@ -17,6 +17,7 @@ def main():
     states, inputs, errors = {}, {}, defaultdict(list)
     max_weight_difference = max_prediction_difference = 0
     checks = 0
+    candidate_model = None
     case = policy = None
     with opener(args.log, 'rt', encoding='utf-8-sig') as stream:
         for line in stream:
@@ -35,21 +36,40 @@ def main():
                 slope = sum((t-mt)*(u-mu) for t, u in samples) / denominator if denominator else 0
                 inputs[host, target_text] = dict(latest=samples[0][1], raw=mu+slope*(target-mt))
             elif line.startswith('FORECAST_BLEND'):
-                match = re.search(r'host=(\d+) target=([\d.]+) weight=([\d.]+) online=(\w+)', line)
-                host, target_text, weight_text, online = match.groups()
+                match = re.search(r'host=(\d+) target=([\d.]+) weight=([\d.]+) online=(\w+)(?: model=(\w+))?', line)
+                host, target_text, weight_text, online, model = match.groups()
+                model = model or 'trend'
+                if candidate_model is None: candidate_model = model
+                assert candidate_model == model, 'Do not mix candidate models in one report'
                 assert online == 'true', 'Expected online candidate log'
                 history, ready = states.setdefault(host, (deque(maxlen=20), []))
                 issue = float(target_text) - 300
                 eligible = [x for x in ready if x[0] < issue - 1e-6]
-                history.extend((trend, change) for target, trend, change in eligible)
+                history.extend((trend, change, latest, actual, old_trend, old_pair)
+                               for target, trend, change, latest, actual, old_trend, old_pair in eligible)
                 ready[:] = [x for x in ready if x[0] >= issue - 1e-6]
-                denominator = sum(d*d for d, y in history)
-                expected = max(0, min(1, sum(d*y for d, y in history)/denominator)) if len(history) >= 10 and denominator > 1e-12 else .5
+                denominator = sum(h[0]*h[0] for h in history)
+                expected = max(0, min(1, sum(h[0]*h[1] for h in history)/denominator)) if len(history) >= 10 and denominator > 1e-12 else .5
                 weight = float(weight_text)
                 difference = abs(expected-weight)
                 max_weight_difference = max(max_weight_difference, difference)
                 assert difference < 1e-5, (case, host, target_text, expected, weight)
                 inputs[host, target_text]['weight'] = weight
+                latest = inputs[host, target_text]['latest']
+                pair = latest
+                if len(history) >= 10:
+                    mx = sum(h[2] for h in history)/len(history)
+                    my = sum(h[3] for h in history)/len(history)
+                    variance = sum((h[2]-mx)**2 for h in history)
+                    if variance > 1e-12:
+                        slope = max(0, min(1, sum((h[2]-mx)*(h[3]-my) for h in history)/variance))
+                        pair = max(0, min(1, my+slope*(latest-mx)))
+                inputs[host, target_text]['pair'] = pair
+                inputs[host, target_text]['model'] = model
+                trend = latest + weight*(inputs[host, target_text]['raw']-latest)
+                choose_pair = len(history) >= 10 and sum(abs(h[5]-h[3]) for h in history) < sum(abs(h[4]-h[3]) for h in history)
+                inputs[host, target_text]['selected'] = pair if choose_pair else trend
+                inputs[host, target_text]['trend'] = trend
                 checks += 1
             elif line.startswith('FORECAST_ERROR'):
                 match = re.search(r'host=(\d+) target=([\d.]+) actual=([-+\d.]+) forecast=([-+\d.]+) persistence=([-+\d.]+)', line)
@@ -57,19 +77,21 @@ def main():
                 actual, predicted = float(actual_text), float(predicted_text)
                 row = inputs[host, target_text]
                 latest, raw = row['latest'], row['raw']
-                reconstructed = latest + row['weight']*(raw-latest)
+                reconstructed = row['selected'] if row['model'] == 'selected' else row['pair'] if row['model'] == 'recent_pairs' else row['trend']
                 difference = abs(reconstructed-predicted)
                 max_prediction_difference = max(max_prediction_difference, difference)
                 assert difference < 1e-5, (case, host, target_text, reconstructed, predicted)
-                states[host][1].append((float(target_text), raw-latest, actual-latest))
+                states[host][1].append((float(target_text), raw-latest, actual-latest, latest, actual, row['trend'], row['pair']))
                 errors[case].append(dict(actual=actual, persistence=latest-actual, ols=raw-actual,
-                                         half=latest+.5*(raw-latest)-actual, online=predicted-actual))
+                                         half=latest+.5*(raw-latest)-actual,
+                                         adaptive_replay=latest+row['weight']*(raw-latest)-actual,
+                                         recent_pairs=row['pair']-actual, selected_replay=row['selected']-actual, online=predicted-actual))
     assert checks and errors, 'No online predictions found'
-    report = dict(weight_checks=checks, max_weight_difference=max_weight_difference,
+    report = dict(candidate_model=candidate_model, weight_checks=checks, max_weight_difference=max_weight_difference,
                   max_prediction_difference=max_prediction_difference, accuracy={})
     for case, rows in errors.items():
         report['accuracy'][case] = {}
-        for model in ('persistence', 'ols', 'half', 'online'):
+        for model in ('persistence', 'ols', 'half', 'adaptive_replay', 'recent_pairs', 'selected_replay', 'online'):
             values = [r[model] for r in rows]
             report['accuracy'][case][model] = dict(count=len(values),
                 mae_pp=100*sum(map(abs, values))/len(values),

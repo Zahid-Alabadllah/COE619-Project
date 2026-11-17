@@ -1,0 +1,29 @@
+{
+  "started_utc": "2026-11-17T22:45:24.4262687Z",
+  "completed_utc": "2026-11-17T22:45:38.4973826Z",
+  "day": "20110409",
+  "model": "selected_guard",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.planningHistoryGuard=true -Dcoe619.selectForecast=true -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110409/manifests",
+  "framework_fix": true,
+  "stable_planning": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "ed06f3d26cccc4cdf18d68caa347cf6ff37f7ce4",
+  "code_status": [
+    " M scripts/research/OnlineBlendRegression.java",
+    " M scripts/research/check_online_forecast.py",
+    " M scripts/research/run_forecast_validation.ps1",
+    " M src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/complete_sequences/",
+    "?? results/predictor_investigation/complete_sequences_confirm/",
+    "?? results/predictor_investigation/complete_sequences_selected_confirm/",
+    "?? results/predictor_investigation/online_holdout_20110309/stable_pair_guard/",
+    "?? results/predictor_investigation/online_holdout_20110309/stable_selected_guard/",
+    "?? results/predictor_investigation/online_holdout_20110322/stable_pair_guard/",
+    "?? results/predictor_investigation/online_holdout_20110322/stable_selected_guard/",
+    "?? results/predictor_investigation/online_holdout_20110409/",
+    "?? scripts/research/validate_complete_sequences.py",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

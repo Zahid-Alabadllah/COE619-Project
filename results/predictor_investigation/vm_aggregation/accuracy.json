@@ -1,0 +1,230 @@
+{
+  "20110411": {
+    "all": {
+      "trace_count": 1233,
+      "hosts": 309,
+      "metrics": {
+        "persistence": {
+          "n": 85902,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.9675618728328703,
+          "rmse_pp": 5.8036893492531805,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "ols": {
+          "n": 85902,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.580667892870265,
+          "rmse_pp": 5.102279496004685,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "adaptive": {
+          "n": 85902,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.562217074717881,
+          "rmse_pp": 5.105709788530936,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "host_pairs": {
+          "n": 85902,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.0714879623114713,
+          "rmse_pp": 4.4148712460445525,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "vm_pairs": {
+          "n": 85902,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.066323537908686,
+          "rmse_pp": 4.409709941619297,
+          "early_precision": null,
+          "early_recall": null
+        }
+      }
+    },
+    "stress": {
+      "trace_count": 16,
+      "hosts": 4,
+      "metrics": {
+        "persistence": {
+          "n": 1112,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 116,
+          "mae_pp": 9.049685251798556,
+          "rmse_pp": 11.789475724548245,
+          "early_precision": null,
+          "early_recall": 0.0
+        },
+        "ols": {
+          "n": 1112,
+          "early_tp": 25,
+          "early_fp": 36,
+          "early_fn": 91,
+          "mae_pp": 8.217640887290166,
+          "rmse_pp": 10.605777846580379,
+          "early_precision": 0.4098360655737705,
+          "early_recall": 0.21551724137931033
+        },
+        "adaptive": {
+          "n": 1112,
+          "early_tp": 20,
+          "early_fp": 24,
+          "early_fn": 96,
+          "mae_pp": 8.077255627307824,
+          "rmse_pp": 10.490078471548642,
+          "early_precision": 0.45454545454545453,
+          "early_recall": 0.1724137931034483
+        },
+        "host_pairs": {
+          "n": 1112,
+          "early_tp": 21,
+          "early_fp": 25,
+          "early_fn": 95,
+          "mae_pp": 7.18114776566862,
+          "rmse_pp": 9.221565297772415,
+          "early_precision": 0.45652173913043476,
+          "early_recall": 0.1810344827586207
+        },
+        "vm_pairs": {
+          "n": 1112,
+          "early_tp": 20,
+          "early_fp": 26,
+          "early_fn": 96,
+          "mae_pp": 7.14658907498314,
+          "rmse_pp": 9.20790064736453,
+          "early_precision": 0.43478260869565216,
+          "early_recall": 0.1724137931034483
+        }
+      }
+    }
+  },
+  "20110412": {
+    "all": {
+      "trace_count": 1054,
+      "hosts": 264,
+      "metrics": {
+        "persistence": {
+          "n": 73392,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.8650295672562116,
+          "rmse_pp": 5.619018647853034,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "ols": {
+          "n": 73392,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.495507684761284,
+          "rmse_pp": 4.962011183309288,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "adaptive": {
+          "n": 73392,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.473414038422178,
+          "rmse_pp": 4.957456311458401,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "host_pairs": {
+          "n": 73392,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.030426261422673,
+          "rmse_pp": 4.329577715011106,
+          "early_precision": null,
+          "early_recall": null
+        },
+        "vm_pairs": {
+          "n": 73392,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 0,
+          "mae_pp": 3.0196149489509487,
+          "rmse_pp": 4.314501722092573,
+          "early_precision": null,
+          "early_recall": null
+        }
+      }
+    },
+    "stress": {
+      "trace_count": 16,
+      "hosts": 4,
+      "metrics": {
+        "persistence": {
+          "n": 1112,
+          "early_tp": 0,
+          "early_fp": 0,
+          "early_fn": 86,
+          "mae_pp": 8.073066546762583,
+          "rmse_pp": 10.263307842002606,
+          "early_precision": null,
+          "early_recall": 0.0
+        },
+        "ols": {
+          "n": 1112,
+          "early_tp": 19,
+          "early_fp": 31,
+          "early_fn": 67,
+          "mae_pp": 7.581264988009592,
+          "rmse_pp": 9.596769904812522,
+          "early_precision": 0.38,
+          "early_recall": 0.22093023255813954
+        },
+        "adaptive": {
+          "n": 1112,
+          "early_tp": 14,
+          "early_fp": 22,
+          "early_fn": 72,
+          "mae_pp": 7.4705995266059375,
+          "rmse_pp": 9.501965426840817,
+          "early_precision": 0.3888888888888889,
+          "early_recall": 0.16279069767441862
+        },
+        "host_pairs": {
+          "n": 1112,
+          "early_tp": 23,
+          "early_fp": 21,
+          "early_fn": 63,
+          "mae_pp": 6.6427612410981025,
+          "rmse_pp": 8.372939275072673,
+          "early_precision": 0.5227272727272727,
+          "early_recall": 0.26744186046511625
+        },
+        "vm_pairs": {
+          "n": 1112,
+          "early_tp": 27,
+          "early_fp": 19,
+          "early_fn": 59,
+          "mae_pp": 6.626686089040995,
+          "rmse_pp": 8.320499682505185,
+          "early_precision": 0.5869565217391305,
+          "early_recall": 0.313953488372093
+        }
+      }
+    }
+  }
+}

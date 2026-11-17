@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-11-17T22:49:44.544703+00:00",
+  "days": [
+    "20110411",
+    "20110412"
+  ],
+  "fresh_day": "20110412",
+  "reused_day": "20110411",
+  "model": "Same recent-pair regression per VM, memory20/min10, slope/output0..1, persistence cold start, strictly earlier resolved targets",
+  "comparison": "Fixed groups4 plus separate top16 whole-day-load stress group; no migration or energy simulation",
+  "archive_sha256": "ef817107a2783a28283bcb9dcbe28c38977a14a7345e6171a4b8d3f00315a88f"
+}

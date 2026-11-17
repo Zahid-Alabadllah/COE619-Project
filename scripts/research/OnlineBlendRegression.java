@@ -24,6 +24,21 @@ public final class OnlineBlendRegression {
         }
         close(negative.weight(301), 0, "lower bound enforced");
         close(flat.weight(301), .5, "zero denominator fallback");
+        var pairs = new PredictiveLinearRegressionPolicy.OnlineBlend();
+        for (int i = 0; i < 10; i++) {
+            double x = .2 + .02*i;
+            pairs.observe(300, .8, x, .1 + .5*x);
+        }
+        close(pairs.pairForecast(299, .4), .4, "pair future outcomes excluded");
+        close(pairs.pairForecast(300, .4), .4, "pair same-time outcomes excluded");
+        close(pairs.pairForecast(301, .4), .3, "exact current-to-next mapping");
+        close(pairs.pairForecast(301, 3), 1, "pair output bounded");
+        var selector = new PredictiveLinearRegressionPolicy.OnlineBlend();
+        for (int i = 0; i < 10; i++) selector.observe(300, .8, .4, .3, .7, .3);
+        close(selector.selectForecast(300, .8, .2), .8, "selector same-time outcomes excluded");
+        close(selector.selectForecast(301, .8, .2), .2, "selector uses past pair advantage");
+        for (int i = 0; i < 20; i++) selector.observe(600, .8, .4, .3, .3, .7);
+        close(selector.selectForecast(601, .8, .2), .8, "selector adapts after old errors expire");
         System.out.println("PASS: causality, cold start, bounded weight, rolling memory and independent state");
     }
 }

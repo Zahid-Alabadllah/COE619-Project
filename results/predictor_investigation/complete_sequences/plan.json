@@ -1,0 +1,22 @@
+{
+  "recorded_utc": "2026-11-17T22:38:36.109529+00:00",
+  "days": [
+    "20110303",
+    "20110306",
+    "20110309",
+    "20110322",
+    "20110325"
+  ],
+  "fresh_day": "20110325",
+  "reused_days": [
+    "20110303",
+    "20110306",
+    "20110309",
+    "20110322"
+  ],
+  "settings": "10 CPU readings; 300s horizon; adaptive memory20/min10/initial0.5/weight0..1; local-level comparator memory20/min10/slope0..1/output0..1; no tuning",
+  "groups": "All valid traces sorted by name in groups of four; each VM has one quarter of host CPU capacity; partial final group has fewer VMs",
+  "scope": "All 278 eligible next readings per fixed host; no migration/finish/admission or energy simulation; research forecast isolation only",
+  "source_commit": "344ffdbf7e528bfa6f276014e889e68a0cb640c2",
+  "archive_sha256": "ef817107a2783a28283bcb9dcbe28c38977a14a7345e6171a4b8d3f00315a88f"
+}
