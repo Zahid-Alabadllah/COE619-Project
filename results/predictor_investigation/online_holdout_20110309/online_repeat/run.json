@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-11-17T21:59:02.1468184Z",
+  "completed_utc": "2026-11-17T21:59:15.0415703Z",
+  "day": "20110309",
+  "model": "online",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110309/manifests",
+  "framework_fix": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "be04ea1232217ba5457ef1cde97ea0eb10c828f1",
+  "code_status": [
+    " M src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/online_holdout_20110309/",
+    "?? results/predictor_investigation/online_holdout_20110322/",
+    "?? results/predictor_investigation/online_normal/",
+    "?? results/predictor_investigation/online_validation_plan.json",
+    "?? scripts/research/",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

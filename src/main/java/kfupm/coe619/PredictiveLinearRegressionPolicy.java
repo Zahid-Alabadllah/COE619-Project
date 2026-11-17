@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * Predictive overload detection using ordinary least-squares (OLS) linear regression.
@@ -28,8 +30,9 @@ import java.util.HashMap;
  *       THR comes from the forecast term only.</li>
  *   <li>This is a lightweight trend extrapolation, not the Local Regression (LOESS) method of
  *       Beloglazov and Buyya (2012). It makes no claim of superior accuracy.</li>
- *   <li>CloudSim Plus also calls {@link #isOverloaded(Host)} in some destination-host checks,
- *       so the forecast can also make a rising host less attractive as a migration target.</li>
+ *   <li>CloudSim Plus 8.0.0 calls {@link #isOverloaded(Host)} during source detection and
+ *       again after temporary VM removal while planning an evacuation. Destination
+ *       placement uses the framework's private threshold check, not this override.</li>
  * </ul>
  */
 public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigrationStaticThreshold {
@@ -38,10 +41,42 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     private final Map<Long, Double> historyCutoff = new HashMap<>();
     private final Map<Long, Long> lastWarningBucket = new HashMap<>();
     private final Map<Long, Integer> warningStreak = new HashMap<>();
-    private record Pending(double target, double estimate, double naive, long generation) { }
+    private record Pending(double target, double estimate, double naive, double raw, long generation) { }
     private final Map<Long, Long> generation = new HashMap<>();
     private final Map<Long, List<Pending>> pending = new HashMap<>();
+    private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
     private long predictionCount;
+
+    /** Research-only learner: use resolved past errors to choose how much trend to trust. */
+    static final class OnlineBlend {
+        private record Error(double target, double trend, double change) { }
+        private final Deque<Error> ready = new ArrayDeque<>();
+        private final Deque<Error> history = new ArrayDeque<>();
+
+        void observe(final double target, final double raw, final double latest, final double actual) {
+            ready.addLast(new Error(target, raw - latest, actual - latest));
+        }
+
+        double weight(final double issueTime) {
+            final var iterator = ready.iterator();
+            while (iterator.hasNext()) {
+                final Error error = iterator.next();
+                // Even a target observed at this exact instant waits for the next forecast.
+                if (error.target() >= issueTime - 1e-6) continue;
+                history.addLast(error);
+                if (history.size() > 20) history.removeFirst();
+                iterator.remove();
+            }
+            if (history.size() < 10) return 0.5;
+            double denominator = 0;
+            double numerator = 0;
+            for (final Error error : history) {
+                denominator += error.trend() * error.trend();
+                numerator += error.trend() * error.change();
+            }
+            return denominator > 1e-12 ? Math.max(0, Math.min(1, numerator / denominator)) : 0.5;
+        }
+    }
 
     /** Experimental: discard pre-migration history only when explicitly enabled. */
     public void resetAfterMigration(final Host host, final double time) {
@@ -85,7 +120,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
 
     @Override
     public boolean isOverloaded(final Host host) {
-        if (Boolean.getBoolean("coe619.evaluateForecast")) evaluatePending(host);
+        final boolean online = Boolean.getBoolean("coe619.onlineForecast");
+        if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
         final boolean reactive = super.isOverloaded(host);
         if (reactive) {
             return true;
@@ -101,17 +137,23 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         final double now = host.getSimulation().clock();
         final double rawForecast = forecast(samples, now + horizonSeconds);
         // Experimental damped trend: setting selected on early real_a only.
-        final double forecast = Boolean.getBoolean("coe619.dampedForecast")
-            ? samples.get(0)[1] + 0.5 * (rawForecast - samples.get(0)[1]) : rawForecast;
-        if (Boolean.getBoolean("coe619.evaluateForecast")) {
+        final double weight = online ? onlineBlends.computeIfAbsent(host.getId(), id -> new OnlineBlend()).weight(now)
+            : Boolean.getBoolean("coe619.dampedForecast") ? 0.5 : 1;
+        final double forecast = online || Boolean.getBoolean("coe619.dampedForecast")
+            ? samples.get(0)[1] + weight * (rawForecast - samples.get(0)[1]) : rawForecast;
+        if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
             final double target = now + horizonSeconds;
             if (queue.stream().noneMatch(item -> Math.abs(item.target() - target) < 1e-6)) {
-                queue.add(new Pending(target, forecast, samples.get(0)[1], generation.getOrDefault(host.getId(), 0L)));
-                final String input = samples.stream().map(sample -> sample[0] + ":" + sample[1])
-                    .collect(java.util.stream.Collectors.joining(";"));
-                System.out.printf(java.util.Locale.ROOT, "FORECAST_INPUT host=%d target=%.3f samples=%s%n",
-                    host.getId(), target, input);
+                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, generation.getOrDefault(host.getId(), 0L)));
+                if (Boolean.getBoolean("coe619.evaluateForecast")) {
+                    final String input = samples.stream().map(sample -> sample[0] + ":" + sample[1])
+                        .collect(java.util.stream.Collectors.joining(";"));
+                    System.out.printf(java.util.Locale.ROOT, "FORECAST_INPUT host=%d target=%.3f samples=%s%n",
+                        host.getId(), target, input);
+                    System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s%n",
+                        host.getId(), target, weight, online);
+                }
             }
         }
         final boolean rawWarning = forecast > getOverUtilizationThreshold(host);
@@ -154,9 +196,15 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                 for (final HostStateHistoryEntry entry : host.getStateHistory()) {
                     if (entry.active() && Math.abs(entry.time() - item.target()) <= 1) {
                         final double observed = HostCpuUtilization.fractionOfCapacity(host, entry);
-                        System.out.printf(java.util.Locale.ROOT,
-                            "FORECAST_ERROR host=%d target=%.3f actual=%.6f forecast=%.6f persistence=%.6f%n",
-                            host.getId(), item.target(), observed, item.estimate(), item.naive());
+                        if (Boolean.getBoolean("coe619.onlineForecast")) {
+                            onlineBlends.computeIfAbsent(host.getId(), id -> new OnlineBlend())
+                                .observe(item.target(), item.raw(), item.naive(), observed);
+                        }
+                        if (Boolean.getBoolean("coe619.evaluateForecast")) {
+                            System.out.printf(java.util.Locale.ROOT,
+                                "FORECAST_ERROR host=%d target=%.3f actual=%.12f forecast=%.12f persistence=%.12f%n",
+                                host.getId(), item.target(), observed, item.estimate(), item.naive());
+                        }
                         iterator.remove();
                         break;
                     }

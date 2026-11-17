@@ -19,7 +19,7 @@ The candidate remains ten spaced observations plus half the fitted trend, select
 | real_c | 1395 | 3.764 | 3.543 | 3.496 |
 | heavy | 442 | 3.819 | 4.608 | 4.053 |
 
-Half-trend beats original OLS in three of four fresh real cases. Original OLS is better on real_b; persistence is better on heavy. This is not a universal accuracy win. Evaluation is on matched allocated-CPU forecasts, excluding completed topology changes, not every workload moment; forecasts can originate in destination probes too.
+Half-trend beats original OLS in three of four fresh real cases. Original OLS is better on real_b; persistence is better on heavy. This is not a universal accuracy win. Evaluation is on matched allocated-CPU forecasts, excluding completed topology changes, not every workload moment; forecasts can originate in temporary source-evacuation checks too. Source inspection on 18 November corrected the earlier destination-probe description: destination placement uses a private framework threshold check.
 
 In the new heavy case, THR uses 8.2876 kWh with 3 moves, IQR 7.0126 with 1 move, and half-trend LR 8.2963 with 3 moves. Improved prediction error therefore has not established energy superiority. The original synthetic case still has excess LR moves when normal underload consolidation is restored. Continue investigating migration decision utility and destination/source distinction, rather than tuning the report toward a winner.
 

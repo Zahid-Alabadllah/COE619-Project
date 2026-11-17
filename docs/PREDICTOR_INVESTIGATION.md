@@ -14,7 +14,7 @@ Irregular timestamps are mathematically valid for OLS, so the initial observatio
 
 Observed diagnostic windows in the spaced run cover at least 2700 seconds (45 minutes). The heavy result improves against original LR but is approximately THR, not a demonstrated predictive win. Diurnal still has three LR moves; the three quiet real groups remain unchanged. No new model or novelty claim is established.
 
-Next: verify repeated-run stability, attribute forecast flags to actual source migrations versus destination checks, inspect history across VM moves, and measure forecast error before comparing a different predictor. Raw results and logs remain under results/predictor_investigation. Unrelated untracked files were left untouched.
+At this checkpoint, next steps were repeated-run stability, attributing forecast flags, inspecting history across VM moves and measuring forecast error. Source inspection on 18 November established that the extra predictor calls are temporary source-evacuation checks; destination placement uses a private threshold check. See ONLINE_FORECAST.md for later results. Raw results and logs remain under results/predictor_investigation. Unrelated untracked files were left untouched.
 
 Follow-up: confirmation, migration-history reset and adaptive-threshold ablations are saved separately. Adaptive predictor and forecast-disabled control had identical results; energy gain cannot be attributed to forecasting. See FORECAST_ACCURACY.md for tuning split, matched forecast accuracy, exceptions and the framework defect. No settings promoted to default.
 

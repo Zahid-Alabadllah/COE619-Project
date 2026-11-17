@@ -20,7 +20,7 @@ Half-trend improves over original OLS on four of these five evaluation segments,
 
 ## Measurement limits and framework issue
 
-Measurements are for matched host-level allocated-CPU forecasts when the policy attempted prediction, not every timestamp or all overload states. Future readings must match the target within one second and are excluded across completed migration generation changes. Destination probes can also invoke the predictor. This is observed-policy conditional accuracy, not a counterfactual estimate of no-migration demand.
+Measurements are for matched host-level allocated-CPU forecasts when the policy attempted prediction, not every timestamp or all overload states. Future readings must match the target within one second and are excluded across completed migration generation changes. Source detection and temporary source-evacuation checks can invoke the predictor. This is observed-policy conditional accuracy, not a counterfactual estimate of no-migration demand. Source inspection on 18 November corrected an earlier description: CloudSim Plus 8.0.0 destination placement calls a private CPU-threshold check, not our forecast override.
 
 A damped-policy run exposed CloudSim Plus 8.0.0's immutable empty-map path: getMigrationMapFromOverloadedHosts returns Collections.emptyMap when there are no overloaded hosts, while updateMigrationMapFromUnderloadedHosts subsequently calls putAll. The isolated check sets the underload threshold to 1e-9 for all policies, rather than claiming this is a production repair. Normal underloaded-host consolidation remains to be validated. No energy-superiority conclusion is drawn from that changed environment.
 
@@ -32,7 +32,7 @@ Run scripts/analyze_forecast_accuracy.py for the original replay, or use --log d
 
 Verified the Java forecast math on an exact line with irregular times, reversed sample order and repeated timestamps. The irregular-time fit is mathematically valid; history selection is an evaluated design choice, not an arithmetic correction.
 
-Next: fresh workload days, threshold-crossing precision/recall, rolling validation, prediction timing separate from destination probes, and a framework repair before end-to-end promotion. A forecast gain alone does not guarantee an energy gain.
+At this historical checkpoint, next steps were fresh workload days, threshold-crossing precision/recall, rolling validation, prediction timing separate from temporary planning checks, and a framework repair before end-to-end promotion. A forecast gain alone does not guarantee an energy gain. Follow-up results are below and in ONLINE_FORECAST.md.
 
 ## Follow-up
 

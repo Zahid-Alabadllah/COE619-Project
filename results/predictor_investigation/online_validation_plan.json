@@ -1,0 +1,11 @@
+{
+  "recorded_date": "2026-11-18",
+  "candidate": "10 spaced observations; online least-squares blend weight from last 20 eligible resolved errors per host; minimum 10 errors; initial 0.5; clamp 0..1",
+  "selection": "Memory selected on early original-day real_a only. Do not change candidate settings based on validation outcomes.",
+  "validation_days": ["20110309", "20110322"],
+  "timing": "20110309 prepared and its first run started before this plan file; 20110322 added before inspecting either day's accuracy results.",
+  "models": ["persistence on common inputs", "OLS on common inputs", "half-trend on common inputs", "online blend", "separate half-trend simulation for energy comparison"],
+  "metrics": ["conditional matched-forecast MAE and RMSE", "conditional 80% warning precision and recall", "energy", "migrations", "active host-hours", "unmet demand"],
+  "limitations": ["Observed-policy conditional host allocated CPU; not all host moments", "Exclude completed migration changes", "Destination checks mixed with source decisions", "Heavy selection uses whole-day mean, not model outcomes", "No general superiority or energy claim without evidence"],
+  "reporting": "Keep real dates. PR2 and its CSV remain frozen. Map early work transparently into Term 262 reports after calendar arrives."
+}
