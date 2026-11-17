@@ -1,0 +1,98 @@
+{
+  "selection": "locked from earlier tuning",
+  "cutoff_s": 61800.071,
+  "chosen_window": 10,
+  "chosen_trend_weight": 0.5,
+  "training": {
+    "count": 975,
+    "mae_pp": 3.5586789885715278,
+    "rmse_pp": 5.23104400286558
+  },
+  "validation": {
+    "diurnal": {
+      "persistence": {
+        "count": 327,
+        "mae_pp": 3.826452599388378,
+        "rmse_pp": 5.463625547970904
+      },
+      "original_ols": {
+        "count": 327,
+        "mae_pp": 4.663719875140915,
+        "rmse_pp": 7.3140909840408455
+      },
+      "selected": {
+        "count": 327,
+        "mae_pp": 3.992896353826152,
+        "rmse_pp": 5.784757713376591
+      }
+    },
+    "real_a": {
+      "persistence": {
+        "count": 420,
+        "mae_pp": 3.187499999999999,
+        "rmse_pp": 4.893250331785999
+      },
+      "original_ols": {
+        "count": 420,
+        "mae_pp": 2.823373267609237,
+        "rmse_pp": 4.182114751727328
+      },
+      "selected": {
+        "count": 420,
+        "mae_pp": 2.8700397918440066,
+        "rmse_pp": 4.340235367044456
+      }
+    },
+    "real_b": {
+      "persistence": {
+        "count": 1395,
+        "mae_pp": 2.8954301075268765,
+        "rmse_pp": 4.3932032977149875
+      },
+      "original_ols": {
+        "count": 1395,
+        "mae_pp": 2.8665167453075715,
+        "rmse_pp": 4.1082698550544094
+      },
+      "selected": {
+        "count": 1395,
+        "mae_pp": 2.7070474466263863,
+        "rmse_pp": 4.00978638267345
+      }
+    },
+    "real_c": {
+      "persistence": {
+        "count": 1395,
+        "mae_pp": 2.2375448028673928,
+        "rmse_pp": 4.198996882683845
+      },
+      "original_ols": {
+        "count": 1395,
+        "mae_pp": 2.340676909514412,
+        "rmse_pp": 3.801980114975742
+      },
+      "selected": {
+        "count": 1395,
+        "mae_pp": 2.173426820141316,
+        "rmse_pp": 3.7942498135069678
+      }
+    },
+    "heavy": {
+      "persistence": {
+        "count": 408,
+        "mae_pp": 4.199142156862743,
+        "rmse_pp": 6.5106142126892
+      },
+      "original_ols": {
+        "count": 408,
+        "mae_pp": 4.323691198097508,
+        "rmse_pp": 6.314587958474957
+      },
+      "selected": {
+        "count": 408,
+        "mae_pp": 4.01524155052453,
+        "rmse_pp": 6.038966564431544
+      }
+    }
+  }
+}

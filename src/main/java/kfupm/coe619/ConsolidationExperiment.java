@@ -124,6 +124,7 @@ public final class ConsolidationExperiment {
     private final List<Host> hosts = new ArrayList<>();
     private final List<Vm> vms = new ArrayList<>();
     private final Map<Vm, Double> migrationStart = new HashMap<>();
+    private final Map<Vm, Host> migrationSource = new HashMap<>();
     private final Map<Vm, Double> migrationTime = new HashMap<>();
     private int migrations;
 
@@ -147,6 +148,9 @@ public final class ConsolidationExperiment {
 
     private Result execute() {
         Log.setLevel(ch.qos.logback.classic.Level.ERROR);
+        if (Boolean.getBoolean("coe619.evaluateForecast")) {
+            System.out.println("CASE_START scenario=" + config.scenario() + " policy=" + config.policy());
+        }
         simulation.terminateAt(config.durationSeconds());
 
         final DatacenterSimple dc = createDatacenter();
@@ -289,6 +293,11 @@ public final class ConsolidationExperiment {
 
         final DatacenterSimple dc = new DatacenterSimple(simulation, hosts);
         allocationPolicy = createPolicy(config.policy());
+        // Diagnostic environment only: isolate forecasting from the CloudSim 8.0.0
+        // underloaded-host immutable-map defect. Applies to every policy equally.
+        if (Boolean.getBoolean("coe619.noUnderload")) {
+            allocationPolicy.setUnderUtilizationThreshold(1e-9);
+        }
         ((VmAllocationPolicyMigrationAbstract) allocationPolicy).setFindHostForVmFunction(
             (policy, vm) -> policy.getHostList().stream()
                 .map(h -> (Host) h)
@@ -299,6 +308,11 @@ public final class ConsolidationExperiment {
         dc.addOnVmMigrationFinishListener(info -> {
             final Vm vm = info.getVm();
             final Double start = migrationStart.remove(vm);
+            final Host source = migrationSource.remove(vm);
+            if (info.isMigrationSuccessful() && allocationPolicy instanceof PredictiveLinearRegressionPolicy lr) {
+                if (source != null) lr.resetAfterMigration(source, info.getTime());
+                lr.resetAfterMigration(vm.getHost(), info.getTime());
+            }
             if (info.isMigrationSuccessful() && start != null) {
                 migrations++;
                 migrationTime.merge(vm, info.getTime() - start, Double::sum);
@@ -352,7 +366,10 @@ public final class ConsolidationExperiment {
         for (int i = 0; i < config.vms(); i++) {
             final Vm vm = new VmSimple(VM_MIPS, VM_PES);
             vm.setRam(VM_RAM).setBw(VM_BW).setSize(VM_STORAGE);
-            vm.addOnMigrationStartListener(info -> migrationStart.put(vm, info.getTime()));
+            vm.addOnMigrationStartListener(info -> {
+                migrationStart.put(vm, info.getTime());
+                migrationSource.put(vm, vm.getHost());
+            });
             vms.add(vm);
         }
     }
@@ -377,3 +394,4 @@ public final class ConsolidationExperiment {
     }
 
 }
+
