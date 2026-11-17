@@ -210,7 +210,8 @@ public final class ConsolidationExperiment {
         int activeHosts = 0;
         double activeSeconds = 0;
         for (final Host host : hosts) {
-            final List<HostStateHistoryEntry> h = host.getStateHistory();
+            // The framework exposes a LinkedList: indexed access would be quadratic.
+            final List<HostStateHistoryEntry> h = new ArrayList<>(host.getStateHistory());
             double active = 0;
             double saturated = 0;
             for (int i = 1; i < h.size(); i++) {

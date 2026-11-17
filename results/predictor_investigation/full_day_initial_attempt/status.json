@@ -1,0 +1,7 @@
+{
+  "status": "aborted during result calculation",
+  "cloudlet_length": -1,
+  "history_entries": 3141832,
+  "problem": "Indexed LinkedList history traversal is quadratic; negative unit-length tasks also cause excessive update frequency",
+  "next_attempt": "Use 1000000000 MI/PE jobs and an ArrayList snapshot for metric traversal"
+}

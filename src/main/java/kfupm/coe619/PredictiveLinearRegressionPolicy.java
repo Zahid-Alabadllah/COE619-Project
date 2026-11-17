@@ -25,6 +25,9 @@ import java.util.Deque;
  * <p>With fewer than {@code windowSize} samples the prediction is not attempted and the
  * policy behaves exactly like the static threshold (THR) policy it extends.</p>
  *
+ * <p>Opt-in research mode can select the adaptive trend or a recent mean using only
+ * earlier verified forecast errors. The default remains the original OLS policy.</p>
+ *
  * <p>Design notes and limits:
  * <ul>
  *   <li>The threshold and VM selection (MMT) are the same as THR, so any difference against
@@ -43,7 +46,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     private final Map<Long, Long> lastWarningBucket = new HashMap<>();
     private final Map<Long, Integer> warningStreak = new HashMap<>();
     private record Pending(double target, double estimate, double naive, double raw,
-                           double trendEstimate, double pairEstimate, long generation) { }
+                           double trendEstimate, double meanEstimate, long generation) { }
     private final Map<Long, Long> generation = new HashMap<>();
     private final Map<Long, List<Pending>> pending = new HashMap<>();
     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
@@ -52,8 +55,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
 
     /** Research-only learner: use resolved past errors to choose how much trend to trust. */
     static final class OnlineBlend {
-        private record Error(double target, double trend, double change, double latest, double actual,
-                             double trendEstimate, double pairEstimate) { }
+        private record Error(double target, double trend, double change, double actual,
+                             double trendEstimate, double meanEstimate) { }
         private final Deque<Error> ready = new ArrayDeque<>();
         private final Deque<Error> history = new ArrayDeque<>();
 
@@ -62,8 +65,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         }
 
         void observe(final double target, final double raw, final double latest, final double actual,
-                     final double trendEstimate, final double pairEstimate) {
-            ready.addLast(new Error(target, raw - latest, actual - latest, latest, actual, trendEstimate, pairEstimate));
+                     final double trendEstimate, final double meanEstimate) {
+            ready.addLast(new Error(target, raw - latest, actual - latest, actual, trendEstimate, meanEstimate));
         }
 
         private void update(final double issueTime) {
@@ -90,41 +93,18 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
             return denominator > 1e-12 ? Math.max(0, Math.min(1, numerator / denominator)) : 0.5;
         }
 
-        /** Fit next CPU against current CPU from resolved pairs, not against future time. */
-        double pairForecast(final double issueTime, final double latest) {
-            update(issueTime);
-            if (history.size() < 10) return latest;
-            double meanX = 0;
-            double meanY = 0;
-            for (final Error error : history) {
-                meanX += error.latest();
-                meanY += error.actual();
-            }
-            meanX /= history.size();
-            meanY /= history.size();
-            double variance = 0;
-            double covariance = 0;
-            for (final Error error : history) {
-                variance += Math.pow(error.latest() - meanX, 2);
-                covariance += (error.latest() - meanX) * (error.actual() - meanY);
-            }
-            if (variance <= 1e-12) return latest;
-            final double slope = Math.max(0, Math.min(1, covariance / variance));
-            return Math.max(0, Math.min(1, meanY + slope * (latest - meanX)));
-        }
-
-        double selectForecast(final double issueTime, final double trend, final double pair) {
+        double selectForecast(final double issueTime, final double trend, final double mean) {
             update(issueTime);
             double trendError = 0;
-            double pairError = 0;
+            double meanError = 0;
             int count = 0;
             for (final Error error : history) {
-                if (!Double.isFinite(error.trendEstimate()) || !Double.isFinite(error.pairEstimate())) continue;
+                if (!Double.isFinite(error.trendEstimate()) || !Double.isFinite(error.meanEstimate())) continue;
                 trendError += Math.abs(error.trendEstimate() - error.actual());
-                pairError += Math.abs(error.pairEstimate() - error.actual());
+                meanError += Math.abs(error.meanEstimate() - error.actual());
                 count++;
             }
-            return count >= 10 && pairError < trendError ? pair : trend;
+            return count >= 10 && meanError < trendError ? mean : trend;
         }
     }
 
@@ -194,9 +174,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
             }
             return super.isOverloaded(host);
         }
-        final boolean pairs = Boolean.getBoolean("coe619.pairForecast");
-        final boolean selected = Boolean.getBoolean("coe619.selectForecast");
-        final boolean online = Boolean.getBoolean("coe619.onlineForecast") || pairs || selected;
+        final boolean meanModel = Boolean.getBoolean("coe619.meanForecast");
+        final boolean online = Boolean.getBoolean("coe619.onlineForecast") || meanModel;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
         final boolean reactive = super.isOverloaded(host);
         if (reactive) {
@@ -217,22 +196,28 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
             : Boolean.getBoolean("coe619.dampedForecast") ? 0.5 : 1;
         final double trendEstimate = online || Boolean.getBoolean("coe619.dampedForecast")
             ? samples.get(0)[1] + weight * (rawForecast - samples.get(0)[1]) : rawForecast;
-        final double pairEstimate = online ? onlineBlends.get(host.getId()).pairForecast(now, samples.get(0)[1]) : samples.get(0)[1];
-        final double forecast = selected ? onlineBlends.get(host.getId()).selectForecast(now, trendEstimate, pairEstimate)
-            : pairs ? pairEstimate : trendEstimate;
+        final List<double[]> meanSamples = meanModel ? recentActiveSamples(host, 20) : List.of();
+        final double meanEstimate = meanModel ? meanSamples.stream().mapToDouble(s -> s[1]).average().orElse(samples.get(0)[1]) : Double.NaN;
+        final double forecast = meanModel ? onlineBlends.get(host.getId()).selectForecast(now, trendEstimate, meanEstimate) : trendEstimate;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
             final double target = now + horizonSeconds;
             if (queue.stream().noneMatch(item -> Math.abs(item.target() - target) < 1e-6)) {
-                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, trendEstimate, pairEstimate,
+                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, trendEstimate, meanEstimate,
                     generation.getOrDefault(host.getId(), 0L)));
                 if (Boolean.getBoolean("coe619.evaluateForecast")) {
                     final String input = samples.stream().map(sample -> sample[0] + ":" + sample[1])
                         .collect(java.util.stream.Collectors.joining(";"));
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_INPUT host=%d target=%.3f samples=%s%n",
                         host.getId(), target, input);
+                    if (meanModel) {
+                        final String meanInput = meanSamples.stream().map(s -> s[0] + ":" + s[1])
+                            .collect(java.util.stream.Collectors.joining(";"));
+                        System.out.printf(java.util.Locale.ROOT, "FORECAST_MEAN_INPUT host=%d target=%.3f samples=%s%n",
+                            host.getId(), target, meanInput);
+                    }
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s model=%s%n",
-                        host.getId(), target, weight, online, selected ? "selected" : pairs ? "recent_pairs" : "trend");
+                        host.getId(), target, weight, online, meanModel ? "mean_selected" : "trend");
                 }
             }
         }
@@ -276,10 +261,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                 for (final HostStateHistoryEntry entry : host.getStateHistory()) {
                     if (entry.active() && Math.abs(entry.time() - item.target()) <= 1) {
                         final double observed = HostCpuUtilization.fractionOfCapacity(host, entry);
-                        if (Boolean.getBoolean("coe619.onlineForecast") || Boolean.getBoolean("coe619.pairForecast")
-                            || Boolean.getBoolean("coe619.selectForecast")) {
+                        if (Boolean.getBoolean("coe619.onlineForecast") || Boolean.getBoolean("coe619.meanForecast")) {
                             onlineBlends.computeIfAbsent(host.getId(), id -> new OnlineBlend())
-                                .observe(item.target(), item.raw(), item.naive(), observed, item.trendEstimate(), item.pairEstimate());
+                                .observe(item.target(), item.raw(), item.naive(), observed, item.trendEstimate(), item.meanEstimate());
                         }
                         if (Boolean.getBoolean("coe619.evaluateForecast")) {
                             System.out.printf(java.util.Locale.ROOT,
@@ -306,9 +290,13 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     }
 
     private List<double[]> recentActiveSamples(final Host host) {
+        return recentActiveSamples(host, windowSize);
+    }
+
+    private List<double[]> recentActiveSamples(final Host host, final int limit) {
         final List<HostStateHistoryEntry> history = host.getStateHistory();
-        final List<double[]> samples = new ArrayList<>(windowSize);
-        for (int i = history.size() - 1; i >= 0 && samples.size() < windowSize; i--) {
+        final List<double[]> samples = new ArrayList<>(limit);
+        for (int i = history.size() - 1; i >= 0 && samples.size() < limit; i--) {
             final HostStateHistoryEntry entry = history.get(i);
             if (entry.active() && entry.time() >= historyCutoff.getOrDefault(host.getId(), Double.NEGATIVE_INFINITY)) {
                 // Experimental ablation only: prevent closely spaced state events from

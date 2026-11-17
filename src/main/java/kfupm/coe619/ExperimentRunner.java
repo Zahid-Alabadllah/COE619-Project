@@ -75,7 +75,10 @@ public final class ExperimentRunner {
         }
         final int hosts = "diurnal".equals(scenario) ? 4 : "heavy".equals(scenario) ? 6 : 10;
         // Last field retained for compatibility with historical harness records; unused here.
-        return new Config(scenario, policy, traces, hosts, 20_000_000, 86_400, 0, 0);
+        // At 1000 MIPS per virtual core, this takes >11 days even at full CPU.
+        // Unlike length -1, it does not force millions of tiny task updates.
+        final long cloudletLength = Boolean.getBoolean("coe619.fullDay") ? 1_000_000_000 : 20_000_000;
+        return new Config(scenario, policy, traces, hosts, cloudletLength, 86_400, 0, 0);
     }
 
     private static String summarize(final List<Result> results) {

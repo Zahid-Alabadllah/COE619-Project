@@ -1,2 +1,3 @@
+PASS: at zero actual CPU use, migration placement rejects a fourth VM at the 80% reserved-CPU threshold, although it physically fits.
 PASS: four idle VMs reserve all 8000 host MIPS; fifth rejected by CPU admission despite spare RAM/BW.
 Trace CPU usage and reserved virtual CPU capacity are different quantities.

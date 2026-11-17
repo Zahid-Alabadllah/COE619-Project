@@ -11,6 +11,9 @@ These are actual completed checkpoints. Work completed early can be reported tra
 | History guard | Do not reuse the original VM group's trend after temporary removal; synthetic migrations fall from six to two | PLANNING_REPRODUCIBILITY.md; ab718f7 |
 | Unsuccessful early-shutdown rule | Two full CSVs unchanged; archived the attempt and removed its runtime option | CONSOLIDATION_LIMITS.md; stable_online_energy results and archived patch |
 | Admission limit verified | Four idle VMs reserve full host CPU capacity; fifth rejected despite spare RAM/BW | CapacityAdmissionCheck.java; verification/capacity_admission.txt |
+| Complete-sequence screening | Compared all eligible targets, recent-pair regressions, VM aggregation and stronger mean/median/smoothing baselines; retained negative results | COMPLETE_FORECAST_STUDY.md; 7e36dd6 |
+| Simpler trend/mean selector | Beats OLS/persistence/half-trend in 16/16 tested real cases, adaptive trend in 15/16; final design's new validation is four 20-April groups | TREND_MEAN_FORECAST.md; mean_selector_summary.json |
+| Full-day and metric traversal | Longer jobs keep traces active; repaired quadratic linked-list traversal with unchanged stable CSV arithmetic | TREND_MEAN_FORECAST.md; full_day_initial_attempt and full_day_* runs |
 
 The root COE619_Full_Context_v2.md retains complete migration history and an appended execution-log continuation. This versioned index records new milestones without duplicating historical administrative material.
 
@@ -24,5 +27,7 @@ The root COE619_Full_Context_v2.md retains complete migration history and an app
 - Term 262 report partitioning awaits its calendar. Identify early work honestly. Explanations should remain ordinary English with examples and nearby attribution for research-specific definitions.
 
 ## Next bounded investigation
+
+Current model/evidence: TREND_MEAN_FORECAST.md. All ten days of the pinned author archive have now been inspected; no remaining day there is an untouched holdout for another design. Preserve staged first-use history. The recent-pair runtime alternatives were retired after stronger simple controls; their source is retained at 7e36dd6.
 
 Measure forecast-warning usefulness and feasible migration opportunities. Keep completed moves separate from temporary planning checks. Resolve admission assumptions before claiming that a different predictor alone can unlock more consolidation. Any new environment must apply equally to all baselines and retain the existing evidence.

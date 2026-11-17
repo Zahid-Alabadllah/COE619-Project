@@ -10,10 +10,14 @@ import org.cloudsimplus.resources.PeSimple;
 import org.cloudsimplus.schedulers.vm.VmSchedulerTimeShared;
 import org.cloudsimplus.vms.Vm;
 import org.cloudsimplus.vms.VmSimple;
+import org.cloudsimplus.hosts.Host;
+import org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationAbstract;
+import org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationStaticThreshold;
+import org.cloudsimplus.selectionpolicies.VmSelectionPolicyMinimumMigrationTime;
 
 /** Checks the current scheduler's admission limit separately from trace CPU usage. */
 public final class CapacityAdmissionCheck {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         var simulation = new CloudSimPlus();
         List<Pe> pes = new ArrayList<>();
         for (int i = 0; i < 8; i++) pes.add(new PeSimple(1000));
@@ -21,9 +25,19 @@ public final class CapacityAdmissionCheck {
         host.setRamProvisioner(new HostLocalResourceProvisioner(host.getRamProvisioner().getPmResource()));
         host.setBwProvisioner(new HostLocalResourceProvisioner(host.getBwProvisioner().getPmResource()));
         host.setVmScheduler(new VmSchedulerTimeShared());
-        new DatacenterSimple(simulation, List.of(host));
+        var datacenter = new DatacenterSimple(simulation, List.of(host));
+        var policy = new VmAllocationPolicyMigrationStaticThreshold(new VmSelectionPolicyMinimumMigrationTime(), .8);
+        datacenter.setVmAllocationPolicy(policy);
         for (int i = 0; i < 4; i++) {
-            if (!host.createVm(vm(i)).fully()) throw new AssertionError("Expected admission of VM " + i);
+            Vm candidate = vm(i);
+            if (i == 3) {
+                if (!host.isSuitableForVm(candidate)) throw new AssertionError("Fourth VM should physically fit");
+                var check = VmAllocationPolicyMigrationAbstract.class.getDeclaredMethod("isNotHostOverloadedAfterAllocation", Host.class, Vm.class);
+                check.setAccessible(true);
+                if ((boolean) check.invoke(policy, host, candidate)) throw new AssertionError("Expected reserved-CPU threshold rejection");
+                System.out.println("PASS: at zero actual CPU use, migration placement rejects a fourth VM at the 80% reserved-CPU threshold, although it physically fits.");
+            }
+            if (!host.createVm(candidate).fully()) throw new AssertionError("Expected admission of VM " + i);
         }
         Vm fifth = vm(4);
         if (host.getVmScheduler().isSuitableForVm(fifth)) throw new AssertionError("Unexpected CPU admission for fifth VM");

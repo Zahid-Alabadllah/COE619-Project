@@ -144,6 +144,7 @@ def main():
         fresh_days=[d for d in args.days if d in args.fresh_days], reused_days=[d for d in args.days if d not in args.fresh_days],
         settings='10 CPU readings; 300s horizon; adaptive memory20/min10/initial0.5/weight0..1; local-level comparator memory20/min10/slope0..1/output0..1; no tuning',
         selector='Use candidate with lower absolute error over last20 eligible resolved forecasts; min10, initial adaptive trend; candidates saved when issued',
+        mean_selector='Compare adaptive trend with average of up to20 most recent CPU readings, minimum10 available; choose lower prior absolute error, memory20/min10/initialtrend; fixed before new-day outputs',
         stress='Top16 whole-day-mean traces in groups of4; load-selected, not model-selected; report separately, never pool with population groups' if args.stress else None,
         groups='All valid traces sorted by name in groups of four; each VM has one quarter of host CPU capacity; partial final group has fewer VMs',
         scope='All 278 eligible next readings per fixed host; no migration/finish/admission or energy simulation; research forecast isolation only',

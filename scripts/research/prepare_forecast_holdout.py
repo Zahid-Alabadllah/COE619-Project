@@ -56,7 +56,7 @@ def main():
     provenance = dict(prepared_utc=datetime.now(timezone.utc).isoformat(), source='https://github.com/beloglazov/planetlab-workload-traces',
         commit=COMMIT, archive_sha256=digest, day=args.day, pool_size=len(pool),
         selection='16 highest mean traces; 60 evenly spaced sorted remaining names; disjoint fixed cases; not model outcomes',
-        candidate='10 spaced CPU samples; online blend from 20 prior matched errors per host, min 10 errors, weight clipped [0,1], initial 0.5; parameters frozen before outcomes',
+        candidate='Input preparation fixes groups only; per-run options and study plans identify the model and frozen settings; no selection based on model outcomes in this script',
         caveat='Heavy group selected retrospectively by whole-day load; synthetic diurnal is a repeated regression case, not fresh data',
         per_file_sha256=hashes)
     (root/'provenance.json').write_text(json.dumps(provenance, indent=2)+'\n')

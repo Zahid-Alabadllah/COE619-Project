@@ -2,7 +2,7 @@
 
 MSc HPCC project by Zahid Alabadllah (202045160), KFUPM. Advisor: Dr. Mohamed Faten Zhani.
 
-We evaluate whether simple CPU trend prediction improves energy/performance trade-offs. Predictive superiority has not been demonstrated. Reactive THR warns at 80%, not 100%.
+We evaluate whether simple CPU forecasting improves energy/performance trade-offs. Predictive energy superiority has not been demonstrated. Later forecast-accuracy improvements are recorded separately. Reactive THR warns at 80%, not 100%.
 
 ## Start here
 
@@ -10,6 +10,7 @@ We evaluate whether simple CPU trend prediction improves energy/performance trad
 - [Corrected PR2](docs/progress_report_2/PR2_Progress_Report_II.pdf)
 - [Results](results/summary.md), generated from [raw runs](results/experiments.csv).
 - [Subsequent research progress](docs/RESEARCH_PROGRESS.md): dated milestones, improved forecasting, planning fixes and remaining energy limitations. PR2 and its evidence remain frozen.
+- [Current research predictor](docs/TREND_MEAN_FORECAST.md): simple trend-versus-average selection, tested gains, exceptions and reproduction.
 - PR1 and older handoffs describe historical versions; current code and corrected PR2 take precedence.
 
 ## Code map

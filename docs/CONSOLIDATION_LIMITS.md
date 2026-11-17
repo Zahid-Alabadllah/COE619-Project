@@ -12,6 +12,8 @@ While all VMs remain resident, 20 VMs therefore need at least five hosts and 16 
 
 The framework's underload check uses scheduler-requested MIPS shares; our forecast samples use allocated host CPU observations. Those are not interchangeable. Light trace usage does not automatically release reserved virtual CPU admission capacity.
 
+The extended capacity check additionally verifies a stricter migration-placement limit: with three idle VMs, a fourth physically fits, but the 80% post-placement policy check rejects it because reserved CPU would be100%. Initial placement can still create four VMs. Thus a temporarily opened host is not necessarily easy to evacuate again even after actual CPU falls. This is a modeling choice in the framework, not a proven forecast-math bug. A demand-aware check would be a separately tested assumption, applied to every policy and still subject to physical/resource admission.
+
 ## Early-underload experiment
 
 A separate experiment reused the online forecast to identify an upcoming low-load host. It also affected the framework's low-load destination filter. It produced many conditional flags but no change in either complete 15-row CSV versus the guarded policy on 9 and 22 March. Flags are not evidence of useful completed moves.
