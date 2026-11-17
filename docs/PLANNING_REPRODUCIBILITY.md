@@ -28,4 +28,14 @@ The official source's getOverloadedHosts calls our isOverloaded override for ini
 
 This reveals another research question: an old host-level trend describes the original VM group, so applying it unchanged after temporary VM removal may select unnecessary additional VMs. Any guard for that must be tested separately from the forecasting-model improvement.
 
+## Tested history guard
+
+The opt-in `coe619.planningHistoryGuard` snapshots each host's VM group at the start of optimization. If the framework temporarily changes that group, the predictor uses current CPU only to finish selecting VMs. It does not fit the original group's history to a different group. The snapshot is cleared in finally after each planning pass. Initial source overload detection still uses the online forecast. This is a history-validity design choice, not a new prediction formula.
+
+With stable planning, the synthetic day/night case falls from six migrations and 5.824043 kWh to two migrations and 5.244283 kWh, about 10% lower energy than the unguarded experimental policy. THR uses 5.248772 and IQR 5.230971 kWh, so this removes a regression but does not beat both baselines. Four changed-composition checks are skipped per complete batch. A repeated guarded full CSV is byte-identical. Repeating the same synthetic case in multiple days is not independent evidence.
+
+On the original heavy case, guarded online and THR both use 8.253002 kWh with four migrations; IQR remains better at 7.040498 kWh with zero. Sampled unmet demand remains nonzero and equal to THR there, so this is not a demonstrated performance improvement. On both new heavy cases the guard leaves the no-predictive-flag outcomes unchanged. The eight real-case prediction comparisons also remain unchanged. Independent causal-weight checks pass after the guard.
+
+Reproduce with `scripts/research/run_forecast_validation.ps1 -Day 20110309 -Model online_guard -Label new_guard_check -StablePlanning`. Results are separate from unguarded/control evidence. Defaults and PR2 remain unchanged.
+
 Primary source inspected locally: the official [CloudSim Plus 8.0.0 source archive](https://repo.maven.apache.org/maven2/org/cloudsimplus/cloudsim-plus/8.0.0/cloudsim-plus-8.0.0-sources.jar), especially VmAllocationPolicyMigrationAbstract and HostSimple. This is an implementation audit, not a universal research convention.

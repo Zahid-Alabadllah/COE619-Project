@@ -4,6 +4,7 @@ import org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigration
 import org.cloudsimplus.hosts.Host;
 import org.cloudsimplus.hosts.HostStateHistoryEntry;
 import org.cloudsimplus.selectionpolicies.VmSelectionPolicy;
+import org.cloudsimplus.vms.Vm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     private final Map<Long, Long> generation = new HashMap<>();
     private final Map<Long, List<Pending>> pending = new HashMap<>();
     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
+    private final Map<Long, List<? extends Vm>> originalPlanningVms = new HashMap<>();
     private long predictionCount;
 
     /** Research-only learner: use resolved past errors to choose how much trend to trust. */
@@ -119,7 +121,31 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     }
 
     @Override
+    public Map<Vm, Host> getOptimizedAllocationMap(final List<? extends Vm> vmList) {
+        if (!Boolean.getBoolean("coe619.planningHistoryGuard")) return super.getOptimizedAllocationMap(vmList);
+        for (final Host host : getHostList()) {
+            originalPlanningVms.put(host.getId(), List.copyOf(host.getVmList()));
+        }
+        try {
+            return super.getOptimizedAllocationMap(vmList);
+        } finally {
+            originalPlanningVms.clear();
+        }
+    }
+
+    @Override
     public boolean isOverloaded(final Host host) {
+        final List<? extends Vm> original = originalPlanningVms.get(host.getId());
+        if (original != null && (host.getVmList().size() != original.size() || !host.getVmList().containsAll(original))) {
+            // Past aggregate CPU describes the original VM group, not this temporary
+            // planning subset. Finish VM selection using current CPU only.
+            if (Boolean.getBoolean("coe619.evaluateForecast")) {
+                System.out.printf(java.util.Locale.ROOT,
+                    "FORECAST_HISTORY_SKIP host=%d time=%.3f originalVms=%d currentVms=%d%n",
+                    host.getId(), host.getSimulation().clock(), original.size(), host.getVmList().size());
+            }
+            return super.isOverloaded(host);
+        }
         final boolean online = Boolean.getBoolean("coe619.onlineForecast");
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
         final boolean reactive = super.isOverloaded(host);

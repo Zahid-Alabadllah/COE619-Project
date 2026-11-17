@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)][ValidatePattern('^2011[0-9]{4}$')][string]$Day,
-    [ValidateSet('online','half','control')][string]$Model = 'online',
+    [ValidateSet('online','half','control','online_guard')][string]$Model = 'online',
     [string]$Label = '',
     [switch]$StablePlanning
 )
@@ -16,9 +16,10 @@ try {
     $output = "$root/$Label"
     if (Test-Path -LiteralPath "$output/experiments.csv") { throw 'Do not overwrite an existing experiment' }
     $properties = '-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true'
-    if ($Model -eq 'online') { $properties += ' -Dcoe619.onlineForecast=true' }
+    if ($Model -in @('online','online_guard')) { $properties += ' -Dcoe619.onlineForecast=true' }
     elseif ($Model -eq 'half') { $properties += ' -Dcoe619.dampedForecast=true' }
     else { $properties += ' -Dcoe619.disableForecast=true' }
+    if ($Model -eq 'online_guard') { $properties += ' -Dcoe619.planningHistoryGuard=true' }
     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
     $csvBefore = (Get-FileHash -LiteralPath results/experiments.csv -Algorithm SHA256).Hash
     $reportBefore = (Get-FileHash -LiteralPath docs/progress_report_2/PR2_Progress_Report_II.pdf -Algorithm SHA256).Hash

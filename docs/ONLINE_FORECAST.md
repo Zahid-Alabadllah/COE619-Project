@@ -78,4 +78,6 @@ Reproduce with `python scripts/analyze_online_forecast.py`. Machine-readable res
 
 ## Reporting timeline
 
+Latest follow-up: the separate planning-history guard removes the synthetic six-migration regression, yielding two migrations and about 5.24 kWh. It does not establish superiority over IQR. See PLANNING_REPRODUCIBILITY.md for the mechanism, stable-planning controls and original-heavy limitation.
+
 Keep actual experiment, file and Git commit dates. When the Term 262 calendar arrives, group these milestones into its deliverables and explicitly identify work completed in advance. Do not change historical dates or present early work as newly performed later. Preserve separate commits and experiment evidence so improvements remain traceable.
