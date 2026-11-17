@@ -1,0 +1,2 @@
+# Research provenance hashes refer to the author's exact trace bytes.
+results/predictor_investigation/**/traces/* -text

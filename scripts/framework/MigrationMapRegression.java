@@ -12,6 +12,12 @@ public class MigrationMapRegression {
   boolean mutable=true;
   try { map.put(Vm.NULL,Host.NULL); } catch(UnsupportedOperationException e) { mutable=false; }
   if(mutable!=Boolean.parseBoolean(args[0])) throw new AssertionError("Unexpected empty-map mutability: "+mutable);
+  boolean stable=args.length>1 && Boolean.parseBoolean(args[1]);
+  var saved=VmAllocationPolicyMigrationAbstract.class.getDeclaredField("savedAllocation");
+  saved.setAccessible(true);
+  if((saved.get(policy) instanceof LinkedHashMap)!=stable) throw new AssertionError("Unexpected saved-allocation ordering");
+  if((map instanceof LinkedHashMap)!=stable) throw new AssertionError("Unexpected migration-map ordering");
   System.out.println("PASS: empty migration map mutable="+mutable);
+  System.out.println("PASS: insertion-ordered planning maps="+stable);
  }
 }

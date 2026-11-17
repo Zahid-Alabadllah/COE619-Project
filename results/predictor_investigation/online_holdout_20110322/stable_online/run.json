@@ -1,0 +1,25 @@
+{
+  "started_utc": "2026-11-17T22:06:28.1703065Z",
+  "completed_utc": "2026-11-17T22:06:38.9283182Z",
+  "day": "20110322",
+  "model": "online",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110322/manifests",
+  "framework_fix": true,
+  "stable_planning": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "03efe8f0674054c78d584d1d9ea8fadb00b04c4a",
+  "code_status": [
+    " M scripts/framework/MutableMigrationMapPatch.java",
+    " M scripts/repair_cloudsim.ps1",
+    " M scripts/research/run_forecast_validation.ps1",
+    " M scripts/run.ps1",
+    "?? .gitattributes",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/online_holdout_20110309/stable_control/",
+    "?? results/predictor_investigation/online_holdout_20110309/stable_online/",
+    "?? results/predictor_investigation/online_holdout_20110309/stable_online_repeat/",
+    "?? results/predictor_investigation/online_holdout_20110322/stable_online/",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

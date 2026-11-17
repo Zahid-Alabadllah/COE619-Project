@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory=$true)][ValidatePattern('^2011[0-9]{4}$')][string]$Day,
     [ValidateSet('online','half','control')][string]$Model = 'online',
-    [string]$Label = ''
+    [string]$Label = '',
+    [switch]$StablePlanning
 )
 $ErrorActionPreference = 'Stop'
 $codeRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -25,13 +26,13 @@ try {
     New-Item -ItemType Directory -Path target -Force | Out-Null
     $started = (Get-Date).ToUniversalTime().ToString('o')
     $env:JAVA_TOOL_OPTIONS = $properties
-    & ./scripts/run.ps1 -FrameworkFix -OutputDir $output *> $log
+    & ./scripts/run.ps1 -FrameworkFix -StablePlanning:$StablePlanning -OutputDir $output *> $log
     if ($LASTEXITCODE -ne 0) { throw 'Simulation failed; retain target log for diagnosis' }
     if ((Get-FileHash -LiteralPath results/experiments.csv -Algorithm SHA256).Hash -ne $csvBefore) { throw 'Frozen CSV changed' }
     if ((Get-FileHash -LiteralPath docs/progress_report_2/PR2_Progress_Report_II.pdf -Algorithm SHA256).Hash -ne $reportBefore) { throw 'Frozen PR2 changed' }
     $runMetadata = [ordered]@{
         started_utc=$started; completed_utc=(Get-Date).ToUniversalTime().ToString('o')
-        day=$Day; model=$Model; java_options=$properties; framework_fix=$true
+        day=$Day; model=$Model; java_options=$properties; framework_fix=$true; stable_planning=$StablePlanning.IsPresent
         frozen_csv_sha256=$csvBefore; frozen_pr2_sha256=$reportBefore
         code_commit=(& git rev-parse HEAD); code_status=(@(& git status --short))
     }
