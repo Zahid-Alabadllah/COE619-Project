@@ -1,0 +1,11 @@
+package kfupm.coe619;
+import java.util.List;
+public class ForecastMathCheck {
+ private static void check(double actual,double expected) { if (Math.abs(actual-expected)>1e-10) throw new AssertionError(actual+" != "+expected); }
+ public static void main(String[] args) {
+  check(PredictiveLinearRegressionPolicy.forecast(List.of(new double[]{0,.2},new double[]{70,.207},new double[]{200,.22},new double[]{700,.27}),1000),.3);
+  check(PredictiveLinearRegressionPolicy.forecast(List.of(new double[]{700,.27},new double[]{200,.22},new double[]{70,.207},new double[]{0,.2}),1000),.3);
+  check(PredictiveLinearRegressionPolicy.forecast(List.of(new double[]{100,.2},new double[]{100,.6}),1000),.4);
+  System.out.println("PASS: irregular-time line, reversed input, repeated-time fallback.");
+ }
+}
