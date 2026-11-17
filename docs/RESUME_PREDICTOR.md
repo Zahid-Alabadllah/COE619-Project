@@ -1,5 +1,11 @@
 # Current predictor checkpoint
 
+Latest 18 November checkpoint: see RESEARCH_PROGRESS.md for the milestone index. Stable planning and planningHistoryGuard are verified separately from accuracy: repeated CSVs match; synthetic migrations fall from six/5.824 kWh to two/5.244 kWh, near THR but slightly above IQR. Original heavy still favors IQR. See PLANNING_REPRODUCIBILITY.md.
+
+An early-underload rule made no change to either full validation CSV; its patch and logs were archived and the runtime option removed. A capacity check confirms four idle VMs reserve all host CPU admission capacity, despite spare RAM/BW. Better forecasts alone cannot bypass that constraint. See CONSOLIDATION_LIMITS.md. Next investigate warning usefulness and feasible migration opportunities with explicit admission assumptions. Keep real dates and transparent early-work milestones; next-term calendar pending. No unattended run is left active at this checkpoint.
+
+The following paragraphs are historical checkpoints; the latest findings above supersede their next-step descriptions.
+
 18 November integration: opt-in onlineForecast now passes Java causality/rolling-memory checks and independent event replay. Frozen settings tested on 20110309 and 20110322: 8/8 fresh real cases beat persistence, 6/8 beat OLS, 7/8 beat half-trend; pooled MAE 3.298 pp versus half-trend 3.329 pp (modest). Neither heavy case has predictive flags; no predictive energy advantage. Separate controls and repeated batch saved. See ONLINE_FORECAST.md. Official framework source also corrected earlier destination-call claims: extra isOverloaded calls occur during temporary source evacuation, not the private destination threshold check. Next investigate planning reproducibility and stale pre-removal histories separately from model accuracy.
 
 18 November follow-up: causal online-blend replay completed. It improves over half-trend in six of nine distinct reused evaluation segments and beats persistence in both recorded heavy cases, with exceptions retained. No Java integration or energy claim yet. See ONLINE_FORECAST.md and online_forecast_accuracy.json. Next: opt-in integration and causal update verification, then fresh validation. Keep real dates and map early work honestly into later reporting milestones.

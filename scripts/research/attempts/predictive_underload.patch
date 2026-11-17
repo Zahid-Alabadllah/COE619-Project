@@ -1,0 +1,96 @@
+diff --git a/scripts/research/run_forecast_validation.ps1 b/scripts/research/run_forecast_validation.ps1
+index d6e15a6..2b85c85 100644
+--- a/scripts/research/run_forecast_validation.ps1
++++ b/scripts/research/run_forecast_validation.ps1
+@@ -1,6 +1,6 @@
+ param(
+     [Parameter(Mandatory=$true)][ValidatePattern('^2011[0-9]{4}$')][string]$Day,
+-    [ValidateSet('online','half','control','online_guard')][string]$Model = 'online',
++    [ValidateSet('online','half','control','online_guard','online_energy')][string]$Model = 'online',
+     [string]$Label = '',
+     [switch]$StablePlanning
+ )
+@@ -16,10 +16,11 @@ try {
+     $output = "$root/$Label"
+     if (Test-Path -LiteralPath "$output/experiments.csv") { throw 'Do not overwrite an existing experiment' }
+     $properties = '-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true'
+-    if ($Model -in @('online','online_guard')) { $properties += ' -Dcoe619.onlineForecast=true' }
++    if ($Model -in @('online','online_guard','online_energy')) { $properties += ' -Dcoe619.onlineForecast=true' }
+     elseif ($Model -eq 'half') { $properties += ' -Dcoe619.dampedForecast=true' }
+     else { $properties += ' -Dcoe619.disableForecast=true' }
+-    if ($Model -eq 'online_guard') { $properties += ' -Dcoe619.planningHistoryGuard=true' }
++    if ($Model -in @('online_guard','online_energy')) { $properties += ' -Dcoe619.planningHistoryGuard=true' }
++    if ($Model -eq 'online_energy') { $properties += ' -Dcoe619.predictUnderload=true' }
+     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
+     $csvBefore = (Get-FileHash -LiteralPath results/experiments.csv -Algorithm SHA256).Hash
+     $reportBefore = (Get-FileHash -LiteralPath docs/progress_report_2/PR2_Progress_Report_II.pdf -Algorithm SHA256).Hash
+diff --git a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+index 4a3a7ea..8d17deb 100644
+--- a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
++++ b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+@@ -47,6 +47,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+     private final Map<Long, List<Pending>> pending = new HashMap<>();
+     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
+     private final Map<Long, List<? extends Vm>> originalPlanningVms = new HashMap<>();
++    private record SourceForecast(double time, double estimate) { }
++    private final Map<Long, SourceForecast> sourceForecasts = new HashMap<>();
+     private long predictionCount;
+ 
+     /** Research-only learner: use resolved past errors to choose how much trend to trust. */
+@@ -122,7 +124,10 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+ 
+     @Override
+     public Map<Vm, Host> getOptimizedAllocationMap(final List<? extends Vm> vmList) {
+-        if (!Boolean.getBoolean("coe619.planningHistoryGuard")) return super.getOptimizedAllocationMap(vmList);
++        if (!Boolean.getBoolean("coe619.planningHistoryGuard") && !Boolean.getBoolean("coe619.predictUnderload")) {
++            return super.getOptimizedAllocationMap(vmList);
++        }
++        sourceForecasts.clear();
+         for (final Host host : getHostList()) {
+             originalPlanningVms.put(host.getId(), List.copyOf(host.getVmList()));
+         }
+@@ -130,13 +135,33 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+             return super.getOptimizedAllocationMap(vmList);
+         } finally {
+             originalPlanningVms.clear();
++            sourceForecasts.clear();
++        }
++    }
++
++    @Override
++    public boolean isUnderloaded(final Host host) {
++        if (super.isUnderloaded(host)) return true;
++        if (!Boolean.getBoolean("coe619.predictUnderload") || Boolean.getBoolean("coe619.disableForecast")) return false;
++        final SourceForecast prediction = sourceForecasts.get(host.getId());
++        final List<? extends Vm> original = originalPlanningVms.get(host.getId());
++        if (prediction == null || original == null || host.getVmList().size() != original.size()
++            || !host.getVmList().containsAll(original)
++            || Math.abs(prediction.time() - host.getSimulation().clock()) > 1e-6) return false;
++        final boolean predicted = prediction.estimate() < getUnderUtilizationThreshold();
++        if (predicted && Boolean.getBoolean("coe619.evaluateForecast")) {
++            System.out.printf(java.util.Locale.ROOT,
++                "FORECAST_UNDERLOAD host=%d time=%.3f forecast=%.6f threshold=%.6f%n",
++                host.getId(), prediction.time(), prediction.estimate(), getUnderUtilizationThreshold());
+         }
++        return predicted;
+     }
+ 
+     @Override
+     public boolean isOverloaded(final Host host) {
+         final List<? extends Vm> original = originalPlanningVms.get(host.getId());
+-        if (original != null && (host.getVmList().size() != original.size() || !host.getVmList().containsAll(original))) {
++        if (Boolean.getBoolean("coe619.planningHistoryGuard") && original != null
++            && (host.getVmList().size() != original.size() || !host.getVmList().containsAll(original))) {
+             // Past aggregate CPU describes the original VM group, not this temporary
+             // planning subset. Finish VM selection using current CPU only.
+             if (Boolean.getBoolean("coe619.evaluateForecast")) {
+@@ -167,6 +192,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+             : Boolean.getBoolean("coe619.dampedForecast") ? 0.5 : 1;
+         final double forecast = online || Boolean.getBoolean("coe619.dampedForecast")
+             ? samples.get(0)[1] + weight * (rawForecast - samples.get(0)[1]) : rawForecast;
++        if (Boolean.getBoolean("coe619.predictUnderload")) {
++            sourceForecasts.put(host.getId(), new SourceForecast(now, forecast));
++        }
+         if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
+             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
+             final double target = now + horizonSeconds;

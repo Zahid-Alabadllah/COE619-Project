@@ -42,7 +42,10 @@ def main():
                     b.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(a,b)
     if not args.clean: return
     target=CODE/"target"
-    candidates=[target/n for n in ("meeting-deck","framework-patch","source-check","meeting-build","classes","maven-status","generated-sources","test-classes")]
+    candidates=[target/n for n in ("meeting-deck","framework-patch","source-check","meeting-build","classes","maven-status","generated-sources","test-classes","default-smoke")]
+    # Essential research inputs/outputs are retained under results before cleanup.
+    # The downloaded archive is reproducible from the pinned commit and digest.
+    candidates += [target/n for n in ("planetlab-source.zip","default-smoke.log","capacity-admission.txt","framework-compile.log","framework-repair.log")]
     if target.exists():
         candidates += [p for p in target.iterdir() if p.is_file() and (p.suffix==".png" or p.name.endswith("-build.txt") or p.name=="demo-verification.log")]
     candidates+=list(ROOT.glob(".chart-data-*"))

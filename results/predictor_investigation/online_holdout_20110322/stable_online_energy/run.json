@@ -1,0 +1,20 @@
+{
+  "started_utc": "2026-11-17T22:12:51.5586484Z",
+  "completed_utc": "2026-11-17T22:13:03.0828118Z",
+  "day": "20110322",
+  "model": "online_energy",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.planningHistoryGuard=true -Dcoe619.predictUnderload=true -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110322/manifests",
+  "framework_fix": true,
+  "stable_planning": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "ab718f7fee8356d3ceb45bee052c9719513f2d60",
+  "code_status": [
+    " M scripts/research/run_forecast_validation.ps1",
+    " M src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/online_holdout_20110309/stable_online_energy/",
+    "?? results/predictor_investigation/online_holdout_20110322/stable_online_energy/",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

@@ -9,6 +9,7 @@ We evaluate whether simple CPU trend prediction improves energy/performance trad
 - [Project Understanding Guide](docs/concepts_guide/COE619_Project_Concepts_And_Methods_Guide.pdf): definitions, simple formulas, evidence and limitations.
 - [Corrected PR2](docs/progress_report_2/PR2_Progress_Report_II.pdf)
 - [Results](results/summary.md), generated from [raw runs](results/experiments.csv).
+- [Subsequent research progress](docs/RESEARCH_PROGRESS.md): dated milestones, improved forecasting, planning fixes and remaining energy limitations. PR2 and its evidence remain frozen.
 - PR1 and older handoffs describe historical versions; current code and corrected PR2 take precedence.
 
 ## Code map
@@ -47,5 +48,7 @@ Use **Terminal > Run Build Task** (Ctrl+Shift+B) for the complete fixed-workload
 Generated build files and LaTeX intermediates are hidden in this checkout's Explorer. PDFs nest under their editable LaTeX sources. The archive remains available for historical reference.
 
 ## Academic documents and cleanup
+
+Research reproduction is documented in [forecast accuracy](docs/ONLINE_FORECAST.md), [stable planning/history guard](docs/PLANNING_REPRODUCIBILITY.md) and [capacity limitations](docs/CONSOLIDATION_LIMITS.md). Research options are explicit and do not replace the five-case default workflow.
 
 Open ../Course_Documents/README.md for current academic deliverables. After verified artifact work run `./scripts/maintain_documents.ps1 -Clean` to sync course copies and remove known temporary output. Preview with `-Clean -DryRun`. Generated simulation files rebuild as needed.

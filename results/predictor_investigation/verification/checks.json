@@ -1,0 +1,14 @@
+{
+  "recorded_date": "2026-11-18",
+  "default_rows": 15,
+  "all_vms_created": true,
+  "patched_class_absent": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "standalone_checks": [
+    "OnlineBlendRegression passed",
+    "CapacityAdmissionCheck passed",
+    "MigrationMapRegression passed original, mutable, stable and cleaned-original"
+  ],
+  "production_java_files": 5
+}
