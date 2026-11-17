@@ -71,6 +71,14 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         if (predicted) {
             predictiveTriggerCount++;
         }
+        // Opt-in investigation only: observe forecasts without changing decisions.
+        if (Boolean.getBoolean("coe619.predictorDiagnostics") && (predictionCount <= 12 || predicted)) {
+            final double oldest = samples.stream().mapToDouble(sample -> sample[0]).min().orElse(now);
+            final double newest = samples.stream().mapToDouble(sample -> sample[0]).max().orElse(now);
+            System.out.printf(java.util.Locale.ROOT,
+                "PREDICTOR_CHECK time=%.3f host=%d vms=%d oldest=%.3f newest=%.3f span=%.3f forecast=%.6f flag=%s%n",
+                now, host.getId(), host.getVmList().size(), oldest, newest, newest - oldest, forecast, predicted);
+        }
         return predicted;
     }
 
@@ -90,6 +98,13 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         for (int i = history.size() - 1; i >= 0 && samples.size() < windowSize; i--) {
             final HostStateHistoryEntry entry = history.get(i);
             if (entry.active()) {
+                // Experimental ablation only: prevent closely spaced state events from
+                // dominating the window. Actual timestamps still drive the OLS fit.
+                final boolean spaced = Boolean.getBoolean("coe619.spacedHistory");
+                if (spaced && !samples.isEmpty()
+                    && samples.get(samples.size() - 1)[0] - entry.time() < 300 - 1e-6) {
+                    continue;
+                }
                 samples.add(new double[]{entry.time(), HostCpuUtilization.fractionOfCapacity(host, entry)});
             }
         }
