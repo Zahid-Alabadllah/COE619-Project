@@ -1,0 +1,154 @@
+{
+  "20110409_stress": {
+    "point": {
+      "n": 1112,
+      "covered": 520,
+      "early_tp": 63,
+      "early_fp": 28,
+      "early_fn": 96,
+      "early_tn": 582,
+      "coverage": 0.4676258992805755,
+      "mean_margin_pp": 0.0,
+      "early_precision": 0.6923076923076923,
+      "early_recall": 0.39622641509433965
+    },
+    "margin80": {
+      "n": 1112,
+      "covered": 836,
+      "early_tp": 120,
+      "early_fp": 186,
+      "early_fn": 39,
+      "early_tn": 424,
+      "coverage": 0.7517985611510791,
+      "mean_margin_pp": 6.503896678336066,
+      "early_precision": 0.39215686274509803,
+      "early_recall": 0.7547169811320755
+    },
+    "margin90": {
+      "n": 1112,
+      "covered": 940,
+      "early_tp": 135,
+      "early_fp": 245,
+      "early_fn": 24,
+      "early_tn": 365,
+      "coverage": 0.8453237410071942,
+      "mean_margin_pp": 8.617387595369829,
+      "early_precision": 0.35526315789473684,
+      "early_recall": 0.8490566037735849
+    }
+  },
+  "20110411_stress": {
+    "point": {
+      "n": 1112,
+      "covered": 540,
+      "early_tp": 25,
+      "early_fp": 28,
+      "early_fn": 91,
+      "early_tn": 775,
+      "coverage": 0.4856115107913669,
+      "mean_margin_pp": 0.0,
+      "early_precision": 0.4716981132075472,
+      "early_recall": 0.21551724137931033
+    },
+    "margin80": {
+      "n": 1112,
+      "covered": 844,
+      "early_tp": 67,
+      "early_fp": 154,
+      "early_fn": 49,
+      "early_tn": 649,
+      "coverage": 0.7589928057553957,
+      "mean_margin_pp": 7.073967731843042,
+      "early_precision": 0.3031674208144796,
+      "early_recall": 0.5775862068965517
+    },
+    "margin90": {
+      "n": 1112,
+      "covered": 948,
+      "early_tp": 84,
+      "early_fp": 256,
+      "early_fn": 32,
+      "early_tn": 547,
+      "coverage": 0.8525179856115108,
+      "mean_margin_pp": 9.863404188677444,
+      "early_precision": 0.24705882352941178,
+      "early_recall": 0.7241379310344828
+    }
+  },
+  "20110420_stress": {
+    "point": {
+      "n": 1112,
+      "covered": 533,
+      "early_tp": 45,
+      "early_fp": 27,
+      "early_fn": 27,
+      "early_tn": 808,
+      "coverage": 0.47931654676258995,
+      "mean_margin_pp": 0.0,
+      "early_precision": 0.625,
+      "early_recall": 0.625
+    },
+    "margin80": {
+      "n": 1112,
+      "covered": 847,
+      "early_tp": 52,
+      "early_fp": 39,
+      "early_fn": 20,
+      "early_tn": 796,
+      "coverage": 0.7616906474820144,
+      "mean_margin_pp": 6.30514591999968,
+      "early_precision": 0.5714285714285714,
+      "early_recall": 0.7222222222222222
+    },
+    "margin90": {
+      "n": 1112,
+      "covered": 944,
+      "early_tp": 56,
+      "early_fp": 96,
+      "early_fn": 16,
+      "early_tn": 739,
+      "coverage": 0.8489208633093526,
+      "mean_margin_pp": 8.872207769046584,
+      "early_precision": 0.3684210526315789,
+      "early_recall": 0.7777777777777778
+    }
+  },
+  "20110420": {
+    "point": {
+      "n": 72002,
+      "covered": 41930,
+      "early_tp": 0,
+      "early_fp": 0,
+      "early_fn": 0,
+      "early_tn": 72002,
+      "coverage": 0.5823449348629205,
+      "mean_margin_pp": 0.0005869067451635175,
+      "early_precision": null,
+      "early_recall": null
+    },
+    "margin80": {
+      "n": 72002,
+      "covered": 54829,
+      "early_tp": 0,
+      "early_fp": 0,
+      "early_fn": 0,
+      "early_tn": 72002,
+      "coverage": 0.7614927363128802,
+      "mean_margin_pp": 3.031363550553749,
+      "early_precision": null,
+      "early_recall": null
+    },
+    "margin90": {
+      "n": 72002,
+      "covered": 61042,
+      "early_tp": 0,
+      "early_fp": 0,
+      "early_fn": 0,
+      "early_tn": 72002,
+      "coverage": 0.8477820060553873,
+      "mean_margin_pp": 5.399637486586358,
+      "early_precision": null,
+      "early_recall": null
+    }
+  }
+}

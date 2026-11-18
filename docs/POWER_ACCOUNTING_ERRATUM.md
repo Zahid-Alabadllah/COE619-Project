@@ -48,6 +48,8 @@ The tiny synthetic difference versus THR is not a broad predictive-energy claim.
 
 Corrected default, corrected candidate and both final full-day batches each pass all 15 VM-sample and 15 history-entry audits with zero violations. These are recorded-state checks, not a proof about every unrecorded instant or all future configurations.
 
+A subsequent bounded-forecast batch adds15 verified policy runs with an unchanged result CSV: the reproducible audit summary now covers75 runs and150 zero-violation checks.
+
 The historical model/data changes already tested are documented in TREND_MEAN_FORECAST.md. Its pre-correction energy examples are superseded by this erratum. The forecast-only fixed-sequence experiments do not use host power flags. The same frozen selector was additionally replay-verified under the corrected power environment; forecasting improved in all four real full-day groups versus adaptive trend, while energy superiority over both baselines remains unproved.
 
 ## Where the evidence is

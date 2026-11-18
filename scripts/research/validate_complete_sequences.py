@@ -20,7 +20,7 @@ from urllib.request import urlretrieve
 CODE = Path(__file__).resolve().parents[2]
 COMMIT = '344ffdbf7e528bfa6f276014e889e68a0cb640c2'
 DIGEST = 'ef817107a2783a28283bcb9dcbe28c38977a14a7345e6171a4b8d3f00315a88f'
-MODELS = ('persistence', 'mean20', 'median20', 'ema20', 'ols', 'ols_clipped', 'half', 'adaptive', 'adaptive_clipped', 'local_level', 'switching', 'mean_switching')
+MODELS = ('persistence', 'mean20', 'median20', 'ema20', 'ols', 'ols_clipped', 'half', 'adaptive', 'adaptive_clipped', 'local_level', 'switching', 'mean_switching', 'mean_switching_clipped', 'three_way_mae', 'three_way_mse')
 
 
 def trend(window):
@@ -45,7 +45,7 @@ def forecasts(series):
             target, old_raw, old_latest, old_trend, old_pair, old_mean = pending.popleft()
             past_errors.append((old_raw-old_latest, series[target]-old_latest))
             past_pairs.append((old_latest, series[target]))
-            past_model_errors.append((abs(old_trend-series[target]),abs(old_pair-series[target]),abs(old_mean-series[target])))
+            past_model_errors.append((abs(old_trend-series[target]),abs(old_pair-series[target]),abs(old_mean-series[target]),abs(old_latest-series[target])))
         latest = series[issue]
         raw = trend(series[issue-9:issue+1])
         denominator = sum(d*d for d, y in past_errors)
@@ -65,11 +65,20 @@ def forecasts(series):
         recent = series[max(0,issue-19):issue+1]
         mean = sum(recent)/len(recent)
         choose_mean = len(past_model_errors) >= 10 and sum(x[2] for x in past_model_errors) < sum(x[0] for x in past_model_errors)
+        candidates = [latest, adaptive, mean]
+        mae_choice = mse_choice = 0
+        if len(past_model_errors) >= 10:
+            mae_scores = [sum(h[i] for h in past_model_errors) for i in (3,0,2)]
+            mse_scores = [sum(h[i]**2 for h in past_model_errors) for i in (3,0,2)]
+            mae_choice = min(range(3),key=lambda i:mae_scores[i])
+            mse_choice = min(range(3),key=lambda i:mse_scores[i])
         predictions = dict(persistence=latest, mean20=sum(recent)/len(recent), median20=statistics.median(recent),
                            ema20=smoothed[issue], ols=raw, ols_clipped=max(0,min(1,raw)), half=latest+.5*(raw-latest),
                            adaptive=adaptive, adaptive_clipped=max(0,min(1,adaptive)), local_level=level,
                            switching=level if choose_pair else adaptive,
-                           mean_switching=mean if choose_mean else adaptive)
+                           mean_switching=mean if choose_mean else adaptive,
+                           mean_switching_clipped=max(0,min(1,mean if choose_mean else adaptive)),
+                           three_way_mae=candidates[mae_choice],three_way_mse=candidates[mse_choice])
         yield issue+1, series[issue+1], predictions
         pending.append((issue+1, raw, latest, adaptive, level, mean))
 

@@ -1,0 +1,11 @@
+{
+  "recorded_utc": "2026-11-18T02:55:29.816255+00:00",
+  "source": "https://atlarge-research.com/gwa-t-12/",
+  "download": "https://atlarge-research.com/gwa-traces/gwa_t_12_fastStorage.zip",
+  "paper": "https://atlarge-research.com/pdfs/2015-shen-statistical.pdf",
+  "selection": "First 76 numeric VM identifiers with a common complete five-minute calendar day; earliest eligible day; selection by identifier/time completeness only, never prediction results or CPU load",
+  "models": "Frozen trend10/adaptive-memory20 and mean20 selector, prior-error min10; compare persistence, OLS, half trend and simple mean/median/EMA controls without tuning",
+  "scope": "Forecast-only independent-provider test; normalize CPU percent to relative VM capacity and controlled equal-capacity four-VM host groups; do not reproduce provider VM sizes or claim energy savings",
+  "reserved": "Do not inspect remaining VM outcomes or later days for model tuning in this stage",
+  "attribution": "Acknowledge Bitbrains IT Services, Grid Workloads Archive, and Shen/van Beek/Iosup CCGrid2015 in published material"
+}

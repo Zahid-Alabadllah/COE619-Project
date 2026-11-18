@@ -18,6 +18,9 @@ These are actual completed checkpoints. Work completed early can be reported tra
 | Full-day and metric traversal | Longer jobs keep traces active; repaired quadratic linked-list traversal with unchanged stable CSV arithmetic | TREND_MEAN_FORECAST.md; full_day_initial_attempt and full_day_* runs |
 | Power-state correction | Incoming migrations no longer permit idle shutdown; default compatibility/stable repair enabled; 60 corrected runs pass 120 recorded power checks | POWER_ACCOUNTING_ERRATUM.md; power_audit_summary.json |
 | Retired placement prototype | Physical-admission unit tests passed; corrected heavy IQR run did not finish; no energy conclusion and no active placement option retained | DEMAND_PLACEMENT_EXPERIMENT.md; archived patch/partial evidence |
+| Independent-provider validation | Frozen selector tested on Bitbrains; unchanged CPU remains competitive; a three-choice prototype has mixed disjoint-VM results and remains offline | INDEPENDENT_FORECAST_VALIDATION.md; bitbrains_holdout and bitbrains_reserved_vms |
+| Physical output bounds | Allocated-CPU forecast limited to0–100%; actual15-row policy CSV unchanged and power audits pass | bounded_power_mean; current75 runs/150 power checks |
+| Error-margin study | More early warnings but many additional false warnings; not added to migration control | forecast_margins |
 
 The root COE619_Full_Context_v2.md retains complete migration history and an appended execution-log continuation. This versioned index records new milestones without duplicating historical administrative material.
 

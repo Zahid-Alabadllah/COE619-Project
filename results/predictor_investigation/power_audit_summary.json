@@ -929,6 +929,192 @@
         }
       ],
       "violations": 0
+    },
+    "online_holdout_20110420/bounded_power_mean": {
+      "rows": 15,
+      "checks": [
+        {
+          "kind": "POWER_AUDIT",
+          "case": "diurnal",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "diurnal",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "diurnal",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "diurnal",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "diurnal",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "diurnal",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_a",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_a",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_a",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_a",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_a",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_a",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_b",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_b",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_b",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_b",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_b",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_b",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_c",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_c",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_c",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_c",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "real_c",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "real_c",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "heavy",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "heavy",
+          "policy": "THR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "heavy",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "heavy",
+          "policy": "IQR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_AUDIT",
+          "case": "heavy",
+          "policy": "LR",
+          "violations": 0
+        },
+        {
+          "kind": "POWER_HISTORY_AUDIT",
+          "case": "heavy",
+          "policy": "LR",
+          "violations": 0
+        }
+      ],
+      "violations": 0
     }
   },
   "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",

@@ -1,0 +1,11 @@
+{
+  "recorded_utc": "2026-11-18T03:01:41.692900+00:00",
+  "source": "https://atlarge-research.com/gwa-t-12/",
+  "archive_sha256": "11313f528a0cbcbe57e63162f8ae5a41a9c7e7c1a79872e294ff3c5bbaa2e671",
+  "skip_numeric_files": 128,
+  "selection": "First76 eligible VMs within the next128 numeric files, earliest common complete UTC day; time/completeness only",
+  "primary_candidate": "three_way_mae: select persistence/adaptive trend/mean20 by last20 earlier absolute errors, min10, persistence warmup/tie preference",
+  "secondary": "three_way_mse is a predeclared squared-error sensitivity check, not selected after validation",
+  "frozen_settings": "All windows20 except10-sample time trend; no model or hyperparameter updates after these VM outcomes",
+  "attribution": "Bitbrains IT Services; Grid Workloads Archive; Shen, van Beek and Iosup, CCGrid2015"
+}

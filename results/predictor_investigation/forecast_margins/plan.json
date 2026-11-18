@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-11-18T02:52:33.014160+00:00",
+  "scope": "Previously inspected fixed-placement inputs; exploratory only; no energy or novelty claim",
+  "model": "Frozen trend/mean point forecast; nonnegative empirical .8 and .9 residual-quantile margins from last20 strictly earlier resolved errors, min10",
+  "caution": "Nominal quantile levels are not coverage guarantees or formal confidence intervals; report observed coverage and early false warnings",
+  "inputs": [
+    "results/predictor_investigation/complete_sequences_reused_stress/20110409_stress_inputs.csv.gz",
+    "results/predictor_investigation/complete_sequences_stress_confirm/20110411_stress_inputs.csv.gz",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_stress_inputs.csv.gz",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_inputs.csv.gz"
+  ]
+}

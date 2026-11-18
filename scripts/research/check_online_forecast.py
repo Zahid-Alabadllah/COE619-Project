@@ -89,7 +89,8 @@ def main():
                 actual, predicted = float(actual_text), float(predicted_text)
                 row = inputs[host, target_text]
                 latest, raw = row['latest'], row['raw']
-                reconstructed = row['mean_selected'] if row['model'] == 'mean_selected' else row['selected'] if row['model'] == 'selected' else row['pair'] if row['model'] == 'recent_pairs' else row['trend']
+                reconstructed = row['mean_selected'] if row['model'] in ('mean_selected','mean_selected_bounded') else row['selected'] if row['model'] == 'selected' else row['pair'] if row['model'] == 'recent_pairs' else row['trend']
+                if row['model'] == 'mean_selected_bounded': reconstructed = max(0,min(1,reconstructed))
                 difference = abs(reconstructed-predicted)
                 max_prediction_difference = max(max_prediction_difference, difference)
                 assert difference < 1e-5, (case, host, target_text, reconstructed, predicted)
@@ -107,7 +108,7 @@ def main():
     for case, rows in errors.items():
         report['accuracy'][case] = {}
         models = ['persistence', 'ols', 'half', 'adaptive_replay', 'recent_pairs', 'selected_replay', 'online']
-        if candidate_model == 'mean_selected': models += ['mean_replay','mean_selected_replay']
+        if candidate_model in ('mean_selected','mean_selected_bounded'): models += ['mean_replay','mean_selected_replay']
         for model in models:
             values = [r[model] for r in rows]
             report['accuracy'][case][model] = dict(count=len(values),

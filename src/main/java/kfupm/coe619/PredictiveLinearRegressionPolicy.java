@@ -198,7 +198,10 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
             ? samples.get(0)[1] + weight * (rawForecast - samples.get(0)[1]) : rawForecast;
         final List<double[]> meanSamples = meanModel ? recentActiveSamples(host, 20) : List.of();
         final double meanEstimate = meanModel ? meanSamples.stream().mapToDouble(s -> s[1]).average().orElse(samples.get(0)[1]) : Double.NaN;
-        final double forecast = meanModel ? onlineBlends.get(host.getId()).selectForecast(now, trendEstimate, meanEstimate) : trendEstimate;
+        final double selectedEstimate = meanModel ? onlineBlends.get(host.getId()).selectForecast(now, trendEstimate, meanEstimate) : trendEstimate;
+        // Our scored target is allocated CPU, whose physical range is 0..1.
+        // For the fixed 80% trigger this projection leaves warning decisions unchanged.
+        final double forecast = meanModel ? Math.max(0, Math.min(1, selectedEstimate)) : selectedEstimate;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
             final double target = now + horizonSeconds;
@@ -217,7 +220,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                             host.getId(), target, meanInput);
                     }
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s model=%s%n",
-                        host.getId(), target, weight, online, meanModel ? "mean_selected" : "trend");
+                        host.getId(), target, weight, online, meanModel ? "mean_selected_bounded" : "trend");
                 }
             }
         }

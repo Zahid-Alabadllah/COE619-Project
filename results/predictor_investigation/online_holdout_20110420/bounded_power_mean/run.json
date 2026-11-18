@@ -1,0 +1,31 @@
+{
+  "started_utc": "2026-11-18T03:04:19.5040624Z",
+  "completed_utc": "2026-11-18T03:04:35.3960285Z",
+  "day": "20110420",
+  "model": "mean_guard",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.planningHistoryGuard=true -Dcoe619.meanForecast=true -Dcoe619.fullDay=true -Dcoe619.auditPower=true -Dcoe619.idleShutdownSeconds=0 -Dcoe619.powerGuard=true -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110420/manifests",
+  "framework_fix": true,
+  "stable_planning": true,
+  "full_day": true,
+  "cloudlet_length_mi_per_pe": 1000000000,
+  "power_audit": true,
+  "idle_shutdown_seconds": 0,
+  "power_guard": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "6952d2b03705eac3a05d660cd429173b00610406",
+  "code_status": [
+    " M scripts/research/check_online_forecast.py",
+    " M scripts/research/validate_complete_sequences.py",
+    " M src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/bitbrains_holdout/",
+    "?? results/predictor_investigation/bitbrains_reserved_vms/",
+    "?? results/predictor_investigation/complete_sequences_mean_confirm/simple_baseline_controls.json",
+    "?? results/predictor_investigation/forecast_margins/",
+    "?? results/predictor_investigation/online_holdout_20110420/bounded_power_mean/",
+    "?? scripts/research/evaluate_forecast_margins.py",
+    "?? scripts/research/validate_bitbrains.py",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

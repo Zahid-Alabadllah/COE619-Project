@@ -9,7 +9,8 @@ import re
 CODE=Path(__file__).resolve().parents[2]
 ROOT=CODE/'results/predictor_investigation'
 CORRECTED=('corrected_default_power_audit','corrected_mean_power_audit',
-           'online_holdout_20110420/validated_power_mean','online_holdout_20110420/validated_power_control')
+           'online_holdout_20110420/validated_power_mean','online_holdout_20110420/validated_power_control',
+           'online_holdout_20110420/bounded_power_mean')
 
 
 def inspect(folder):
@@ -45,7 +46,9 @@ def main():
     assert report['production_java_files']==5
     report['interpretation']='Zero violations in recorded samples/history for four corrected batches; not proof over every unrecorded instant or all future configurations. Legacy energies need erratum.'
     (ROOT/'power_audit_summary.json').write_text(json.dumps(report,indent=2)+'\n')
-    print('PASS: 60 corrected policy runs / 120 power checks have zero recorded violations; legacy counterexample retained; frozen PR2/CSV unchanged; five production Java files')
+    runs=sum(x['rows'] for x in report['corrected'].values())
+    checks=sum(len(x['checks']) for x in report['corrected'].values())
+    print(f'PASS: {runs} corrected policy runs / {checks} power checks have zero recorded violations; legacy counterexample retained; frozen PR2/CSV unchanged; five production Java files')
 
 
 if __name__=='__main__':

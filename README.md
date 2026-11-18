@@ -14,6 +14,7 @@ We evaluate whether simple CPU forecasting improves energy/performance trade-off
 - [Historical PR2 summary](results/summary.md) and [original CSV](results/experiments.csv), preserved with the energy qualification above.
 - [Subsequent research progress](docs/RESEARCH_PROGRESS.md): dated milestones, improved forecasting, planning fixes and remaining energy limitations. PR2 and its evidence remain frozen.
 - [Current research predictor](docs/TREND_MEAN_FORECAST.md): simple trend-versus-average selection, tested gains, exceptions and reproduction.
+- [Independent validation](docs/INDEPENDENT_FORECAST_VALIDATION.md): separate-provider checks, limitations, preserved future VMs and unused uncertainty experiments.
 - PR1/PR2 and older handoffs describe historical versions; current code and the research errata take precedence for behavior and energy interpretation.
 
 ## Code map
