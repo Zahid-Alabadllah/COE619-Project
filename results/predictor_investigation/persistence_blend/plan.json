@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-11-18T03:17:57.911968+00:00",
+  "scope": "Already inspected inputs; exploratory, no fresh-validation or energy claim",
+  "objective": "Primary squared error/RMSE, report MAE too; no changes to Java",
+  "model": "Blend persistence with bounded adaptive trend; rolling20 earlier errors/min10; initial persistence; least-squares blend weight clipped0..1; final forecast clipped0..1",
+  "inputs": [
+    "results/predictor_investigation/bitbrains_holdout/bitbrains_20130813_inputs.csv.gz",
+    "results/predictor_investigation/bitbrains_reserved_vms/bitbrains_20130814_inputs.csv.gz",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_inputs.csv.gz",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_stress_inputs.csv.gz"
+  ]
+}

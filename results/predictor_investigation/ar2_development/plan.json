@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-11-18T03:20:42.355515+00:00",
+  "scope": "All default development inputs already inspected; no fresh-validation or energy claim",
+  "objective": "Primary RMSE/tail error; report MAE without claiming dominance",
+  "model": "Two most recent CPU readings predict next; rolling20 strictly earlier triples; min20 persistence fallback; ridge0.0001 on centered residual-to-persistence coefficients; output0..1",
+  "inputs": [
+    "C:\\Users\\zahed\\OneDrive - KFUPM\\MX HPCC\\T261\\COE619\\COE619-Project-Code\\results\\predictor_investigation\\bitbrains_holdout\\bitbrains_20130813_inputs.csv.gz",
+    "C:\\Users\\zahed\\OneDrive - KFUPM\\MX HPCC\\T261\\COE619\\COE619-Project-Code\\results\\predictor_investigation\\bitbrains_reserved_vms\\bitbrains_20130814_inputs.csv.gz",
+    "C:\\Users\\zahed\\OneDrive - KFUPM\\MX HPCC\\T261\\COE619\\COE619-Project-Code\\results\\predictor_investigation\\complete_sequences_mean_confirm\\20110420_inputs.csv.gz",
+    "C:\\Users\\zahed\\OneDrive - KFUPM\\MX HPCC\\T261\\COE619\\COE619-Project-Code\\results\\predictor_investigation\\complete_sequences_mean_confirm\\20110420_stress_inputs.csv.gz"
+  ]
+}

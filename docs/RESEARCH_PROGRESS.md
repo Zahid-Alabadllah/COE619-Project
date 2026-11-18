@@ -21,6 +21,7 @@ These are actual completed checkpoints. Work completed early can be reported tra
 | Independent-provider validation | Frozen selector tested on Bitbrains; unchanged CPU remains competitive; a three-choice prototype has mixed disjoint-VM results and remains offline | INDEPENDENT_FORECAST_VALIDATION.md; bitbrains_holdout and bitbrains_reserved_vms |
 | Physical output bounds | Allocated-CPU forecast limited to0–100%; actual15-row policy CSV unchanged and power audits pass | bounded_power_mean; current75 runs/150 power checks |
 | Error-margin study | More early warnings but many additional false warnings; not added to migration control | forecast_margins |
+| Further small-model checks | Persistence blending and two-reading regression show trade-offs/poorer results; retained offline, no extra Java model | FORECAST_FOLLOWUP_CHECKS.md |
 
 The root COE619_Full_Context_v2.md retains complete migration history and an appended execution-log continuation. This versioned index records new milestones without duplicating historical administrative material.
 
