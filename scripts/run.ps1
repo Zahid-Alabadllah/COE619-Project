@@ -1,5 +1,6 @@
-param([switch]$FrameworkFix, [switch]$StablePlanning, [string]$Scenario = "", [string]$OutputDir = "results/demo")
+param([switch]$FrameworkFix=$true, [switch]$StablePlanning=$true, [switch]$PrepareDebug, [string]$Scenario = "", [string]$OutputDir = "results/demo")
 $ErrorActionPreference = "Stop"
+$debugReady = $false
 Push-Location (Split-Path $PSScriptRoot -Parent)
 try {
     if ($StablePlanning -and !$FrameworkFix) { throw 'StablePlanning requires the explicit FrameworkFix research run' }
@@ -11,10 +12,11 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Maven failed" }
     if ($FrameworkFix) { & (Join-Path $PSScriptRoot "repair_cloudsim.ps1") -StablePlanning:$StablePlanning }
     $cp = "target/meeting-build/classes;" + (Get-Content target/meeting-build/classpath.txt -Raw).Trim()
+    if ($PrepareDebug) { $debugReady = $true; return }
     if ($Scenario) { & java -cp $cp kfupm.coe619.ExperimentRunner $Scenario --output $OutputDir }
     else { & java -cp $cp kfupm.coe619.ExperimentRunner --output $OutputDir }
     if ($LASTEXITCODE -ne 0) { throw "Java failed" }
 } finally {
-    & python (Join-Path $PSScriptRoot "framework/clear_patch.py")
+    if (!$debugReady) { & python (Join-Path $PSScriptRoot "framework/clear_patch.py") }
     Pop-Location
 }

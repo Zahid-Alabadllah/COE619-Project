@@ -2,6 +2,22 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Prepare Java debugger",
+            "type": "shell",
+            "command": "./scripts/run.ps1",
+            "args": ["-PrepareDebug"],
+            "options": {"cwd": "${workspaceFolder}"},
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean Java debugger override",
+            "type": "shell",
+            "command": "python",
+            "args": ["scripts/framework/clear_patch.py"],
+            "options": {"cwd": "${workspaceFolder}"},
+            "problemMatcher": []
+        },
+        {
             "label": "Compare all workloads",
             "type": "shell",
             "command": "./scripts/run.ps1",

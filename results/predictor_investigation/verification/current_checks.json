@@ -1,0 +1,6 @@
+{
+  "default_repeat_csv_identical": true,
+  "debugger_equivalent_classpath_smoke_passed": true,
+  "interactive_vscode_debugger_exercised": false,
+  "runtime_override_absent": true
+}

@@ -2,6 +2,8 @@
 
 Research checkpoint: 18 November 2026. PR2 and its CSV remain frozen.
 
+**Later correction:** the energy examples below predate the migration power-state fix. Use POWER_ACCOUNTING_ERRATUM.md and its corrected runs for physical energy comparisons. Forecast-only sequence results are independent of host power accounting; the frozen selector was also rechecked in corrected-power simulations. Retired runtime variants and legacy default statements below describe their historical checkpoints.
+
 ## What it does in plain English
 
 Keep two simple forecasts. A line follows a rising or falling CPU trend. A rolling average ignores some of the short-lived noise. Use whichever has made smaller errors recently. At prediction time, only already verified earlier forecasts may influence that choice.

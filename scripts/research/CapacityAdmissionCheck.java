@@ -34,8 +34,10 @@ public final class CapacityAdmissionCheck {
                 if (!host.isSuitableForVm(candidate)) throw new AssertionError("Fourth VM should physically fit");
                 var check = VmAllocationPolicyMigrationAbstract.class.getDeclaredMethod("isNotHostOverloadedAfterAllocation", Host.class, Vm.class);
                 check.setAccessible(true);
-                if ((boolean) check.invoke(policy, host, candidate)) throw new AssertionError("Expected reserved-CPU threshold rejection");
-                System.out.println("PASS: at zero actual CPU use, migration placement rejects a fourth VM at the 80% reserved-CPU threshold, although it physically fits.");
+                boolean allowed = (boolean) check.invoke(policy, host, candidate);
+                boolean expected = false;
+                if (allowed != expected) throw new AssertionError("Unexpected fourth-VM migration eligibility: " + allowed);
+                System.out.println("PASS: idle fourth VM migration allowed=" + allowed + "; physical CPU admission is checked separately.");
             }
             if (!host.createVm(candidate).fully()) throw new AssertionError("Expected admission of VM " + i);
         }
@@ -53,4 +55,5 @@ public final class CapacityAdmissionCheck {
     private static Vm vm(int id) {
         return new VmSimple(id, 1000, 2).setRam(2048).setBw(1000).setSize(10000);
     }
+
 }

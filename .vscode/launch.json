@@ -4,6 +4,9 @@
         {
             "type": "java",
             "name": "Compare all fixed workloads",
+            "preLaunchTask": "Prepare Java debugger",
+            "postDebugTask": "Clean Java debugger override",
+            "classPaths": ["${workspaceFolder}/target/meeting-build/classes", "$Auto"],
             "request": "launch",
             "mainClass": "kfupm.coe619.ExperimentRunner",
             "args": "--output results/demo",
@@ -13,6 +16,9 @@
         {
             "type": "java",
             "name": "Compare day-night workload",
+            "preLaunchTask": "Prepare Java debugger",
+            "postDebugTask": "Clean Java debugger override",
+            "classPaths": ["${workspaceFolder}/target/meeting-build/classes", "$Auto"],
             "request": "launch",
             "mainClass": "kfupm.coe619.ExperimentRunner",
             "args": "diurnal --output results/demo",
@@ -22,6 +28,9 @@
         {
             "type": "java",
             "name": "Compare heavy workload",
+            "preLaunchTask": "Prepare Java debugger",
+            "postDebugTask": "Clean Java debugger override",
+            "classPaths": ["${workspaceFolder}/target/meeting-build/classes", "$Auto"],
             "request": "launch",
             "mainClass": "kfupm.coe619.ExperimentRunner",
             "args": "heavy --output results/demo",

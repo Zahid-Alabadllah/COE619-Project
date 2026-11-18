@@ -56,6 +56,26 @@ public final class ConsolidationExperiment {
 
     public enum Policy { THR, IQR, LR }
 
+    /** Do not power down an empty destination while a VM is on its way to it. */
+    static final class MigrationAwareHost extends HostSimple {
+        MigrationAwareHost(long ram, long bandwidth, long storage, List<Pe> pes) {
+            super(ram, bandwidth, storage, pes);
+        }
+
+        @Override
+        public double updateProcessing(final double time) {
+            final double deadline = getIdleShutdownDeadline();
+            final boolean protect = Boolean.parseBoolean(System.getProperty("coe619.powerGuard", "true"))
+                && !getVmsMigratingIn().isEmpty();
+            if (protect) setIdleShutdownDeadline(-1);
+            try {
+                return super.updateProcessing(time);
+            } finally {
+                if (protect) setIdleShutdownDeadline(deadline);
+            }
+        }
+    }
+
     public static final double UPPER_THRESHOLD = 0.80;
     public static final double IQR_SAFETY = 0.75;
     public static final int LR_WINDOW = 10;
@@ -127,6 +147,7 @@ public final class ConsolidationExperiment {
     private final Map<Vm, Host> migrationSource = new HashMap<>();
     private final Map<Vm, Double> migrationTime = new HashMap<>();
     private int migrations;
+    private int inactiveWorkSamples;
 
     // Demand sampling (once per scheduling interval): MIPS x seconds summed over all VMs.
     private double demandMipsSeconds;
@@ -178,6 +199,10 @@ public final class ConsolidationExperiment {
         if (created != n) {
             throw new IllegalStateException("Only " + created + "/" + n + " VMs were created");
         }
+        if (Boolean.getBoolean("coe619.auditPower")) {
+            System.out.printf(Locale.ROOT, "POWER_AUDIT scenario=%s policy=%s inactiveWorkSamples=%d%n",
+                config.scenario(), config.policy(), inactiveWorkSamples);
+        }
         return computeResult(dc, cloudlets);
     }
 
@@ -199,6 +224,14 @@ public final class ConsolidationExperiment {
             }
             final double demand = vm.getCpuPercentRequested() * vm.getTotalMipsCapacity();
             final double allocated = vm.getHost().getVmScheduler().getTotalAllocatedMipsForVm(vm);
+            if (Boolean.getBoolean("coe619.auditPower") && !vm.getHost().isActive() && demand > 1e-9 && allocated > 1e-9) {
+                inactiveWorkSamples++;
+                if (inactiveWorkSamples <= 8) {
+                    System.out.printf(Locale.ROOT,
+                        "POWER_INVARIANT time=%.3f host=%d vm=%d demand=%.3f allocated=%.3f%n",
+                        now, vm.getHost().getId(), vm.getId(), demand, allocated);
+                }
+            }
             demandMipsSeconds += demand * SCHEDULING_INTERVAL;
             unmetMipsSeconds += Math.max(0, demand - allocated) * SCHEDULING_INTERVAL;
         }
@@ -209,9 +242,15 @@ public final class ConsolidationExperiment {
         double slatahSum = 0;
         int activeHosts = 0;
         double activeSeconds = 0;
+        int inactiveCpuEntries = 0;
         for (final Host host : hosts) {
             // The framework exposes a LinkedList: indexed access would be quadratic.
             final List<HostStateHistoryEntry> h = new ArrayList<>(host.getStateHistory());
+            if (Boolean.getBoolean("coe619.auditPower")) {
+                for (final HostStateHistoryEntry entry : h) {
+                    if (!entry.active() && entry.allocatedMips() > 1e-9) inactiveCpuEntries++;
+                }
+            }
             double active = 0;
             double saturated = 0;
             for (int i = 1; i < h.size(); i++) {
@@ -269,6 +308,10 @@ public final class ConsolidationExperiment {
 
         final int finished = (int) broker.getCloudletFinishedList().stream()
             .filter(c -> c.getStatus() == Cloudlet.Status.SUCCESS).count();
+        if (Boolean.getBoolean("coe619.auditPower")) {
+            System.out.printf(Locale.ROOT, "POWER_HISTORY_AUDIT scenario=%s policy=%s inactiveCpuEntries=%d%n",
+                config.scenario(), config.policy(), inactiveCpuEntries);
+        }
         return new Result(config, energy, slatah, pdm, slav, energyKwh * slav, unmet, migrations,
             activeSeconds / 3600.0, broker.getVmCreatedList().size(), finished,
             simulation.clock(), predictions, triggers);
@@ -280,7 +323,7 @@ public final class ConsolidationExperiment {
             for (int j = 0; j < HOST_PES; j++) {
                 pes.add(new PeSimple(HOST_MIPS));
             }
-            final Host host = new HostSimple(HOST_RAM, HOST_BW, HOST_STORAGE, pes);
+            final Host host = new MigrationAwareHost(HOST_RAM, HOST_BW, HOST_STORAGE, pes);
             host.setRamProvisioner(new HostLocalResourceProvisioner(host.getRamProvisioner().getPmResource()));
             host.setBwProvisioner(new HostLocalResourceProvisioner(host.getBwProvisioner().getPmResource()));
             host.setVmScheduler(new VmSchedulerTimeShared());

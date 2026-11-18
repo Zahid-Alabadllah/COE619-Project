@@ -1,0 +1,134 @@
+21316:
+2026-11-18 02:31:17
+Full thread dump OpenJDK 64-Bit Server VM (25.0.2+10-LTS mixed mode, sharing):
+
+Threads class SMR info:
+_java_thread_list=0x000001f3f9a20cd0, length=11, elements={
+0x000001f3d1204680, 0x000001f3f03a7240, 0x000001f3f03a7ca0, 0x000001f3f03a9440,
+0x000001f3f03ab010, 0x000001f3f03abbd0, 0x000001f3f03b67b0, 0x000001f3f03b97e0,
+0x000001f3f03cd680, 0x000001f3f7098600, 0x000001f3f709f280
+}
+
+"main" #3 [16516] prio=5 os_prio=0 cpu=241109.38ms elapsed=248.88s tid=0x000001f3d1204680 nid=16516 runnable  [0x0000007f7b8fe000]
+   java.lang.Thread.State: RUNNABLE
+	at org.apache.commons.math3.util.KthSelector.partition(KthSelector.java:143)
+	at org.apache.commons.math3.util.KthSelector.select(KthSelector.java:94)
+	at org.apache.commons.math3.stat.descriptive.rank.Percentile$EstimationType.estimate(Percentile.java:1015)
+	at org.apache.commons.math3.stat.descriptive.rank.Percentile$EstimationType.evaluate(Percentile.java:1042)
+	at org.apache.commons.math3.stat.descriptive.rank.Percentile.evaluate(Percentile.java:353)
+	at org.apache.commons.math3.stat.descriptive.rank.Percentile.evaluate(Percentile.java:302)
+	at org.apache.commons.math3.util.ResizableDoubleArray.compute(ResizableDoubleArray.java:949)
+	at org.apache.commons.math3.stat.descriptive.DescriptiveStatistics.apply(DescriptiveStatistics.java:499)
+	at org.apache.commons.math3.stat.descriptive.DescriptiveStatistics.getPercentile(DescriptiveStatistics.java:460)
+	at kfupm.coe619.ConsolidationExperiment$1.computeHostUtilizationMeasure(ConsolidationExperiment.java:408)
+	at org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit.getOverUtilizationThreshold(VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit.java:84)
+	at kfupm.coe619.ConsolidationExperiment$1.getOverUtilizationThreshold(ConsolidationExperiment.java:413)
+	at org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit.isOverloaded(VmAllocationPolicyMigrationDynamicUpperThresholdFirstFit.java:65)
+	at org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationAbstract$$Lambda/0x0000000008105f30.test(Unknown Source)
+	at java.util.stream.ReferencePipeline$2$1.accept(java.base@25.0.2/ReferencePipeline.java:196)
+	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(java.base@25.0.2/ArrayList.java:1716)
+	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.2/AbstractPipeline.java:570)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.2/AbstractPipeline.java:560)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(java.base@25.0.2/ReduceOps.java:921)
+	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.2/AbstractPipeline.java:265)
+	at java.util.stream.ReferencePipeline.collect(java.base@25.0.2/ReferencePipeline.java:723)
+	at org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationAbstract.getOverloadedHosts(VmAllocationPolicyMigrationAbstract.java:591)
+	at org.cloudsimplus.allocationpolicies.migration.VmAllocationPolicyMigrationAbstract.getOptimizedAllocationMap(VmAllocationPolicyMigrationAbstract.java:139)
+	at org.cloudsimplus.datacenters.DatacenterSimple.checkIfVmMigrationsAreNeeded(DatacenterSimple.java:793)
+	at org.cloudsimplus.datacenters.DatacenterSimple.updateCloudletProcessing(DatacenterSimple.java:770)
+	at org.cloudsimplus.datacenters.DatacenterSimple.processVmEvents(DatacenterSimple.java:334)
+	at org.cloudsimplus.datacenters.DatacenterSimple.processEvent(DatacenterSimple.java:239)
+	at org.cloudsimplus.core.CloudSimEntity.run(CloudSimEntity.java:321)
+	at org.cloudsimplus.core.CloudSim.executeRunnableEntities(CloudSim.java:493)
+	at org.cloudsimplus.core.CloudSim.runClockTickAndProcessFutureEvents(CloudSim.java:416)
+	at org.cloudsimplus.core.CloudSim.notifyEndOfSimulationToEntities(CloudSim.java:296)
+	at org.cloudsimplus.core.CloudSim.finish(CloudSim.java:180)
+	at org.cloudsimplus.core.CloudSim.start(CloudSim.java:217)
+	at org.cloudsimplus.core.CloudSimPlus.start(CloudSimPlus.java:38)
+	at kfupm.coe619.ConsolidationExperiment.execute(ConsolidationExperiment.java:208)
+	at kfupm.coe619.ConsolidationExperiment.run(ConsolidationExperiment.java:179)
+	at kfupm.coe619.ExperimentRunner.main(ExperimentRunner.java:43)
+
+"Reference Handler" #14 [13440] daemon prio=10 os_prio=2 cpu=0.00ms elapsed=248.85s tid=0x000001f3f03a7240 nid=13440 waiting on condition  [0x0000007f7c0ff000]
+   java.lang.Thread.State: RUNNABLE
+	at java.lang.ref.Reference.waitForReferencePendingList(java.base@25.0.2/Native Method)
+	at java.lang.ref.Reference.processPendingReferences(java.base@25.0.2/Reference.java:246)
+	at java.lang.ref.Reference$ReferenceHandler.run(java.base@25.0.2/Reference.java:208)
+
+"Finalizer" #15 [12864] daemon prio=8 os_prio=1 cpu=0.00ms elapsed=248.85s tid=0x000001f3f03a7ca0 nid=12864 in Object.wait()  [0x0000007f7c1fe000]
+   java.lang.Thread.State: WAITING (on object monitor)
+	at java.lang.Object.wait0(java.base@25.0.2/Native Method)
+	- waiting on <0x0000000703000888> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.Object.wait(java.base@25.0.2/Object.java:389)
+	at java.lang.Object.wait(java.base@25.0.2/Object.java:351)
+	at java.lang.ref.ReferenceQueue.remove0(java.base@25.0.2/ReferenceQueue.java:137)
+	at java.lang.ref.ReferenceQueue.remove(java.base@25.0.2/ReferenceQueue.java:215)
+	- locked <0x0000000703000888> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.Finalizer$FinalizerThread.run(java.base@25.0.2/Finalizer.java:165)
+
+"Signal Dispatcher" #16 [22784] daemon prio=9 os_prio=2 cpu=15.62ms elapsed=248.85s tid=0x000001f3f03a9440 nid=22784 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Attach Listener" #17 [15504] daemon prio=5 os_prio=2 cpu=0.00ms elapsed=248.85s tid=0x000001f3f03ab010 nid=15504 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Service Thread" #18 [12812] daemon prio=9 os_prio=0 cpu=0.00ms elapsed=248.85s tid=0x000001f3f03abbd0 nid=12812 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Monitor Deflation Thread" #19 [18656] daemon prio=9 os_prio=0 cpu=31.25ms elapsed=248.85s tid=0x000001f3f03b67b0 nid=18656 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"C2 CompilerThread0" #20 [24364] daemon prio=9 os_prio=2 cpu=2859.38ms elapsed=248.85s tid=0x000001f3f03b97e0 nid=24364 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"C1 CompilerThread0" #23 [6260] daemon prio=9 os_prio=2 cpu=765.62ms elapsed=248.85s tid=0x000001f3f03cd680 nid=6260 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"Notification Thread" #24 [22384] daemon prio=9 os_prio=0 cpu=0.00ms elapsed=248.83s tid=0x000001f3f7098600 nid=22384 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Common-Cleaner" #25 [2760] daemon prio=8 os_prio=1 cpu=0.00ms elapsed=248.83s tid=0x000001f3f709f280 nid=2760 in Object.wait()  [0x0000007f7c9ff000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait0(java.base@25.0.2/Native Method)
+	- waiting on <0x0000000703001098> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.Object.wait(java.base@25.0.2/Object.java:389)
+	at java.lang.ref.ReferenceQueue.remove0(java.base@25.0.2/ReferenceQueue.java:123)
+	at java.lang.ref.ReferenceQueue.remove(java.base@25.0.2/ReferenceQueue.java:201)
+	- locked <0x0000000703001098> (a java.lang.ref.ReferenceQueue$Lock)
+	at jdk.internal.ref.CleanerImpl.run(java.base@25.0.2/CleanerImpl.java:146)
+	at java.lang.Thread.runWith(java.base@25.0.2/Thread.java:1487)
+	at java.lang.Thread.run(java.base@25.0.2/Thread.java:1474)
+	at jdk.internal.misc.InnocuousThread.run(java.base@25.0.2/InnocuousThread.java:148)
+
+"GC Thread#7" os_prio=2 cpu=296.88ms elapsed=244.09s tid=0x000001f3f7a4b340 nid=19640 runnable  
+
+"GC Thread#6" os_prio=2 cpu=312.50ms elapsed=244.74s tid=0x000001f3f7a4bbe0 nid=19112 runnable  
+
+"GC Thread#3" os_prio=2 cpu=265.62ms elapsed=248.03s tid=0x000001f3f7a56040 nid=23008 runnable  
+
+"GC Thread#5" os_prio=2 cpu=296.88ms elapsed=248.03s tid=0x000001f3f7a48820 nid=21252 runnable  
+
+"GC Thread#4" os_prio=2 cpu=234.38ms elapsed=248.03s tid=0x000001f3f7a49960 nid=10432 runnable  
+
+"GC Thread#2" os_prio=2 cpu=281.25ms elapsed=248.03s tid=0x000001f3f79eef00 nid=18536 runnable  
+
+"GC Thread#1" os_prio=2 cpu=265.62ms elapsed=248.03s tid=0x000001f3f7a72510 nid=2268 runnable  
+
+"VM Thread" os_prio=2 cpu=671.88ms elapsed=248.86s tid=0x000001f3f0396850 nid=6356 runnable  
+
+"VM Periodic Task Thread" os_prio=2 cpu=15.62ms elapsed=248.86s tid=0x000001f3f03851f0 nid=17912 waiting on condition  
+
+"G1 Service" os_prio=2 cpu=78.12ms elapsed=248.87s tid=0x000001f3d356e260 nid=21608 runnable  
+
+"G1 Refine#0" os_prio=2 cpu=0.00ms elapsed=248.87s tid=0x000001f3f0252570 nid=14412 runnable  
+
+"G1 Conc#0" os_prio=2 cpu=0.00ms elapsed=248.88s tid=0x000001f3f0232dd0 nid=24112 runnable  
+
+"G1 Main Marker" os_prio=2 cpu=0.00ms elapsed=248.88s tid=0x000001f3d35325e0 nid=9320 runnable  
+
+"GC Thread#0" os_prio=2 cpu=359.38ms elapsed=248.88s tid=0x000001f3d351c550 nid=7944 runnable  
+
+JNI global refs: 8, weak refs: 0
+

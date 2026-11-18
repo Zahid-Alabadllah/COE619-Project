@@ -1,0 +1,5 @@
+{
+  "status": "aborted incomplete benchmark",
+  "reason": "Heavy IQR spends excessive time scanning growing host history under experimental demand placement; no completed batch CSV and no predictive energy conclusion",
+  "default": "Corrected standard benchmark completed independently"
+}

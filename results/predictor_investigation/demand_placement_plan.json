@@ -1,0 +1,12 @@
+{
+  "recorded_date": "2026-11-18",
+  "purpose": "Separate benchmark assumption test: allow physically feasible repacking based on current workload CPU demand instead of reserved VM capacity in the private post-placement CPU threshold check.",
+  "all_policies": "Identical mutable-map fix, stable ordering, resources, manifests, job length and destination-check rule for THR/IQR/predictive. Only the predictive model changes between model/control batches.",
+  "physical_admission": "Unchanged. CPU capacity, RAM, bandwidth and storage must still fit. Fifth VM remains rejected under the current eight-core/two-core-VM setup.",
+  "demand_formula": "Sum residents' current requested CPU fraction times nominal VM MIPS, excluding the temporary clone, plus original candidate's current requested demand; divide by physical host capacity. Use explicit current simulation timestamp, never future data.",
+  "controls": ["mean_guard", "online_guard", "control"],
+  "first_cases": "20110420 full-day manifests; already inspected data, therefore exploratory assumption test, not fresh validation",
+  "hypothesis": "May permit consolidation back into a four-VM host after load falls. Shared energy gains belong to the environment; predictive added value requires comparison against the disabled-forecast control.",
+  "invariants": ["Original dependency jar unchanged", "Exact one known placement site patched", "Runtime override cleared before/after helper runs", "PR2 PDF and baseline CSV unchanged"],
+  "scope": "Do not promote as a universal correction or rewrite historical results. Source overload checks and underload checks retain their earlier semantics."
+}

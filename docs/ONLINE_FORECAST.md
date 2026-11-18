@@ -1,5 +1,7 @@
 # Adaptive forecast investigation
 
+**Later energy correction:** unguarded instant-shutdown energy examples in this historical study need POWER_ACCOUNTING_ERRATUM.md. The current helper enables stable compatibility repair and migration-aware power protection by default; old reproduction settings differ.
+
 Recorded: 18 November 2026. Research only; PR2 is unchanged.
 
 The predictor can learn how much to trust its straight-line trend from its own earlier errors. If trends have been misleading, it moves closer to predicting that CPU stays unchanged. It uses only outcomes whose target time is strictly earlier than the new forecast's issue time. No future readings enter the forecast.

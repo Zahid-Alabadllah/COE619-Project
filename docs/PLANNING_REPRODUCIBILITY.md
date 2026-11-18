@@ -1,5 +1,7 @@
 # Stable planning investigation, 18 November 2026
 
+**Later energy correction:** recorded energy values below predate the power-state fix. Use POWER_ACCOUNTING_ERRATUM.md for corrected physical comparisons. Current helper defaults include stable planning and compatibility repair; historical opt-in tests remain preserved.
+
 Fixed input traces do not by themselves fix every simulator tie. A full batch and a standalone heavy run gave slightly different energy even when the predictor recorded zero predictive flags. Forecast-disabled controls confirmed that these small differences should not be credited to forecasting.
 
 Inspection of the official CloudSim Plus 8.0.0 source identified unordered planning collections. Overloaded hosts are collected into a set; HostSimple's generated hash includes the simulation object as well as host ID. The saved VM allocation and migration plans use HashMap. Restoration order can therefore change VM order and minimum-migration-time ties. This is a framework-ordering explanation, distinct from forecast accuracy.

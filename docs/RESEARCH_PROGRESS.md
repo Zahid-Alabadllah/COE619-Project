@@ -1,5 +1,7 @@
 # Research milestones recorded on 18 November 2026
 
+**Current priority correction:** POWER_ACCOUNTING_ERRATUM.md explains a confirmed off-host-CPU/energy omission. Current default and corrected candidate pass recorded power audits; old energy comparisons are historical, not current validated savings.
+
 These are actual completed checkpoints. Work completed early can be reported transparently in Term 262 after its calendar is supplied. Keep actual experiment/commit dates. PR2 and its completed Term 261 evidence remain frozen.
 
 | Milestone | Result | Evidence / Git checkpoint |
@@ -14,6 +16,8 @@ These are actual completed checkpoints. Work completed early can be reported tra
 | Complete-sequence screening | Compared all eligible targets, recent-pair regressions, VM aggregation and stronger mean/median/smoothing baselines; retained negative results | COMPLETE_FORECAST_STUDY.md; 7e36dd6 |
 | Simpler trend/mean selector | Beats OLS/persistence/half-trend in 16/16 tested real cases, adaptive trend in 15/16; final design's new validation is four 20-April groups | TREND_MEAN_FORECAST.md; mean_selector_summary.json |
 | Full-day and metric traversal | Longer jobs keep traces active; repaired quadratic linked-list traversal with unchanged stable CSV arithmetic | TREND_MEAN_FORECAST.md; full_day_initial_attempt and full_day_* runs |
+| Power-state correction | Incoming migrations no longer permit idle shutdown; default compatibility/stable repair enabled; 60 corrected runs pass 120 recorded power checks | POWER_ACCOUNTING_ERRATUM.md; power_audit_summary.json |
+| Retired placement prototype | Physical-admission unit tests passed; corrected heavy IQR run did not finish; no energy conclusion and no active placement option retained | DEMAND_PLACEMENT_EXPERIMENT.md; archived patch/partial evidence |
 
 The root COE619_Full_Context_v2.md retains complete migration history and an appended execution-log continuation. This versioned index records new milestones without duplicating historical administrative material.
 

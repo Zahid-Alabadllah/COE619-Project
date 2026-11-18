@@ -1,0 +1,33 @@
+{
+  "started_utc": "2026-11-17T23:18:36.8712255Z",
+  "completed_utc": "2026-11-17T23:18:51.4372506Z",
+  "day": "20110420",
+  "model": "control",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.disableForecast=true -Dcoe619.fullDay=true -Dcoe619.auditPower=true -Dcoe619.idleShutdownSeconds=0 -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110420/manifests",
+  "framework_fix": true,
+  "stable_planning": true,
+  "full_day": true,
+  "cloudlet_length_mi_per_pe": 1000000000,
+  "demand_placement": false,
+  "power_audit": true,
+  "idle_shutdown_seconds": 0,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "c6ac0739455ed508af74436dbd188c081fe2175f",
+  "code_status": [
+    " M scripts/framework/MutableMigrationMapPatch.java",
+    " M scripts/repair_cloudsim.ps1",
+    " M scripts/research/CapacityAdmissionCheck.java",
+    " M scripts/research/run_forecast_validation.ps1",
+    " M scripts/run.ps1",
+    " M src/main/java/kfupm/coe619/ConsolidationExperiment.java",
+    " M src/main/java/kfupm/coe619/ExperimentRunner.java",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/demand_placement_plan.json",
+    "?? results/predictor_investigation/online_holdout_20110420/demand_full_day_control/",
+    "?? results/predictor_investigation/online_holdout_20110420/demand_full_day_mean_guard/",
+    "?? results/predictor_investigation/online_holdout_20110420/demand_full_day_online_guard/",
+    "?? results/predictor_investigation/online_holdout_20110420/power_audit_deadline0/",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

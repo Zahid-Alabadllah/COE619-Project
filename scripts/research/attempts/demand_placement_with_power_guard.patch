@@ -1,0 +1,306 @@
+diff --git a/scripts/framework/MutableMigrationMapPatch.java b/scripts/framework/MutableMigrationMapPatch.java
+index a30b094..d152483 100644
+--- a/scripts/framework/MutableMigrationMapPatch.java
++++ b/scripts/framework/MutableMigrationMapPatch.java
+@@ -10,12 +10,19 @@ public class MutableMigrationMapPatch {
+   ClassWriter writer=new ClassWriter(ClassWriter.COMPUTE_MAXS);
+   int[] changes={0};
+   final boolean stable=args.length>2 && Boolean.parseBoolean(args[2]);
++  final boolean demand=args.length>3 && Boolean.parseBoolean(args[3]);
+   int[] orderedMaps={0};
+   int[] orderedHosts={0};
++  int[] demandSites={0};
+   new ClassReader(original).accept(new ClassVisitor(Opcodes.ASM9,writer) {
+    @Override public MethodVisitor visitMethod(int access,String name,String desc,String sig,String[] exceptions) {
+     MethodVisitor next=super.visitMethod(access,name,desc,sig,exceptions);
+     return new MethodVisitor(Opcodes.ASM9,next) {
++     private int temporaryLocal=-1;
++     @Override public void visitVarInsn(int opcode,int variable) {
++      if(demand && name.equals("isNotHostOverloadedAfterAllocation") && opcode==Opcodes.ASTORE && temporaryLocal<0) temporaryLocal=variable;
++      super.visitVarInsn(opcode,variable);
++     }
+      @Override public void visitCode() {
+       super.visitCode();
+       if(stable && name.equals("getMigrationMapFromOverloadedHosts")) {
+@@ -36,7 +43,17 @@ public class MutableMigrationMapPatch {
+       } else super.visitTypeInsn(opcode,type);
+      }
+      @Override public void visitMethodInsn(int opcode,String owner,String method,String descriptor,boolean itf) {
+-      if(name.equals("getMigrationMapFromOverloadedHosts") && opcode==Opcodes.INVOKESTATIC && owner.equals("java/util/Collections") && method.equals("emptyMap") && descriptor.equals("()Ljava/util/Map;")) {
++      if(demand && name.equals("isNotHostOverloadedAfterAllocation") && method.equals("getHostCpuPercentRequested") && descriptor.equals("(Lorg/cloudsimplus/hosts/Host;)D")) {
++       if(temporaryLocal!=3) throw new IllegalStateException("Unexpected temporary VM local: "+temporaryLocal);
++       // Replace [this, host] with [host, originalCandidate, temporaryCopy].
++       super.visitInsn(Opcodes.SWAP);
++       super.visitInsn(Opcodes.POP);
++       super.visitVarInsn(Opcodes.ALOAD,2);
++       super.visitVarInsn(Opcodes.ALOAD,temporaryLocal);
++       super.visitMethodInsn(Opcodes.INVOKESTATIC,"kfupm/coe619/ConsolidationExperiment","prospectiveCpuDemand",
++        "(Lorg/cloudsimplus/hosts/Host;Lorg/cloudsimplus/vms/Vm;Lorg/cloudsimplus/vms/Vm;)D",false);
++       demandSites[0]++;
++      } else if(name.equals("getMigrationMapFromOverloadedHosts") && opcode==Opcodes.INVOKESTATIC && owner.equals("java/util/Collections") && method.equals("emptyMap") && descriptor.equals("()Ljava/util/Map;")) {
+        final String map=stable?"java/util/LinkedHashMap":"java/util/HashMap";
+        super.visitTypeInsn(Opcodes.NEW,map);
+        super.visitInsn(Opcodes.DUP);
+@@ -51,9 +68,11 @@ public class MutableMigrationMapPatch {
+   },0);
+   if(changes[0]!=1) throw new IllegalStateException("Expected exactly one known defective return path, found "+changes[0]);
+   if(stable && (orderedMaps[0]!=4 || orderedHosts[0]!=1)) throw new IllegalStateException("Unexpected planning sites: maps="+orderedMaps[0]+" hosts="+orderedHosts[0]);
++  if(demand && demandSites[0]!=1) throw new IllegalStateException("Expected exactly one destination CPU site, found "+demandSites[0]);
+   Path output=Path.of(args[1]).resolve(entry);
+   Files.createDirectories(output.getParent());Files.write(output,writer.toByteArray());
+   System.out.println("Applied one mutable-map repair to generated runtime classes; original dependency jar unchanged.");
+   if(stable) System.out.println("Opt-in stable planning: four insertion-ordered maps and ID-sorted overloaded sources.");
++  if(demand) System.out.println("Opt-in benchmark: destination CPU threshold uses current cloudlet demand; physical admission unchanged.");
+  }
+ }
+diff --git a/scripts/repair_cloudsim.ps1 b/scripts/repair_cloudsim.ps1
+index 7adb3f6..e3e2aef 100644
+--- a/scripts/repair_cloudsim.ps1
++++ b/scripts/repair_cloudsim.ps1
+@@ -1,4 +1,4 @@
+-param([switch]$StablePlanning)
++param([switch]$StablePlanning, [switch]$DemandPlacement)
+ $ErrorActionPreference = "Stop"
+ $codeRoot = Split-Path $PSScriptRoot -Parent
+ Push-Location $codeRoot
+@@ -10,7 +10,7 @@ try {
+     $originalHash = (Get-FileHash -LiteralPath $simJar -Algorithm SHA256).Hash
+     & javac --release 17 -cp $asmJar -d target/framework-patch scripts/framework/MutableMigrationMapPatch.java
+     if ($LASTEXITCODE -ne 0) { throw "Patch tool compilation failed" }
+-    & java -cp "target/framework-patch;$asmJar" MutableMigrationMapPatch $simJar target/meeting-build/classes $StablePlanning.IsPresent.ToString().ToLowerInvariant()
++    & java -cp "target/framework-patch;$asmJar" MutableMigrationMapPatch $simJar target/meeting-build/classes $StablePlanning.IsPresent.ToString().ToLowerInvariant() $DemandPlacement.IsPresent.ToString().ToLowerInvariant()
+     if ($LASTEXITCODE -ne 0) { throw "CloudSim compatibility repair failed" }
+     if ((Get-FileHash -LiteralPath $simJar -Algorithm SHA256).Hash -ne $originalHash) { throw "Original dependency changed unexpectedly" }
+ } finally { Pop-Location }
+diff --git a/scripts/research/CapacityAdmissionCheck.java b/scripts/research/CapacityAdmissionCheck.java
+index 07b11dc..e826784 100644
+--- a/scripts/research/CapacityAdmissionCheck.java
++++ b/scripts/research/CapacityAdmissionCheck.java
+@@ -34,8 +34,10 @@ public final class CapacityAdmissionCheck {
+                 if (!host.isSuitableForVm(candidate)) throw new AssertionError("Fourth VM should physically fit");
+                 var check = VmAllocationPolicyMigrationAbstract.class.getDeclaredMethod("isNotHostOverloadedAfterAllocation", Host.class, Vm.class);
+                 check.setAccessible(true);
+-                if ((boolean) check.invoke(policy, host, candidate)) throw new AssertionError("Expected reserved-CPU threshold rejection");
+-                System.out.println("PASS: at zero actual CPU use, migration placement rejects a fourth VM at the 80% reserved-CPU threshold, although it physically fits.");
++                boolean allowed = (boolean) check.invoke(policy, host, candidate);
++                boolean expected = args.length > 0 && Boolean.parseBoolean(args[0]);
++                if (allowed != expected) throw new AssertionError("Unexpected fourth-VM migration eligibility: " + allowed);
++                System.out.println("PASS: idle fourth VM migration allowed=" + allowed + "; physical CPU admission is checked separately.");
+             }
+             if (!host.createVm(candidate).fully()) throw new AssertionError("Expected admission of VM " + i);
+         }
+@@ -48,9 +50,24 @@ public final class CapacityAdmissionCheck {
+         if (host.getCpuPercentUtilization() != 0) throw new AssertionError("No cloudlet CPU work expected");
+         System.out.println("PASS: four idle VMs reserve all 8000 host MIPS; fifth rejected by CPU admission despite spare RAM/BW.");
+         System.out.println("Trace CPU usage and reserved virtual CPU capacity are different quantities.");
++        host.destroyVm(host.getVmList().get(0));
++        Vm temporary = demandVm(10, .9);
++        if (!host.createTemporaryVm(temporary).fully()) throw new AssertionError("Temporary test VM should fit");
++        host.destroyVm(host.getVmList().get(0));
++        if (!host.createVm(demandVm(11, .6)).fully()) throw new AssertionError("Resident demand test VM should fit");
++        double projected = ConsolidationExperiment.prospectiveCpuDemand(host, demandVm(12, .4), temporary);
++        if (Math.abs(projected - .25) > 1e-12) throw new AssertionError("Expected resident/candidate demand without clone double-count: " + projected);
++        host.destroyTemporaryVm(temporary);
++        System.out.println("PASS: 60% resident plus 40% candidate demand uses 25% of host capacity; temporary clone excluded.");
+     }
+ 
+     private static Vm vm(int id) {
+         return new VmSimple(id, 1000, 2).setRam(2048).setBw(1000).setSize(10000);
+     }
++
++    private static Vm demandVm(int id, double usage) {
++        return new VmSimple(id, 1000, 2) {
++            @Override public double getCpuPercentRequested(double time) { return usage; }
++        }.setRam(2048).setBw(1000).setSize(10000);
++    }
+ }
+diff --git a/scripts/research/run_forecast_validation.ps1 b/scripts/research/run_forecast_validation.ps1
+index b532eec..7221c89 100644
+--- a/scripts/research/run_forecast_validation.ps1
++++ b/scripts/research/run_forecast_validation.ps1
+@@ -3,7 +3,11 @@ param(
+     [ValidateSet('online','half','control','online_guard','mean_guard')][string]$Model = 'online',
+     [string]$Label = '',
+     [switch]$StablePlanning,
+-    [switch]$FullDay
++    [switch]$FullDay,
++    [switch]$DemandPlacement,
++    [switch]$AuditPower,
++    [ValidateRange(0,86400)][int]$IdleShutdownSeconds=0,
++    [switch]$PowerGuard=$true
+ )
+ $ErrorActionPreference = 'Stop'
+ $codeRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+@@ -23,6 +27,9 @@ try {
+     if ($Model -in @('online_guard','mean_guard')) { $properties += ' -Dcoe619.planningHistoryGuard=true' }
+     if ($Model -eq 'mean_guard') { $properties += ' -Dcoe619.meanForecast=true' }
+     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
++    if ($AuditPower) { $properties += ' -Dcoe619.auditPower=true' }
++    $properties += " -Dcoe619.idleShutdownSeconds=$IdleShutdownSeconds"
++    $properties += " -Dcoe619.powerGuard=$($PowerGuard.IsPresent.ToString().ToLowerInvariant())"
+     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
+     $csvBefore = (Get-FileHash -LiteralPath results/experiments.csv -Algorithm SHA256).Hash
+     $reportBefore = (Get-FileHash -LiteralPath docs/progress_report_2/PR2_Progress_Report_II.pdf -Algorithm SHA256).Hash
+@@ -30,7 +37,7 @@ try {
+     New-Item -ItemType Directory -Path target -Force | Out-Null
+     $started = (Get-Date).ToUniversalTime().ToString('o')
+     $env:JAVA_TOOL_OPTIONS = $properties
+-    & ./scripts/run.ps1 -FrameworkFix -StablePlanning:$StablePlanning -OutputDir $output *> $log
++    & ./scripts/run.ps1 -FrameworkFix -StablePlanning:$StablePlanning -DemandPlacement:$DemandPlacement -OutputDir $output *> $log
+     if ($LASTEXITCODE -ne 0) { throw 'Simulation failed; retain target log for diagnosis' }
+     if ((Get-FileHash -LiteralPath results/experiments.csv -Algorithm SHA256).Hash -ne $csvBefore) { throw 'Frozen CSV changed' }
+     if ((Get-FileHash -LiteralPath docs/progress_report_2/PR2_Progress_Report_II.pdf -Algorithm SHA256).Hash -ne $reportBefore) { throw 'Frozen PR2 changed' }
+@@ -38,6 +45,9 @@ try {
+         started_utc=$started; completed_utc=(Get-Date).ToUniversalTime().ToString('o')
+         day=$Day; model=$Model; java_options=$properties; framework_fix=$true; stable_planning=$StablePlanning.IsPresent; full_day=$FullDay.IsPresent
+         cloudlet_length_mi_per_pe=$(if ($FullDay) { 1000000000 } else { 20000000 })
++        demand_placement=$DemandPlacement.IsPresent
++        power_audit=$AuditPower.IsPresent; idle_shutdown_seconds=$IdleShutdownSeconds
++        power_guard=$PowerGuard.IsPresent
+         frozen_csv_sha256=$csvBefore; frozen_pr2_sha256=$reportBefore
+         code_commit=(& git rev-parse HEAD); code_status=(@(& git status --short))
+     }
+diff --git a/scripts/run.ps1 b/scripts/run.ps1
+index 95099d6..ff438f8 100644
+--- a/scripts/run.ps1
++++ b/scripts/run.ps1
+@@ -1,20 +1,23 @@
+-param([switch]$FrameworkFix, [switch]$StablePlanning, [string]$Scenario = "", [string]$OutputDir = "results/demo")
++param([switch]$FrameworkFix=$true, [switch]$StablePlanning=$true, [switch]$DemandPlacement, [switch]$PrepareDebug, [string]$Scenario = "", [string]$OutputDir = "results/demo")
+ $ErrorActionPreference = "Stop"
++$debugReady = $false
+ Push-Location (Split-Path $PSScriptRoot -Parent)
+ try {
+     if ($StablePlanning -and !$FrameworkFix) { throw 'StablePlanning requires the explicit FrameworkFix research run' }
++    if ($DemandPlacement -and (!$FrameworkFix -or !$StablePlanning)) { throw 'DemandPlacement requires FrameworkFix and StablePlanning' }
+     $jdk = Join-Path $env:USERPROFILE ".jdk/jdk-25.0.2"
+     if (Test-Path $jdk) { $env:JAVA_HOME = $jdk; $env:Path = "$jdk/bin;$env:Path" }
+     & python (Join-Path $PSScriptRoot "framework/clear_patch.py")
+     if ($LASTEXITCODE -ne 0) { throw "Cannot clear stale framework override" }
+     & mvn -q compile "-Dcoe619.build.directory=target/meeting-build" dependency:build-classpath "-Dmdep.outputFile=target/meeting-build/classpath.txt"
+     if ($LASTEXITCODE -ne 0) { throw "Maven failed" }
+-    if ($FrameworkFix) { & (Join-Path $PSScriptRoot "repair_cloudsim.ps1") -StablePlanning:$StablePlanning }
++    if ($FrameworkFix) { & (Join-Path $PSScriptRoot "repair_cloudsim.ps1") -StablePlanning:$StablePlanning -DemandPlacement:$DemandPlacement }
+     $cp = "target/meeting-build/classes;" + (Get-Content target/meeting-build/classpath.txt -Raw).Trim()
++    if ($PrepareDebug) { $debugReady = $true; return }
+     if ($Scenario) { & java -cp $cp kfupm.coe619.ExperimentRunner $Scenario --output $OutputDir }
+     else { & java -cp $cp kfupm.coe619.ExperimentRunner --output $OutputDir }
+     if ($LASTEXITCODE -ne 0) { throw "Java failed" }
+ } finally {
+-    & python (Join-Path $PSScriptRoot "framework/clear_patch.py")
++    if (!$debugReady) { & python (Join-Path $PSScriptRoot "framework/clear_patch.py") }
+     Pop-Location
+ }
+diff --git a/src/main/java/kfupm/coe619/ConsolidationExperiment.java b/src/main/java/kfupm/coe619/ConsolidationExperiment.java
+index 68a0f04..b67823d 100644
+--- a/src/main/java/kfupm/coe619/ConsolidationExperiment.java
++++ b/src/main/java/kfupm/coe619/ConsolidationExperiment.java
+@@ -56,6 +56,38 @@ public final class ConsolidationExperiment {
+ 
+     public enum Policy { THR, IQR, LR }
+ 
++    /** Do not power down an empty destination while a VM is on its way to it. */
++    static final class MigrationAwareHost extends HostSimple {
++        MigrationAwareHost(long ram, long bandwidth, long storage, List<Pe> pes) {
++            super(ram, bandwidth, storage, pes);
++        }
++
++        @Override
++        public double updateProcessing(final double time) {
++            final double deadline = getIdleShutdownDeadline();
++            final boolean protect = Boolean.parseBoolean(System.getProperty("coe619.powerGuard", "true"))
++                && !getVmsMigratingIn().isEmpty();
++            if (protect) setIdleShutdownDeadline(-1);
++            try {
++                return super.updateProcessing(time);
++            } finally {
++                if (protect) setIdleShutdownDeadline(deadline);
++            }
++        }
++    }
++
++    /** Opt-in benchmark helper: CPU demand after placement, with physical admission unchanged. */
++    public static double prospectiveCpuDemand(final Host host, final Vm candidate, final Vm temporaryCopy) {
++        final double capacity = host.getTotalMipsCapacity();
++        if (capacity <= 0) throw new IllegalStateException("Destination has no CPU capacity");
++        final double now = host.getSimulation().clock();
++        double demand = candidate.getCpuPercentRequested(now) * candidate.getTotalMipsCapacity();
++        for (final Vm resident : host.getVmList()) {
++            if (resident != temporaryCopy) demand += resident.getCpuPercentRequested(now) * resident.getTotalMipsCapacity();
++        }
++        return demand / capacity;
++    }
++
+     public static final double UPPER_THRESHOLD = 0.80;
+     public static final double IQR_SAFETY = 0.75;
+     public static final int LR_WINDOW = 10;
+@@ -127,6 +159,7 @@ public final class ConsolidationExperiment {
+     private final Map<Vm, Host> migrationSource = new HashMap<>();
+     private final Map<Vm, Double> migrationTime = new HashMap<>();
+     private int migrations;
++    private int inactiveWorkSamples;
+ 
+     // Demand sampling (once per scheduling interval): MIPS x seconds summed over all VMs.
+     private double demandMipsSeconds;
+@@ -178,6 +211,10 @@ public final class ConsolidationExperiment {
+         if (created != n) {
+             throw new IllegalStateException("Only " + created + "/" + n + " VMs were created");
+         }
++        if (Boolean.getBoolean("coe619.auditPower")) {
++            System.out.printf(Locale.ROOT, "POWER_AUDIT scenario=%s policy=%s inactiveWorkSamples=%d%n",
++                config.scenario(), config.policy(), inactiveWorkSamples);
++        }
+         return computeResult(dc, cloudlets);
+     }
+ 
+@@ -199,6 +236,14 @@ public final class ConsolidationExperiment {
+             }
+             final double demand = vm.getCpuPercentRequested() * vm.getTotalMipsCapacity();
+             final double allocated = vm.getHost().getVmScheduler().getTotalAllocatedMipsForVm(vm);
++            if (Boolean.getBoolean("coe619.auditPower") && !vm.getHost().isActive() && demand > 1e-9 && allocated > 1e-9) {
++                inactiveWorkSamples++;
++                if (inactiveWorkSamples <= 8) {
++                    System.out.printf(Locale.ROOT,
++                        "POWER_INVARIANT time=%.3f host=%d vm=%d demand=%.3f allocated=%.3f%n",
++                        now, vm.getHost().getId(), vm.getId(), demand, allocated);
++                }
++            }
+             demandMipsSeconds += demand * SCHEDULING_INTERVAL;
+             unmetMipsSeconds += Math.max(0, demand - allocated) * SCHEDULING_INTERVAL;
+         }
+@@ -209,9 +254,15 @@ public final class ConsolidationExperiment {
+         double slatahSum = 0;
+         int activeHosts = 0;
+         double activeSeconds = 0;
++        int inactiveCpuEntries = 0;
+         for (final Host host : hosts) {
+             // The framework exposes a LinkedList: indexed access would be quadratic.
+             final List<HostStateHistoryEntry> h = new ArrayList<>(host.getStateHistory());
++            if (Boolean.getBoolean("coe619.auditPower")) {
++                for (final HostStateHistoryEntry entry : h) {
++                    if (!entry.active() && entry.allocatedMips() > 1e-9) inactiveCpuEntries++;
++                }
++            }
+             double active = 0;
+             double saturated = 0;
+             for (int i = 1; i < h.size(); i++) {
+@@ -269,6 +320,10 @@ public final class ConsolidationExperiment {
+ 
+         final int finished = (int) broker.getCloudletFinishedList().stream()
+             .filter(c -> c.getStatus() == Cloudlet.Status.SUCCESS).count();
++        if (Boolean.getBoolean("coe619.auditPower")) {
++            System.out.printf(Locale.ROOT, "POWER_HISTORY_AUDIT scenario=%s policy=%s inactiveCpuEntries=%d%n",
++                config.scenario(), config.policy(), inactiveCpuEntries);
++        }
+         return new Result(config, energy, slatah, pdm, slav, energyKwh * slav, unmet, migrations,
+             activeSeconds / 3600.0, broker.getVmCreatedList().size(), finished,
+             simulation.clock(), predictions, triggers);
+@@ -280,7 +335,7 @@ public final class ConsolidationExperiment {
+             for (int j = 0; j < HOST_PES; j++) {
+                 pes.add(new PeSimple(HOST_MIPS));
+             }
+-            final Host host = new HostSimple(HOST_RAM, HOST_BW, HOST_STORAGE, pes);
++            final Host host = new MigrationAwareHost(HOST_RAM, HOST_BW, HOST_STORAGE, pes);
+             host.setRamProvisioner(new HostLocalResourceProvisioner(host.getRamProvisioner().getPmResource()));
+             host.setBwProvisioner(new HostLocalResourceProvisioner(host.getBwProvisioner().getPmResource()));
+             host.setVmScheduler(new VmSchedulerTimeShared());

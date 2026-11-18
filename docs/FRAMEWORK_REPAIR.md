@@ -1,5 +1,7 @@
 # Framework repair and fresh-day validation
 
+**Later correction:** see POWER_ACCOUNTING_ERRATUM.md before using historical energy examples. The current run helper enables this repair/stable planning by default after power-corrected paths exposed the old defect. Earlier opt-in descriptions below record that stage of the investigation.
+
 ## Repair
 
 CloudSim Plus 8.0.0 returns Collections.emptyMap() in getMigrationMapFromOverloadedHosts when no host is overloaded. Its underloaded-host phase may then putAll into that immutable map. This was verified against the locally cached official 8.0.0 source jar and the original runtime class.

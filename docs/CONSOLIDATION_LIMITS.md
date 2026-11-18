@@ -1,5 +1,7 @@
 # Why better forecasts do not automatically save energy
 
+**Later findings:** POWER_ACCOUNTING_ERRATUM.md corrects the instant-shutdown power race and supersedes historical energy examples. A separately attempted demand-placement prototype was retired after an incomplete/stalled IQR benchmark; see DEMAND_PLACEMENT_EXPERIMENT.md. Its code is not an active runner option.
+
 Recorded 18 November 2026. These are implementation findings, not changes to PR2.
 
 Our scheduler reserves each VM's full virtual CPU capacity when deciding whether it fits. CPU usage in a workload trace is a different quantity. A mostly idle VM still reserves its virtual CPUs.

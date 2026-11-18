@@ -4,14 +4,17 @@ MSc HPCC project by Zahid Alabadllah (202045160), KFUPM. Advisor: Dr. Mohamed Fa
 
 We evaluate whether simple CPU forecasting improves energy/performance trade-offs. Predictive energy superiority has not been demonstrated. Later forecast-accuracy improvements are recorded separately. Reactive THR warns at 80%, not 100%.
 
+**Energy correction, 18 November:** instant shutdown could mark a destination off while its arriving VM received CPU. The current harness prevents this. Historical PR2 energy comparisons need the [power-accounting erratum](docs/POWER_ACCOUNTING_ERRATUM.md); preserved CSVs are not silently updated.
+
 ## Start here
 
 - [Project Understanding Guide](docs/concepts_guide/COE619_Project_Concepts_And_Methods_Guide.pdf): definitions, simple formulas, evidence and limitations.
 - [Corrected PR2](docs/progress_report_2/PR2_Progress_Report_II.pdf)
-- [Results](results/summary.md), generated from [raw runs](results/experiments.csv).
+- [Corrected baseline](results/predictor_investigation/corrected_default_power_audit/summary.md) and [corrected research candidate](results/predictor_investigation/corrected_mean_power_audit/summary.md).
+- [Historical PR2 summary](results/summary.md) and [original CSV](results/experiments.csv), preserved with the energy qualification above.
 - [Subsequent research progress](docs/RESEARCH_PROGRESS.md): dated milestones, improved forecasting, planning fixes and remaining energy limitations. PR2 and its evidence remain frozen.
 - [Current research predictor](docs/TREND_MEAN_FORECAST.md): simple trend-versus-average selection, tested gains, exceptions and reproduction.
-- PR1 and older handoffs describe historical versions; current code and corrected PR2 take precedence.
+- PR1/PR2 and older handoffs describe historical versions; current code and the research errata take precedence for behavior and energy interpretation.
 
 ## Code map
 
@@ -26,7 +29,7 @@ We evaluate whether simple CPU forecasting improves energy/performance trade-off
 
 Run `./scripts/run.ps1` for all five fixed cases, or `./scripts/run.ps1 -Scenario diurnal` / `-Scenario heavy` / `-Scenario real_a` for one case. Each compares THR, IQR and LR. There is no seed setting or averaging across workloads.
 
-Demo output is written to results/demo. Add `-OutputDir results` only when deliberately regenerating the report evidence. JDK 25 is used locally; Maven targets Java 17. The helper uses target/meeting-build to avoid IDE output collisions.
+Demo output is written to results/demo. Preserve frozen report evidence until an explicitly requested report revision. JDK 25 is used locally; Maven targets Java 17. The helper uses target/meeting-build and enables the compatibility repair/stable planning automatically. The migration-aware power guard is on by default.
 
 ## Fixed workload cases
 
