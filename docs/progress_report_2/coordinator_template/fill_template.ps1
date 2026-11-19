@@ -1,7 +1,7 @@
 $ErrorActionPreference='Stop'
 $root='C:\Users\zahed\OneDrive - KFUPM\MX HPCC\T261\COE619'
 $stage=Join-Path $root 'COE619-Project-Code\target\pr2-template'
-$out=Join-Path $root 'Course_Documents\05_Progress_Report_II\PR2_Coordinator_Template.docx'
+$out=Join-Path $root 'Course_Documents\05_Progress_Report_II\PR2_202045160.docx'
 $w=New-Object -ComObject Word.Application
 $w.Visible=$false
 $w.DisplayAlerts=0
@@ -50,6 +50,7 @@ Prepared the concepts guide and advisor demonstration. The initial predictor sho
  "Saved $out; pages=$($d.ComputeStatistics(2))"
  $d.Close(0)
 } finally { $w.Quit() }
+
 
 
 
