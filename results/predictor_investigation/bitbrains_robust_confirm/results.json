@@ -1,0 +1,412 @@
+{
+  "summary": {
+    "persistence": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.25715508420331035,
+      "rmse_pp": 1.4983128833105561
+    },
+    "ols_clipped": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.4069333687185611,
+      "rmse_pp": 1.981558164773615
+    },
+    "adaptive_clipped": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.28884152129341645,
+      "rmse_pp": 1.477692350334007
+    },
+    "mean_switching_clipped": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.2651998909835349,
+      "rmse_pp": 1.427299660106236
+    },
+    "local_level": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.30329857190239917,
+      "rmse_pp": 1.636382309599771
+    },
+    "robust_pairs": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.22597369389275093,
+      "rmse_pp": 1.5075157797819463
+    },
+    "robust_or_persistence": {
+      "n": 5282,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 5282,
+      "mae_pp": 0.2226928107962323,
+      "rmse_pp": 1.4817181550429335
+    }
+  },
+  "hosts": [
+    {
+      "traces": [
+        "fastStorage/2013-8/385.csv",
+        "fastStorage/2013-8/386.csv",
+        "fastStorage/2013-8/387.csv",
+        "fastStorage/2013-8/388.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.502316718054128,
+        "ols_clipped": 0.9359779319401621,
+        "adaptive_clipped": 0.602630329463512,
+        "mean_switching_clipped": 0.65611012300132,
+        "local_level": 0.6808720572918987,
+        "robust_pairs": 0.5026463671133513,
+        "robust_or_persistence": 0.5500469127241282
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/389.csv",
+        "fastStorage/2013-8/390.csv",
+        "fastStorage/2013-8/391.csv",
+        "fastStorage/2013-8/392.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 1.433442531688935,
+        "ols_clipped": 3.12657688135206,
+        "adaptive_clipped": 1.4805369919668223,
+        "mean_switching_clipped": 1.4872456904439697,
+        "local_level": 2.1470894108524043,
+        "robust_pairs": 1.7277544282729411,
+        "robust_or_persistence": 1.5427155634350684
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/393.csv",
+        "fastStorage/2013-8/394.csv",
+        "fastStorage/2013-8/396.csv",
+        "fastStorage/2013-8/397.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.410596522781775,
+        "ols_clipped": 0.49421462829736224,
+        "adaptive_clipped": 0.47419421777342863,
+        "mean_switching_clipped": 0.38184778392694635,
+        "local_level": 0.40529206440933,
+        "robust_pairs": 0.2841792015423358,
+        "robust_or_persistence": 0.296761446586755
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/399.csv",
+        "fastStorage/2013-8/400.csv",
+        "fastStorage/2013-8/401.csv",
+        "fastStorage/2013-8/402.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.32340698869475865,
+        "ols_clipped": 0.396111111111111,
+        "adaptive_clipped": 0.373394460010606,
+        "mean_switching_clipped": 0.310849807669914,
+        "local_level": 0.33069169700124923,
+        "robust_pairs": 0.22556714888166776,
+        "robust_or_persistence": 0.2301776415912586
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/403.csv",
+        "fastStorage/2013-8/404.csv",
+        "fastStorage/2013-8/405.csv",
+        "fastStorage/2013-8/406.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.3919728502911961,
+        "ols_clipped": 0.49982057211373787,
+        "adaptive_clipped": 0.47659445041300075,
+        "mean_switching_clipped": 0.39786876604377247,
+        "local_level": 0.40004495242631444,
+        "robust_pairs": 0.26564589331608923,
+        "robust_or_persistence": 0.2785343679533675
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/407.csv",
+        "fastStorage/2013-8/408.csv",
+        "fastStorage/2013-8/411.csv",
+        "fastStorage/2013-8/412.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.3972100890716004,
+        "ols_clipped": 0.4886583590270635,
+        "adaptive_clipped": 0.4597797404027317,
+        "mean_switching_clipped": 0.37405452216210666,
+        "local_level": 0.3818443138965974,
+        "robust_pairs": 0.2419652346232036,
+        "robust_or_persistence": 0.25165910178674855
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/413.csv",
+        "fastStorage/2013-8/414.csv",
+        "fastStorage/2013-8/415.csv",
+        "fastStorage/2013-8/416.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.38750428228845474,
+        "ols_clipped": 0.4877109740778805,
+        "adaptive_clipped": 0.45623805651651567,
+        "mean_switching_clipped": 0.3708963049107538,
+        "local_level": 0.37931793584830437,
+        "robust_pairs": 0.25446412273494223,
+        "robust_or_persistence": 0.2550683024507302
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/417.csv",
+        "fastStorage/2013-8/418.csv",
+        "fastStorage/2013-8/420.csv",
+        "fastStorage/2013-8/421.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.4339756766015759,
+        "ols_clipped": 0.5187718396711202,
+        "adaptive_clipped": 0.508600440479366,
+        "mean_switching_clipped": 0.40164856676039334,
+        "local_level": 0.4116754451741997,
+        "robust_pairs": 0.2568046101765128,
+        "robust_or_persistence": 0.2572848375367013
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/422.csv",
+        "fastStorage/2013-8/423.csv",
+        "fastStorage/2013-8/424.csv",
+        "fastStorage/2013-8/425.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.07769570058239118,
+        "ols_clipped": 0.09057839442731522,
+        "adaptive_clipped": 0.08378363592992412,
+        "mean_switching_clipped": 0.07838924827348977,
+        "local_level": 0.07464639428441144,
+        "robust_pairs": 0.05886088236280614,
+        "robust_or_persistence": 0.06942424946409738
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/426.csv",
+        "fastStorage/2013-8/427.csv",
+        "fastStorage/2013-8/428.csv",
+        "fastStorage/2013-8/429.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.08292651593011299,
+        "ols_clipped": 0.0940648909443874,
+        "adaptive_clipped": 0.08659412654872402,
+        "mean_switching_clipped": 0.08167374037769075,
+        "local_level": 0.07899510151587529,
+        "robust_pairs": 0.065625352241019,
+        "robust_or_persistence": 0.07667724564645705
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/430.csv",
+        "fastStorage/2013-8/431.csv",
+        "fastStorage/2013-8/432.csv",
+        "fastStorage/2013-8/433.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.07044364508393285,
+        "ols_clipped": 0.08545463629096728,
+        "adaptive_clipped": 0.07414603579979193,
+        "mean_switching_clipped": 0.0744960423732011,
+        "local_level": 0.07140753747732381,
+        "robust_pairs": 0.05866192493102538,
+        "robust_or_persistence": 0.06419896909702699
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/434.csv",
+        "fastStorage/2013-8/435.csv",
+        "fastStorage/2013-8/436.csv",
+        "fastStorage/2013-8/437.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.07735311750599518,
+        "ols_clipped": 0.08345623501199037,
+        "adaptive_clipped": 0.08031813703935482,
+        "mean_switching_clipped": 0.07270375638355894,
+        "local_level": 0.07132364457868541,
+        "robust_pairs": 0.056923838222649806,
+        "robust_or_persistence": 0.06442705045416351
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/438.csv",
+        "fastStorage/2013-8/439.csv",
+        "fastStorage/2013-8/440.csv",
+        "fastStorage/2013-8/441.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.03819266015758819,
+        "ols_clipped": 0.05373212144570063,
+        "adaptive_clipped": 0.04114879343122476,
+        "mean_switching_clipped": 0.039936544285036076,
+        "local_level": 0.04003968314594313,
+        "robust_pairs": 0.03891531231187644,
+        "robust_or_persistence": 0.03905509722062719
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/442.csv",
+        "fastStorage/2013-8/443.csv",
+        "fastStorage/2013-8/444.csv",
+        "fastStorage/2013-8/445.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.03466726618705032,
+        "ols_clipped": 0.05063349320543563,
+        "adaptive_clipped": 0.037807111966201803,
+        "mean_switching_clipped": 0.03827240701404085,
+        "local_level": 0.0364403114031307,
+        "robust_pairs": 0.03656728903429606,
+        "robust_or_persistence": 0.03426640701919973
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/446.csv",
+        "fastStorage/2013-8/447.csv",
+        "fastStorage/2013-8/448.csv",
+        "fastStorage/2013-8/449.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.03839928057553955,
+        "ols_clipped": 0.05845123900879295,
+        "adaptive_clipped": 0.04088674349370459,
+        "mean_switching_clipped": 0.04275838480920627,
+        "local_level": 0.04238007027802245,
+        "robust_pairs": 0.041019227011936645,
+        "robust_or_persistence": 0.04011271652247384
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/450.csv",
+        "fastStorage/2013-8/451.csv",
+        "fastStorage/2013-8/452.csv",
+        "fastStorage/2013-8/453.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.060386690647481985,
+        "ols_clipped": 0.08179756195043973,
+        "adaptive_clipped": 0.06746880887626792,
+        "mean_switching_clipped": 0.07227154347943537,
+        "local_level": 0.06525025269148459,
+        "robust_pairs": 0.05239390894766666,
+        "robust_or_persistence": 0.055028440930478324
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/454.csv",
+        "fastStorage/2013-8/455.csv",
+        "fastStorage/2013-8/456.csv",
+        "fastStorage/2013-8/457.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.03487709832134292,
+        "ols_clipped": 0.056402877697841795,
+        "adaptive_clipped": 0.03776704809780298,
+        "mean_switching_clipped": 0.041734110793663175,
+        "local_level": 0.04036462091004718,
+        "robust_pairs": 0.037610949292068124,
+        "robust_or_persistence": 0.03886891489607478
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/458.csv",
+        "fastStorage/2013-8/459.csv",
+        "fastStorage/2013-8/461.csv",
+        "fastStorage/2013-8/462.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.057808752997601916,
+        "ols_clipped": 0.0823541167066348,
+        "adaptive_clipped": 0.07222692605831936,
+        "mean_switching_clipped": 0.08088866366438317,
+        "local_level": 0.07245471219029946,
+        "robust_pairs": 0.055605838374868065,
+        "robust_or_persistence": 0.05574649231963808
+      }
+    },
+    {
+      "traces": [
+        "fastStorage/2013-8/463.csv",
+        "fastStorage/2013-8/464.csv",
+        "fastStorage/2013-8/465.csv",
+        "fastStorage/2013-8/466.csv"
+      ],
+      "count": 278,
+      "mae_pp": {
+        "persistence": 0.032770212401507355,
+        "ols_clipped": 0.0469661413726162,
+        "adaptive_clipped": 0.03387285030761975,
+        "mean_switching_clipped": 0.03515192231427502,
+        "local_level": 0.03254266077007222,
+        "robust_pairs": 0.032288654571024054,
+        "robust_or_persistence": 0.031109647493456304
+      }
+    }
+  ],
+  "scope": "First model-outcome use of disjoint VM block within already inspected provider; not a new provider, energy simulation or statistical-representativeness claim"
+}

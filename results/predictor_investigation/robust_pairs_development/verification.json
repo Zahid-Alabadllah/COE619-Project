@@ -1,0 +1,7 @@
+{
+  "exact_line": true,
+  "constant_previous_cpu": true,
+  "warmup_persistence": true,
+  "single_outlier": true,
+  "future_perturbation_unchanged_earlier_predictions": 191
+}

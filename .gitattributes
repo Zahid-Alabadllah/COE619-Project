@@ -2,3 +2,6 @@
 results/predictor_investigation/**/traces/* -text
 
 results/predictor_investigation/absolute_blend_development/frozen_forecast_source.py.txt -text
+
+results/predictor_investigation/robust_pairs_development/frozen_forecast_source.py.txt -text
+results/predictor_investigation/bitbrains_robust_*/*_source.py.txt -text

@@ -1,0 +1,81 @@
+"""Frozen robust-pair forecast tested on the next untouched Bitbrains VM block."""
+from datetime import datetime, timezone
+import argparse
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+import sys
+sys.dont_write_bytecode = True
+from evaluate_robust_pairs import CODE, predictions, REFERENCE
+import validate_bitbrains
+
+LABEL = 'bitbrains_robust_reserved'
+SKIP = 256
+NAMES = ('persistence', 'ols_clipped', 'adaptive_clipped', 'mean_switching_clipped',
+         'local_level', 'robust_pairs', 'robust_or_persistence')
+
+
+def evaluate(groups):
+    totals = {m: dict(n=0, absolute=0., square=0., tp=0, fp=0, fn=0, tn=0) for m in NAMES}
+    hosts = []
+    for members, series in groups:
+        own = {m: [] for m in NAMES}
+        for target, actual, models in predictions(series):
+            for name in NAMES:
+                estimate = models[name]
+                error = estimate-actual
+                row = totals[name]
+                row['n'] += 1; row['absolute'] += abs(error); row['square'] += error*error
+                row['tp' if estimate>.8 and actual>.8 else 'fp' if estimate>.8 else 'fn' if actual>.8 else 'tn'] += 1
+                own[name].append(abs(error))
+        hosts.append(dict(traces=members, count=len(own[NAMES[0]]),
+                          mae_pp={m:100*sum(e)/len(e) for m,e in own.items()}))
+    for row in totals.values():
+        row['mae_pp'] = 100*row.pop('absolute')/row['n']
+        row['rmse_pp'] = 100*math.sqrt(row.pop('square')/row['n'])
+    return dict(summary=totals, hosts=hosts)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--label', default=LABEL)
+    parser.add_argument('--skip-files', type=int, default=SKIP)
+    args = parser.parse_args()
+    assert re.fullmatch('[a-z0-9_]+', args.label)
+    assert args.skip_files >= SKIP and args.skip_files % 128 == 0
+    root = CODE/'results/predictor_investigation'/args.label
+    root.mkdir(parents=True, exist_ok=True)
+    assert not (root/'plan.json').exists(), 'Do not overwrite frozen study'
+    source_files = [Path(__file__), Path(validate_bitbrains.__file__),
+                    CODE/'scripts/research/evaluate_robust_pairs.py',
+                    CODE/'scripts/research/validate_complete_sequences.py']
+    sources = {}
+    for path in source_files:
+        data = path.read_bytes()
+        sources[path.name] = hashlib.sha256(data).hexdigest()
+        (root/(path.stem+'_source.py.txt')).write_bytes(data)
+    plan = dict(recorded_utc=datetime.now(timezone.utc).isoformat(),
+                scope='First model-outcome use of disjoint VM block within already inspected provider; not a new provider, energy simulation or statistical-representativeness claim',
+                primary_candidate='robust_or_persistence', primary_metric='MAE',
+                secondary_metrics='RMSE, per-host MAE, 80% warnings; report trade-offs even when primary improves',
+                baselines=list(NAMES), skip_numeric_files=args.skip_files,
+                selection='Next128 numeric VM IDs after the declared skip, first76 eligible on earliest common complete UTC day; timestamp/completeness selection only',
+                fixed_design='20 earlier resolved current-to-next pairs, min10; median pairwise slope projected0..1; joint median intercept; no varying x gives median next CPU; prediction projected0..1. Selector20 earlier absolute errors/min10; persistence warmup/tie. Strict target<issue learning.',
+                reference=REFERENCE, source='https://atlarge-research.com/gwa-t-12/',
+                archive_sha256=validate_bitbrains.DIGEST,
+                attribution='Bitbrains IT Services; Grid Workloads Archive; Shen, van Beek and Iosup, CCGrid2015',
+                frozen_source_sha256=sources)
+    (root/'plan.json').write_text(json.dumps(plan,indent=2)+'\n')
+    validate_bitbrains.evaluate = evaluate
+    sys.argv = [sys.argv[0], '--label', args.label, '--skip-files', str(args.skip_files)]
+    validate_bitbrains.main()
+    path = root/'results.json'
+    result = json.loads(path.read_text())
+    result['scope'] = plan['scope']
+    path.write_text(json.dumps(result,indent=2)+'\n')
+
+
+if __name__ == '__main__':
+    main()

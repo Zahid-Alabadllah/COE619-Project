@@ -1,0 +1,16 @@
+{
+  "recorded_utc": "2026-11-19T22:31:07.522684+00:00",
+  "scope": "Exploratory reuse only; no new reserved VM outcomes; no energy claim",
+  "primary": "MAE",
+  "secondary": "RMSE, per-host MAE and next-step 80% warnings",
+  "published_method": "Theil-Sen median pairwise slopes; joint median intercept",
+  "reference": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.theilslopes.html",
+  "project_choices": "Regress next CPU on previous CPU using20 strictly earlier pairs, min10; slope bounded0..1, forecast bounded0..1; no distinct x gives median next CPU; initial persistence. Secondary conservative selector uses20 strictly earlier MAEs, min10, persistence on warmup/tie. No parameter search.",
+  "source_sha256": "70bd36b987ca018dd6ce53185cf1242c1dd28a919d31b481a733301b755db50b",
+  "inputs": {
+    "results/predictor_investigation/bitbrains_holdout/bitbrains_20130813_inputs.csv.gz": "c9637beb398705c618492cb253d40133a167fc046f9e56454144c36c3bfb528b",
+    "results/predictor_investigation/bitbrains_reserved_vms/bitbrains_20130814_inputs.csv.gz": "9a63167db0362b4b437013ad5dab5eb34612e59eb25274dc64dc539626ba9f57",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_inputs.csv.gz": "8885344d7ea4de6a6e0817053394660bda8fa8c8eb5397cd5b10d917f546be38",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_stress_inputs.csv.gz": "a78aa1264d843ae3a6eb32375263a73322c094ce2458438d9ec0452993d5617b"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "recorded_utc": "2026-11-19T22:32:20.085061+00:00",
+  "scope": "First model-outcome use of disjoint VM block within already inspected provider; not a new provider, energy simulation or statistical-representativeness claim",
+  "primary_candidate": "robust_or_persistence",
+  "primary_metric": "MAE",
+  "secondary_metrics": "RMSE, per-host MAE, 80% warnings; report trade-offs even when primary improves",
+  "baselines": [
+    "persistence",
+    "ols_clipped",
+    "adaptive_clipped",
+    "mean_switching_clipped",
+    "local_level",
+    "robust_pairs",
+    "robust_or_persistence"
+  ],
+  "skip_numeric_files": 256,
+  "selection": "Next128 numeric VM IDs after earlier256, first76 eligible on earliest common complete UTC day; timestamp/completeness selection only",
+  "fixed_design": "20 earlier resolved current-to-next pairs, min10; median pairwise slope projected0..1; joint median intercept; no varying x gives median next CPU; prediction projected0..1. Selector20 earlier absolute errors/min10; persistence warmup/tie. Strict target<issue learning.",
+  "reference": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.theilslopes.html",
+  "source": "https://atlarge-research.com/gwa-t-12/",
+  "archive_sha256": "11313f528a0cbcbe57e63162f8ae5a41a9c7e7c1a79872e294ff3c5bbaa2e671",
+  "attribution": "Bitbrains IT Services; Grid Workloads Archive; Shen, van Beek and Iosup, CCGrid2015",
+  "frozen_source_sha256": {
+    "validate_robust_bitbrains.py": "294f672100f4d0ab55501ca833a133e0d158a89ec955dbf6e6718b691bf2038d",
+    "validate_bitbrains.py": "c7d6ffb319a206835ff1257afc39d110490e504ec47ba323fb90cc13ff6b8390",
+    "evaluate_robust_pairs.py": "70bd36b987ca018dd6ce53185cf1242c1dd28a919d31b481a733301b755db50b",
+    "validate_complete_sequences.py": "dafff5a2b5effd526c3acd48f400a40d054aa3d46a3c38a9b3c55c103706e731"
+  }
+}
