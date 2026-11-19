@@ -195,6 +195,10 @@ public final class ConsolidationExperiment {
 
         simulation.start();
 
+        if (Boolean.getBoolean("coe619.evaluateForecast") && allocationPolicy instanceof PredictiveLinearRegressionPolicy predictor) {
+            predictor.finishForecastEvaluation();
+        }
+
         final int created = broker.getVmCreatedList().size();
         if (created != n) {
             throw new IllegalStateException("Only " + created + "/" + n + " VMs were created");

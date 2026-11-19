@@ -260,6 +260,11 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         while (iterator.hasNext()) {
             final Pending item = iterator.next();
             if (now < item.target()) continue;
+            if (item.generation() != generation.getOrDefault(host.getId(), 0L)) {
+                logExcluded(host.getId(), item, "migration");
+                iterator.remove();
+                continue;
+            }
             if (item.generation() == generation.getOrDefault(host.getId(), 0L)) {
                 for (final HostStateHistoryEntry entry : host.getStateHistory()) {
                     if (entry.active() && Math.abs(entry.time() - item.target()) <= 1) {
@@ -278,8 +283,29 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                     }
                 }
             }
-            if (now > item.target() + 1 && queue.contains(item)) iterator.remove();
+            if (now > item.target() + 1 && queue.contains(item)) {
+                logExcluded(host.getId(), item, "missing_sample");
+                iterator.remove();
+            }
         }
+    }
+
+    private void logExcluded(final long hostId, final Pending item, final String reason) {
+        if (Boolean.getBoolean("coe619.evaluateForecast")) {
+            System.out.printf(java.util.Locale.ROOT, "FORECAST_EXCLUDED host=%d target=%.3f reason=%s%n",
+                hostId, item.target(), reason);
+        }
+    }
+
+    /** Close the measurement ledger without adding retrospective learning samples. */
+    public void finishForecastEvaluation() {
+        for (final var entry : pending.entrySet()) {
+            for (final Pending item : entry.getValue()) {
+                logExcluded(entry.getKey(), item, item.generation() == generation.getOrDefault(entry.getKey(), 0L)
+                    ? "simulation_end" : "migration");
+            }
+        }
+        pending.clear();
     }
 
     /** Number of times a forecast was computed. */

@@ -1,6 +1,6 @@
 # Current predictor checkpoint
 
-CURRENT AUTONOMOUS-RUN LIMIT: user requested stopping this project work when weekly allowance reaches15% remaining and closing voice mode then. Check the account usage tool between bounded steps; latest observed value was16% remaining. Save/commit evidence before stopping. This preserves quota for later user tasks, not a permanent prohibition on future authorized work.
+CURRENT AUTHORIZATION,19November: user expressly removed the earlier15% weekly reserve and authorized continuing prediction work autonomously. Do not stop or close voice mode solely at that threshold. The previous reserve caused a safe stop when15% was reported; it no longer limits this resumed run.
 
 Latest small follow-up: persistence blending and a two-reading ridge regression gave mixed/poorer MAE/RMSE on already inspected Bitbrains/PlanetLab inputs. Neither added to Java; no new reserved VM data consumed. See FORECAST_FOLLOWUP_CHECKS.md. Active source remains the tested bounded trend/mean candidate and corrected power model.
 
@@ -33,3 +33,5 @@ The following paragraphs are historical checkpoints; the latest findings above s
 Resumed after user authorization. Framework repair verified with original/repaired map regression and complete normal-consolidation runs. Runtime patch isolation guard implemented and tested. Fresh-day 20110306 accuracy tested with frozen settings; candidate beats OLS in three of four fresh real cases, but not every baseline. Energy still does not beat IQR in the heavy case. See FRAMEWORK_REPAIR.md and FORECAST_ACCURACY.md.
 
 Next research: source versus destination decision accounting, prediction-trigger precision/recall and benefit of actual migrations. Do not retune on the fresh holdout and continue calling it untouched validation. Preserve PR2 and its evidence. Unrelated untracked active traces and maintenance-check file were not modified.
+
+20 November checkpoint: forecast coverage is fully reconciled (6,341 issued, 6,293 scored, two migration exclusions, 46 simulation-end exclusions). Independent causal replay passes; results CSV unchanged and power checks zero. This logging-only checkpoint adds no forecasting or energy superiority claim. PR2 form completed and renamed to PR2_202045160.docx/pdf. Next research must keep independent-provider persistence baseline and reserved-data discipline.
