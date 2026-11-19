@@ -1,0 +1,6 @@
+# PR2 coordinator template contract
+Reference: original root Progress Report (1, 2 and 3) Template.doc; converted by Microsoft Word to reference.docx without edits.
+Three source pages: portrait project information and achievements; landscape 24-week chart; portrait discrepancies and difficulties. Retain sections, margins, logo, headers, footer rules, page fields, table grids and merged cells. Editable slots are tables 2 (cover information), 3 row 2 (achievements), 4 task names and sample chart data only, 5 row 2 (discrepancies), 6 row 2 (difficulties). Second checkbox checked. ID appears only on cover. Unknown cover details remain blank.
+Source sample percentages and bars are example values, replaced with documented milestones. Weeks are proposal checkpoints in Term 261; completion marker means status at cutoff, not dated completion. Later-term tasks remain unplotted pending calendar.
+Content cutoff 15 November 2026; later power-accounting defect explicitly qualifies historic figures. No later predictor results added. Preserve original PR2 PDF and TeX as historical records.
+Rendering: packaged render_docx.py attempted but unavailable LibreOffice on PATH. Use native installed Microsoft Word PDF export, then bundled pdf2image/Poppler for all-page inspection.
