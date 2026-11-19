@@ -32,7 +32,7 @@ Prepared the concepts guide and advisor demonstration. The initial predictor sho
    $status=if($i -lt 5){'Completed for PR2 (100%)'}else{'Planned for Term 262'}
    Fill $chart.Cell($rows[$i],25) ($tasks[$i]+"`r"+$status)
    if($weeks[$i] -gt 0){
-     $col=26-$weeks[$i]
+     $col=25-$weeks[$i]
      foreach($c in $chart.Range.Cells){
        if($c.RowIndex -eq $rows[$i] -and $c.ColumnIndex -eq $col){$c.Shading.BackgroundPatternColor=12632256}
        if($c.RowIndex -eq ($rows[$i]+1) -and $c.ColumnIndex -eq $col){$c.Shading.BackgroundPatternColor=5287936}
@@ -50,6 +50,8 @@ Prepared the concepts guide and advisor demonstration. The initial predictor sho
  "Saved $out; pages=$($d.ComputeStatistics(2))"
  $d.Close(0)
 } finally { $w.Quit() }
+
+
 
 
 
