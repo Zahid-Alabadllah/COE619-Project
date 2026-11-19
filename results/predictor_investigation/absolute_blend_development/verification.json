@@ -1,0 +1,7 @@
+{
+  "optimizer_cases": 33,
+  "max_objective_excess": 0.0,
+  "frozen_source_sha_matches": true,
+  "production_java_changed": false,
+  "additional_reserved_vm_files_opened": 0
+}

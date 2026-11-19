@@ -1,0 +1,14 @@
+{
+  "recorded_utc": "2026-11-19T22:23:35.294889+00:00",
+  "scope": "Exploratory reuse of inspected data only; no fresh validation or energy claim",
+  "primary": "MAE",
+  "secondary": "RMSE and per-host MAE",
+  "model": "Blend bounded trend/mean selector with persistence; minimize absolute error on last20 strictly earlier resolved forecasts; min10, initial weight0, clip weight0..1; no parameter search",
+  "source_sha256": "3c151eac1c9554edb01d536320d7f8fd5835b8928f6869e55bba4cac190d0443",
+  "inputs": {
+    "results/predictor_investigation/bitbrains_holdout/bitbrains_20130813_inputs.csv.gz": "c9637beb398705c618492cb253d40133a167fc046f9e56454144c36c3bfb528b",
+    "results/predictor_investigation/bitbrains_reserved_vms/bitbrains_20130814_inputs.csv.gz": "9a63167db0362b4b437013ad5dab5eb34612e59eb25274dc64dc539626ba9f57",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_inputs.csv.gz": "8885344d7ea4de6a6e0817053394660bda8fa8c8eb5397cd5b10d917f546be38",
+    "results/predictor_investigation/complete_sequences_mean_confirm/20110420_stress_inputs.csv.gz": "a78aa1264d843ae3a6eb32375263a73322c094ce2458438d9ec0452993d5617b"
+  }
+}

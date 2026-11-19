@@ -1,0 +1,90 @@
+{
+  "bitbrains_20130813_inputs.csv.gz": {
+    "n": 5282,
+    "host_count": 19,
+    "quiet_latest_below_10_percent": 0.9833396440742143,
+    "unchanged_next": 0.17663763725861417,
+    "next_change_over_10pp": 0.0015145778114350624,
+    "note": "Future-change groups are retrospective descriptions only, never available to a live selector.",
+    "scores": {
+      "persistence": {
+        "top_one_percent_squared_error_share": 0.8555901301126994,
+        "hosts_beating_persistence_mae": 0
+      },
+      "adaptive_clipped": {
+        "top_one_percent_squared_error_share": 0.859684694959295,
+        "hosts_beating_persistence_mae": 10
+      },
+      "mean_switching_clipped": {
+        "top_one_percent_squared_error_share": 0.9217115759671327,
+        "hosts_beating_persistence_mae": 12
+      }
+    }
+  },
+  "bitbrains_20130814_inputs.csv.gz": {
+    "n": 5282,
+    "host_count": 19,
+    "quiet_latest_below_10_percent": 0.9284361984096933,
+    "unchanged_next": 0.06588413479742522,
+    "next_change_over_10pp": 0.042786823173040514,
+    "note": "Future-change groups are retrospective descriptions only, never available to a live selector.",
+    "scores": {
+      "persistence": {
+        "top_one_percent_squared_error_share": 0.683137396656656,
+        "hosts_beating_persistence_mae": 0
+      },
+      "adaptive_clipped": {
+        "top_one_percent_squared_error_share": 0.6506448913794423,
+        "hosts_beating_persistence_mae": 7
+      },
+      "mean_switching_clipped": {
+        "top_one_percent_squared_error_share": 0.6391188478293247,
+        "hosts_beating_persistence_mae": 9
+      }
+    }
+  },
+  "20110420_inputs.csv.gz": {
+    "n": 72002,
+    "host_count": 259,
+    "quiet_latest_below_10_percent": 0.5826227049248632,
+    "unchanged_next": 0.037610066387044803,
+    "next_change_over_10pp": 0.13276020110552483,
+    "note": "Future-change groups are retrospective descriptions only, never available to a live selector.",
+    "scores": {
+      "persistence": {
+        "top_one_percent_squared_error_share": 0.15761858819334132,
+        "hosts_beating_persistence_mae": 0
+      },
+      "adaptive_clipped": {
+        "top_one_percent_squared_error_share": 0.1637826895783019,
+        "hosts_beating_persistence_mae": 251
+      },
+      "mean_switching_clipped": {
+        "top_one_percent_squared_error_share": 0.1799307794772533,
+        "hosts_beating_persistence_mae": 253
+      }
+    }
+  },
+  "20110420_stress_inputs.csv.gz": {
+    "n": 1112,
+    "host_count": 4,
+    "quiet_latest_below_10_percent": 0.0,
+    "unchanged_next": 0.008992805755395683,
+    "next_change_over_10pp": 0.33902877697841727,
+    "note": "Future-change groups are retrospective descriptions only, never available to a live selector.",
+    "scores": {
+      "persistence": {
+        "top_one_percent_squared_error_share": 0.08040838079252437,
+        "hosts_beating_persistence_mae": 0
+      },
+      "adaptive_clipped": {
+        "top_one_percent_squared_error_share": 0.08258047587881082,
+        "hosts_beating_persistence_mae": 4
+      },
+      "mean_switching_clipped": {
+        "top_one_percent_squared_error_share": 0.09004313978834735,
+        "hosts_beating_persistence_mae": 4
+      }
+    }
+  }
+}

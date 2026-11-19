@@ -40,9 +40,17 @@ def main():
                 print("Sync:",b.relative_to(ROOT))
                 if not args.dry_run:
                     b.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(a,b)
+    # Current filled form is separate from the frozen historical PDF/TeX.
+    for ext in ('docx', 'pdf'):
+        a=CODE/'docs/progress_report_2/coordinator_template'/('PR2_202045160.'+ext)
+        b=COURSE/'05_Progress_Report_II'/a.name
+        if a.is_file() and (not b.exists() or a.read_bytes()!=b.read_bytes()):
+            print('Sync:',b.relative_to(ROOT))
+            if not args.dry_run:
+                b.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(a,b)
     if not args.clean: return
     target=CODE/"target"
-    candidates=[target/n for n in ("meeting-deck","framework-patch","source-check","meeting-build","classes","maven-status","generated-sources","test-classes","default-smoke","corrected-default-repeat","debug-smoke","mean-metric-regression")]
+    candidates=[target/n for n in ("pr2-template","meeting-deck","framework-patch","source-check","meeting-build","classes","maven-status","generated-sources","test-classes","default-smoke","corrected-default-repeat","debug-smoke","mean-metric-regression")]
     # Essential research inputs/outputs are retained under results before cleanup.
     # The downloaded archive is reproducible from the pinned commit and digest.
     candidates += [target/n for n in ("planetlab-source.zip","default-smoke.log","capacity-admission.txt","framework-compile.log","framework-repair.log")]
