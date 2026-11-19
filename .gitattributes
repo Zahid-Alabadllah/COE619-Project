@@ -1,2 +1,4 @@
 # Research provenance hashes refer to the author's exact trace bytes.
 results/predictor_investigation/**/traces/* -text
+
+results/predictor_investigation/absolute_blend_development/frozen_forecast_source.py.txt -text
