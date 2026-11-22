@@ -46,12 +46,64 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     private final Map<Long, Long> lastWarningBucket = new HashMap<>();
     private final Map<Long, Integer> warningStreak = new HashMap<>();
     private record Pending(double target, double estimate, double naive, double raw,
-                           double trendEstimate, double meanEstimate, long generation) { }
+                           double trendEstimate, double meanEstimate, double robustEstimate, long generation) { }
+    private final Map<Long, RobustPairs> robustPairs = new HashMap<>();
     private final Map<Long, Long> generation = new HashMap<>();
     private final Map<Long, List<Pending>> pending = new HashMap<>();
     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
     private final Map<Long, List<? extends Vm>> originalPlanningVms = new HashMap<>();
     private long predictionCount;
+
+    /**
+     * Opt-in Theil-Sen current-to-next fit; bounds and fallback are project choices.
+     * Median-slope/joint-intercept reference: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.theilslopes.html
+     * This is an experimental CPU predictor, not a demonstrated energy-saving policy.
+     */
+    static final class RobustPairs {
+        private record Observation(double target, double latest, double actual, double estimate) { }
+        private final Deque<Observation> ready = new ArrayDeque<>();
+        private final Deque<Observation> history = new ArrayDeque<>();
+
+        void observe(double target, double latest, double actual, double estimate) {
+            ready.addLast(new Observation(target, latest, actual, estimate));
+        }
+
+        private static double median(List<Double> values) {
+            values.sort(Double::compare);
+            int n = values.size();
+            return n % 2 == 1 ? values.get(n / 2) : (values.get(n / 2 - 1) + values.get(n / 2)) / 2;
+        }
+
+        double[] predict(double issue, double latest) {
+            var iterator = ready.iterator();
+            while (iterator.hasNext()) {
+                var item = iterator.next();
+                if (item.target() >= issue - 1e-6) continue;
+                history.addLast(item);
+                if (history.size() > 20) history.removeFirst();
+                iterator.remove();
+            }
+            if (history.size() < 10) return new double[]{latest, latest};
+            var points = new ArrayList<>(history);
+            var slopes = new ArrayList<Double>();
+            for (int i = 0; i < points.size(); i++) {
+                for (int j = i + 1; j < points.size(); j++) {
+                    double dx = points.get(j).latest() - points.get(i).latest();
+                    if (Math.abs(dx) > 1e-12) slopes.add((points.get(j).actual() - points.get(i).actual()) / dx);
+                }
+            }
+            double slope = slopes.isEmpty() ? 0 : Math.max(0, Math.min(1, median(slopes)));
+            var intercepts = new ArrayList<Double>();
+            double baselineError = 0, robustError = 0;
+            for (var item : history) {
+                intercepts.add(item.actual() - slope * item.latest());
+                baselineError += Math.abs(item.latest() - item.actual());
+                robustError += Math.abs(item.estimate() - item.actual());
+            }
+            double estimate = Math.max(0, Math.min(1, median(intercepts) + slope * latest));
+            return new double[]{estimate, robustError < baselineError ? estimate : latest};
+        }
+    }
 
     /** Research-only learner: use resolved past errors to choose how much trend to trust. */
     static final class OnlineBlend {
@@ -111,6 +163,10 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
     /** Experimental: discard pre-migration history only when explicitly enabled. */
     public void resetAfterMigration(final Host host, final double time) {
         generation.merge(host.getId(), 1L, Long::sum);
+        robustPairs.remove(host.getId());
+        if (Boolean.getBoolean("coe619.robustForecast") && Boolean.getBoolean("coe619.evaluateForecast")) {
+            System.out.printf(java.util.Locale.ROOT, "FORECAST_ROBUST_RESET host=%d time=%.3f%n", host.getId(), time);
+        }
         if (Boolean.getBoolean("coe619.resetHistory")) {
             historyCutoff.put(host.getId(), time);
             warningStreak.remove(host.getId());
@@ -175,7 +231,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
             return super.isOverloaded(host);
         }
         final boolean meanModel = Boolean.getBoolean("coe619.meanForecast");
-        final boolean online = Boolean.getBoolean("coe619.onlineForecast") || meanModel;
+        final boolean robustModel = Boolean.getBoolean("coe619.robustForecast");
+        final boolean online = Boolean.getBoolean("coe619.onlineForecast") || meanModel || robustModel;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
         final boolean reactive = super.isOverloaded(host);
         if (reactive) {
@@ -201,12 +258,14 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         final double selectedEstimate = meanModel ? onlineBlends.get(host.getId()).selectForecast(now, trendEstimate, meanEstimate) : trendEstimate;
         // Our scored target is allocated CPU, whose physical range is 0..1.
         // For the fixed 80% trigger this projection leaves warning decisions unchanged.
-        final double forecast = meanModel ? Math.max(0, Math.min(1, selectedEstimate)) : selectedEstimate;
+        final double[] robust = robustModel ? robustPairs.computeIfAbsent(host.getId(), id -> new RobustPairs())
+            .predict(now, samples.get(0)[1]) : new double[]{Double.NaN, Double.NaN};
+        final double forecast = robustModel ? robust[1] : meanModel ? Math.max(0, Math.min(1, selectedEstimate)) : selectedEstimate;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
             final double target = now + horizonSeconds;
             if (queue.stream().noneMatch(item -> Math.abs(item.target() - target) < 1e-6)) {
-                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, trendEstimate, meanEstimate,
+                queue.add(new Pending(target, forecast, samples.get(0)[1], rawForecast, trendEstimate, meanEstimate, robust[0],
                     generation.getOrDefault(host.getId(), 0L)));
                 if (Boolean.getBoolean("coe619.evaluateForecast")) {
                     final String input = samples.stream().map(sample -> sample[0] + ":" + sample[1])
@@ -220,7 +279,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                             host.getId(), target, meanInput);
                     }
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s model=%s%n",
-                        host.getId(), target, weight, online, meanModel ? "mean_selected_bounded" : "trend");
+                        host.getId(), target, weight, online, robustModel ? "robust_selected" : meanModel ? "mean_selected_bounded" : "trend");
+                    if (robustModel) System.out.printf(java.util.Locale.ROOT,
+                        "FORECAST_ROBUST host=%d target=%.3f raw=%.12f selected=%.12f%n", host.getId(), target, robust[0], robust[1]);
                 }
             }
         }
@@ -269,6 +330,10 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                 for (final HostStateHistoryEntry entry : host.getStateHistory()) {
                     if (entry.active() && Math.abs(entry.time() - item.target()) <= 1) {
                         final double observed = HostCpuUtilization.fractionOfCapacity(host, entry);
+                        if (Boolean.getBoolean("coe619.robustForecast")) {
+                            robustPairs.computeIfAbsent(host.getId(), id -> new RobustPairs())
+                                .observe(item.target(), item.naive(), observed, item.robustEstimate());
+                        }
                         if (Boolean.getBoolean("coe619.onlineForecast") || Boolean.getBoolean("coe619.meanForecast")) {
                             onlineBlends.computeIfAbsent(host.getId(), id -> new OnlineBlend())
                                 .observe(item.target(), item.raw(), item.naive(), observed, item.trendEstimate(), item.meanEstimate());

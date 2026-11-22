@@ -47,3 +47,9 @@ Evidence: results/predictor_investigation/closed_history_age_audit.json and onli
 
 ## 20 November 2026 - Conservative forecast blend rejected
 An absolute-error-optimal blend of persistence and the bounded trend/mean candidate was tested on four already inspected input sets. It improved MAE in the first Bitbrains group but not in the second versus persistence, and degraded the existing PlanetLab candidate. It remains offline. All settings, source and input hashes, per-host scores and aggregate MAE/RMSE retained under absolute_blend_development. No further reserved VMs consumed. Independent-provider tail errors and typical error remain separate objectives; no energy or forecasting superiority claim added. See FORECAST_FOLLOWUP_CHECKS.md for the numeric comparison.
+
+## 23 November 2026 - Robust forecast integration
+Frozen robust/persistence selection beats persistence MAE and RMSE on two fresh disjoint Bitbrains cohorts. Opt-in Java integration passes6340 independent forecast checks and30 power checks; scored ledger fully accounted. Four real simulator cases improve MAE versus prior selector, synthetic worsens, energy matches THR. Existing mean-selector15-row control is byte-identical and6341 independent checks pass. No energy superiority claim. Evidence and reproduction: FORECAST_FOLLOWUP_CHECKS.md.
+
+For later Term262 reporting, keep three distinct milestones: simulator/accounting reliability, robust forecast design and disjoint-VM validation, then end-to-end energy/performance evaluation (still unresolved). Work completed now remains dated now and can be identified as early preparation. No experiment or Git date is moved to next semester; calendar-based report assignment remains pending.
+

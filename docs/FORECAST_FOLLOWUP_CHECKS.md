@@ -47,3 +47,29 @@ Settings frozen before parsing two further disjoint blocks of128 numeric Bitbrai
 | Fourth128 IDs,13August |0.25716/1.49831|0.26520/1.42730|0.22269/1.48172|
 
 Candidate beats persistence on both metrics in both fresh cohorts. Improvement is modest in the first. It beats the current selector's MAE in both, but loses RMSE to it in the fourth block. In the third block it wins host MAE on10/19 and loses on9/19, so aggregate improvement is not universal host improvement. No settings changed between the two fresh validations. Remaining738 archive VM files unparsed. Evidence: robust_pairs_development, bitbrains_robust_reserved and bitbrains_robust_confirm. No Java integration or energy claim at this checkpoint.
+
+## 23 November - Opt-in simulator integration
+The same robust/persistence candidate is now available only with the research option coe619.robustForecast. The five production Java files remain; the learner is nested in the existing policy. It learns only resolved targets strictly before the current issue time, keeps20 observations and resets its state after a completed migration changes the host's VM group. Offline validation has fixed groups and therefore no such migration reset. Default OLS and the prior mean selector are preserved.
+
+The corrected-power full-day20April simulator batch completed normal consolidation. Independent Python replay matches all6,340 issued robust forecasts (maximum numerical difference below5e-13);6,293 are scored, one excluded after migration and46 at simulation end. No unaccounted forecasts remain. All30 recorded power checks are zero. Separate Java checks passed exact-line fitting, constant inputs, causal warmup, rolling memory, fallback selection and independent host state.
+
+| Simulator case | Prior trend/mean MAE pp | Robust/persistence MAE pp |
+|---|---:|---:|
+| Synthetic day/night |2.873|3.320|
+| Real a |3.992|3.903|
+| Real b |3.726|3.694|
+| Real c |5.231|5.108|
+| Heavy |5.751|5.727|
+
+These are conditional scored moments in each run; the synthetic policies can change their histories, so they are not a matched-target causal accuracy comparison. Real cases have corresponding counts; complete-sequence offline evidence is separate. The robust policy has zero predictive triggers in this batch and matches THR energy and completed migrations. Heavy IQR remains lower-energy. Better point forecasting is not an energy-saving result.
+
+A full15-row mean-selector control was repeated after integration: CSV bytes are identical to bounded_power_mean, independent replay passes6,341 checks, and all30 power checks are zero. No need to repeat unrelated baselines. Frozen PR2 PDF and experiments.csv hashes remain unchanged. Saved runs: online_holdout_20110420/robust_power_full_day and robust_integration_mean_control.
+
+Reproduce from the code repository:
+
+```powershell
+./scripts/research/run_forecast_validation.ps1 -Day 20110420 -Model robust_guard -Label new_robust_check -StablePlanning -FullDay -AuditPower
+python scripts/research/check_robust_forecast.py results/predictor_investigation/online_holdout_20110420/new_robust_check/simulation.log.gz results/predictor_investigation/online_holdout_20110420/new_robust_check/accuracy.json
+```
+
+Use a new label; completed studies cannot be overwritten. This remains experimental because day/night accuracy regresses and predictive energy benefit is unresolved. Keep the remaining738 unparsed Bitbrains VM files for a future frozen design. Fresh validation above refers to new VM groups in the same provider, not another provider or new workload day.

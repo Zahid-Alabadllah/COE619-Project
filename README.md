@@ -57,3 +57,6 @@ Generated build files and LaTeX intermediates are hidden in this checkout's Expl
 Research reproduction is documented in [forecast accuracy](docs/ONLINE_FORECAST.md), [stable planning/history guard](docs/PLANNING_REPRODUCIBILITY.md) and [capacity limitations](docs/CONSOLIDATION_LIMITS.md). Research options are explicit and do not replace the five-case default workflow.
 
 Open ../Course_Documents/README.md for current academic deliverables. After verified artifact work run `./scripts/maintain_documents.ps1 -Clean` to sync course copies and remove known temporary output. Preview with `-Clean -DryRun`. Generated simulation files rebuild as needed.
+
+Latest opt-in predictor: [robust forecasting follow-up](docs/FORECAST_FOLLOWUP_CHECKS.md). Tested on two fresh disjoint Bitbrains VM groups and in the corrected simulator. Better real-case point accuracy has not produced a predictive energy advantage; synthetic accuracy regresses. The default remains OLS.
+

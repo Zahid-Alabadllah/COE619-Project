@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)][ValidatePattern('^2011[0-9]{4}$')][string]$Day,
-    [ValidateSet('online','half','control','online_guard','mean_guard')][string]$Model = 'online',
+    [ValidateSet('online','half','control','online_guard','mean_guard','robust_guard')][string]$Model = 'online',
     [string]$Label = '',
     [switch]$StablePlanning,
     [switch]$FullDay,
@@ -20,11 +20,12 @@ try {
     $output = "$root/$Label"
     if (Test-Path -LiteralPath "$output/experiments.csv") { throw 'Do not overwrite an existing experiment' }
     $properties = '-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true'
-    if ($Model -in @('online','online_guard','mean_guard')) { $properties += ' -Dcoe619.onlineForecast=true' }
+    if ($Model -in @('online','online_guard','mean_guard','robust_guard')) { $properties += ' -Dcoe619.onlineForecast=true' }
     elseif ($Model -eq 'half') { $properties += ' -Dcoe619.dampedForecast=true' }
     else { $properties += ' -Dcoe619.disableForecast=true' }
-    if ($Model -in @('online_guard','mean_guard')) { $properties += ' -Dcoe619.planningHistoryGuard=true' }
+    if ($Model -in @('online_guard','mean_guard','robust_guard')) { $properties += ' -Dcoe619.planningHistoryGuard=true' }
     if ($Model -eq 'mean_guard') { $properties += ' -Dcoe619.meanForecast=true' }
+    if ($Model -eq 'robust_guard') { $properties += ' -Dcoe619.robustForecast=true' }
     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
     if ($AuditPower) { $properties += ' -Dcoe619.auditPower=true' }
     $properties += " -Dcoe619.idleShutdownSeconds=$IdleShutdownSeconds"
