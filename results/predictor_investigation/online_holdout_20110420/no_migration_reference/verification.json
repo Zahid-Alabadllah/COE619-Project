@@ -1,0 +1,6 @@
+{
+  "zero_power_checks": 30,
+  "migration_disabled_all_labels": true,
+  "labels_have_equal_energy_within_case": true,
+  "scope": "Full-day fixed VM population, not a general claim about all workload lifecycles"
+}

@@ -73,3 +73,53 @@ python scripts/research/check_robust_forecast.py results/predictor_investigation
 ```
 
 Use a new label; completed studies cannot be overwritten. This remains experimental because day/night accuracy regresses and predictive energy benefit is unresolved. Keep the remaining738 unparsed Bitbrains VM files for a future frozen design. Fresh validation above refers to new VM groups in the same provider, not another provider or new workload day.
+
+## 23 November - Migration timing and bounded deferral
+Added opt-in decision diagnostics without changing policy behavior: reactive checks show CPU, time and available samples; completed moves show source, destination and timing. The diagnostic-only15-row CSV is byte-identical to the prior robust run. In the full-day heavy case, THR/robust move at600.1s (only two recent samples available) and7800.1s; IQR's only move starts1500.1s. Cold-start behavior and server active time therefore matter more than point-error gains alone.
+
+Tested a separate bounded rule: once ten CPU readings exist, if current CPU is above80% but below95% and the robust forecast is at most80%, wait one five-minute bucket at most; move if overload persists into the next bucket.95% is an illustrative design ceiling, not an SLA guarantee. Cold-start behavior remains THR. The control waits one bucket without consulting the forecast, under the same warmup/ceiling. Both were opt-in and are now retired.
+
+| Full-day heavy case | kWh | Completed moves | Active host-hours |
+|---|---:|---:|---:|
+| Original robust/THR |25.707605|2|120.3333|
+| Forecast deferral |25.708297|1|120.3333|
+| Delay without prediction |25.708297|1|120.3333|
+| IQR |25.663730|1|120.0833|
+
+The simple delay matches the forecast rule's heavy outcome exactly. No incremental forecasting benefit was established. The migration reduction does not save energy and does not switch off a server. Sampled unmet demand and saturation remain zero, which is not a universal performance guarantee. The delay control slightly lowers synthetic energy; that is a timing-rule result, not a prediction result.
+
+With active-host power175+75u watts, a0.25 host-hour difference contributes0.04375kWh in the175W fixed component alone, close to the observed0.043875kWh heavy gap versus IQR. This decomposition supports investigating active-host duration and placement feasibility. It does not prove which small dynamic-power/timing terms explain the remainder.
+
+Both deferral runs pass independent robust forecast replay (6,343/6,340 checks), closed coverage ledgers and30 zero power audits each. The exact experimental patch againstd976ceb is scripts/research/attempts/bounded_forecast_deferral.patch. Logs, run options and15-row CSVs remain under online_holdout_20110420/robust_bounded_defer and robust_one_step_control. Active code retains useful diagnostics but removes the two unsuccessful policy options.
+
+The offline trend-switching extension improves synthetic MAE3.8588 to3.3148pp in fixed-placement replay but worsens the real/cohort comparisons, so it was not added to Java. Offline brief-overload analysis has six unique cohort keys plus synthetic; an initial basename-key collision was corrected before drawing conclusions. All inputs are now reused development data, with no further reserved VM files opened. See forecast_decision_audit for full scores and the19/22 short-spike outcomes; these are next-reading observations, not energy or safety proofs.
+
+## 23 November - No-migration reference and a lifecycle benchmark
+The full-day fixed-population reference disables all migration policies. Labels THR/IQR/LR are retained by the runner but no policy acts. In that setting, no migration uses10.240151kWh on day/night and21.508036kWh on heavy, below robust/THR12.719158 and25.707605. Quiet real groups are unchanged. There is no counted saturation or sampled unmet demand. This exposes a benchmark limitation, not a general theorem that consolidation is harmful: VMs never finish in the full-day study and already start tightly packed.
+
+A separate controlled workload now gives three out of every four VM indices a short5000000MI-per-PE job and the fourth the long1000000000MI-per-PE job. Real CPU traces, VM order and resource sizes remain unchanged. Completed VMs release their resources after1second, using the CloudSim Plus broker destruction API. These job lengths and lifetimes are synthetic benchmark choices, not measured PlanetLab VM lifetimes. They apply equally to THR, IQR, robust LR and the no-migration reference. There are no new arrival patterns or random seeds.
+
+Initial fairness checks found unequal event-tail end clocks and small nonzero sampled CPU shortfall during migrations. The final mixed-job benchmark therefore clips energy, active-host/saturation time and sampled demand to0..86400seconds; completed-job counts also use that horizon. Interpolated power intervals are clipped at the boundary. end_time_s still reports the actual simulation clock so tail differences remain visible. PDM retains its documented execution-time/capacity approximation. The original benchmark's measurement behavior is unchanged.
+
+Final24-hour results, robust LR versus no migration:
+
+| Case | Consolidation kWh | No-migration kWh | Reduction | Sampled unmet-demand fraction |
+|---|---:|---:|---:|---:|
+| Day/night |6.000527|9.004668|33.36%|0|
+| Real a |19.966631|21.446918|6.90%|0|
+| Real b |21.487827|21.487827|0%|0|
+| Real c |17.460824|21.528711|18.90%|0|
+| Heavy |10.837014|18.186062|40.41%|0.0000794651|
+
+Every comparison has the same created-VM and completed-job counts. Heavy finishes12 short jobs in both; sampled unmet demand is about0.008% with consolidation versus zero without. SLATAH is zero, which must not hide that sampled shortfall. Both final batches pass30 zero power checks each. These are controlled-case savings, not statistical population estimates or proof of no performance cost.
+
+THR and robust LR match in every mixed-job case. IQR's heavy energy is10.824817kWh, slightly lower. Thus this benchmark demonstrates useful consolidation but not extra value from prediction. Original OLS and the previous fixed five cases remain available unchanged. The final original-benchmark repeat is byte-identical to the saved robust reference.
+
+Validated results: online_holdout_20110420/mixed_jobs_windowed and mixed_jobs_windowed_no_migration. Earlier mixed_jobs_robust and mixed_jobs_no_migration contain preliminary unbounded-tail measurements and are superseded for fair energy comparison. no_migration_reference is the separate fixed-population diagnostic, not the lifecycle control.
+
+```powershell
+./scripts/research/run_forecast_validation.ps1 -Day 20110420 -Model robust_guard -Label new_mixed_test -StablePlanning -FullDay -AuditPower -MixedJobs
+./scripts/research/run_forecast_validation.ps1 -Day 20110420 -Model control -Label new_mixed_reference -StablePlanning -FullDay -AuditPower -MixedJobs -NoMigrations
+```
+
+Use new labels to preserve earlier evidence. The next targeted question is whether forecast-aware source selection or shutdown timing adds anything beyond an equally informed reactive rule. The library's isUnderloaded is used for both source selection and destination filtering; modifying it globally can accidentally exclude all candidate destinations. Investigate those roles separately before another policy change. No further reserved Bitbrains outcomes have been used.

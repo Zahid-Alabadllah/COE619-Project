@@ -1,0 +1,5 @@
+{
+  "original_workload_csv_byte_identical": true,
+  "zero_power_checks": 30,
+  "new_window_applies_only_to_mixed_jobs": true
+}

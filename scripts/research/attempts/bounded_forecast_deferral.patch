@@ -1,0 +1,118 @@
+diff --git a/scripts/research/run_forecast_validation.ps1 b/scripts/research/run_forecast_validation.ps1
+index 4460797..7bd52c9 100644
+--- a/scripts/research/run_forecast_validation.ps1
++++ b/scripts/research/run_forecast_validation.ps1
+@@ -5,10 +5,15 @@ param(
+     [switch]$StablePlanning,
+     [switch]$FullDay,
+     [switch]$AuditPower,
++    [switch]$DecisionAudit,
++    [switch]$ForecastDefer,
++    [switch]$DelayControl,
+     [ValidateRange(0,86400)][int]$IdleShutdownSeconds=0,
+     [switch]$PowerGuard=$true
+ )
+ $ErrorActionPreference = 'Stop'
++if ($ForecastDefer -and $DelayControl) { throw 'Choose prediction deferral or delay ablation, not both' }
++if (($ForecastDefer -or $DelayControl) -and $Model -ne 'robust_guard') { throw 'Deferral studies require robust_guard' }
+ $codeRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+ Push-Location $codeRoot
+ $priorJavaOptions = $env:JAVA_TOOL_OPTIONS
+@@ -28,6 +33,9 @@ try {
+     if ($Model -eq 'robust_guard') { $properties += ' -Dcoe619.robustForecast=true' }
+     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
+     if ($AuditPower) { $properties += ' -Dcoe619.auditPower=true' }
++    if ($DecisionAudit) { $properties += ' -Dcoe619.predictorDiagnostics=true' }
++    if ($ForecastDefer) { $properties += ' -Dcoe619.forecastDefer=true' }
++    if ($DelayControl) { $properties += ' -Dcoe619.delayControl=true' }
+     $properties += " -Dcoe619.idleShutdownSeconds=$IdleShutdownSeconds"
+     $properties += " -Dcoe619.powerGuard=$($PowerGuard.IsPresent.ToString().ToLowerInvariant())"
+     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
+diff --git a/src/main/java/kfupm/coe619/ConsolidationExperiment.java b/src/main/java/kfupm/coe619/ConsolidationExperiment.java
+index 871296d..c3a1c5d 100644
+--- a/src/main/java/kfupm/coe619/ConsolidationExperiment.java
++++ b/src/main/java/kfupm/coe619/ConsolidationExperiment.java
+@@ -364,6 +364,12 @@ public final class ConsolidationExperiment {
+             if (info.isMigrationSuccessful() && start != null) {
+                 migrations++;
+                 migrationTime.merge(vm, info.getTime() - start, Double::sum);
++                if (Boolean.getBoolean("coe619.predictorDiagnostics")) {
++                    System.out.printf(Locale.ROOT,
++                        "MIGRATION_AUDIT scenario=%s policy=%s vm=%d start=%.3f finish=%.3f source=%d destination=%d%n",
++                        config.scenario(), config.policy(), vm.getId(), start, info.getTime(),
++                        source == null ? -1 : source.getId(), vm.getHost().getId());
++                }
+             }
+             trace("t=%.0f migrated VM %d -> host %d", info.getTime(), vm.getId(), info.getVm().getHost().getId());
+         });
+diff --git a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+index b3f534b..7a2afac 100644
+--- a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
++++ b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+@@ -48,6 +48,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+     private record Pending(double target, double estimate, double naive, double raw,
+                            double trendEstimate, double meanEstimate, double robustEstimate, long generation) { }
+     private final Map<Long, RobustPairs> robustPairs = new HashMap<>();
++    private final Map<Long, Long> deferredBucket = new HashMap<>();
+     private final Map<Long, Long> generation = new HashMap<>();
+     private final Map<Long, List<Pending>> pending = new HashMap<>();
+     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
+@@ -164,6 +165,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+     public void resetAfterMigration(final Host host, final double time) {
+         generation.merge(host.getId(), 1L, Long::sum);
+         robustPairs.remove(host.getId());
++        deferredBucket.remove(host.getId());
+         if (Boolean.getBoolean("coe619.robustForecast") && Boolean.getBoolean("coe619.evaluateForecast")) {
+             System.out.printf(java.util.Locale.ROOT, "FORECAST_ROBUST_RESET host=%d time=%.3f%n", host.getId(), time);
+         }
+@@ -235,14 +237,23 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+         final boolean online = Boolean.getBoolean("coe619.onlineForecast") || meanModel || robustModel;
+         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
+         final boolean reactive = super.isOverloaded(host);
+-        if (reactive) {
++        final boolean forecastDefer = Boolean.getBoolean("coe619.forecastDefer");
++        final boolean delayControl = Boolean.getBoolean("coe619.delayControl");
++        if (!reactive) deferredBucket.remove(host.getId());
++        if (reactive && !(forecastDefer || delayControl)) {
++            if (Boolean.getBoolean("coe619.predictorDiagnostics")) {
++                System.out.printf(java.util.Locale.ROOT,
++                    "REACTIVE_DECISION host=%d time=%.3f cpu=%.12f samples=%d forecastConsulted=false%n",
++                    host.getId(), host.getSimulation().clock(), host.getCpuMipsUtilization() / host.getTotalMipsCapacity(),
++                    recentActiveSamples(host).size());
++            }
+             return true;
+         }
+ 
+-        if (Boolean.getBoolean("coe619.disableForecast")) return false;
++        if (Boolean.getBoolean("coe619.disableForecast")) return reactive;
+         final List<double[]> samples = recentActiveSamples(host);
+         if (samples.size() < windowSize) {
+-            return false; // not enough history: behave like THR
++            return reactive; // not enough history: behave like THR
+         }
+ 
+         predictionCount++;
+@@ -285,6 +296,23 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+                 }
+             }
+         }
++        if (reactive && (forecastDefer || delayControl)) {
++            final double cpu = host.getCpuMipsUtilization() / host.getTotalMipsCapacity();
++            final long bucket = (long) Math.floor(now / horizonSeconds);
++            final Long first = deferredBucket.get(host.getId());
++            // One-interval bounded experiment.95% is a design ceiling, not an SLA guarantee.
++            final boolean mayWait = cpu < 0.95 && (delayControl || forecast <= getOverUtilizationThreshold(host))
++                && (first == null || first == bucket);
++            if (mayWait) {
++                deferredBucket.putIfAbsent(host.getId(), bucket);
++            }
++            if (Boolean.getBoolean("coe619.evaluateForecast")) {
++                System.out.printf(java.util.Locale.ROOT,
++                    "DEFER_DECISION host=%d time=%.3f cpu=%.12f forecast=%.12f control=%s wait=%s%n",
++                    host.getId(), now, cpu, forecast, delayControl, mayWait);
++            }
++            return !mayWait;
++        }
+         final boolean rawWarning = forecast > getOverUtilizationThreshold(host);
+         boolean predicted = rawWarning;
+         if (Boolean.getBoolean("coe619.confirmWarning")) {

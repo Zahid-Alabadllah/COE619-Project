@@ -53,3 +53,8 @@ Frozen robust/persistence selection beats persistence MAE and RMSE on two fresh 
 
 For later Term262 reporting, keep three distinct milestones: simulator/accounting reliability, robust forecast design and disjoint-VM validation, then end-to-end energy/performance evaluation (still unresolved). Work completed now remains dated now and can be identified as early preparation. No experiment or Git date is moved to next semester; calendar-based report assignment remains pending.
 
+
+## 23 November 2026 - Energy evaluation clarified
+Audited reactive decisions and tested one-interval forecast deferral against a no-forecast delay. Both reduce the heavy case from two moves to one but do not improve energy; removed those experimental policy options and retained a reproducible patch againstd976ceb. Offline trend-switching helps synthetic accuracy but worsens real comparisons, so it also stays offline.
+
+Added a no-migration reference: it wins the tightly packed permanent-VM full-day benchmark. Added a separate equal-policy short/long-job lifecycle benchmark with VM release and a common24-hour energy/demand window. Consolidation saves40.41% on heavy versus no migration, but THR and robust LR match and sampled unmet demand is about0.008% versus zero. No predictive superiority claim. Original five-case results are byte-identical after feature isolation checks. See FORECAST_FOLLOWUP_CHECKS.md for exact numbers and qualifiers. Remaining738 Bitbrains VM files untouched.

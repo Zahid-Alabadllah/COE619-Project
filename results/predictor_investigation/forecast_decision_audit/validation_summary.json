@@ -1,0 +1,22 @@
+{
+  "zero_power_checks": {
+    "robust_decision_audit": 30,
+    "robust_bounded_defer": 30,
+    "robust_one_step_control": 30,
+    "robust_after_deferral_cleanup": 30,
+    "no_migration_reference": 30,
+    "mixed_jobs_robust": 30,
+    "mixed_jobs_no_migration": 30,
+    "original_after_lifecycle_changes": 30,
+    "mixed_jobs_windowed": 30,
+    "mixed_jobs_windowed_no_migration": 30,
+    "original_after_windowing": 30
+  },
+  "total_zero_power_checks": 330,
+  "original_csv_exact_repeats": 4,
+  "archived_deferral_patch_applies_to_base": true,
+  "production_java_sources": 5,
+  "reserved_vm_files_not_opened_this_phase": 738,
+  "shared_window_lifecycle_verification": "online_holdout_20110420/mixed_jobs_windowed/verification.json",
+  "retired_policy_rules_not_promoted": true
+}

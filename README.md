@@ -60,3 +60,6 @@ Open ../Course_Documents/README.md for current academic deliverables. After veri
 
 Latest opt-in predictor: [robust forecasting follow-up](docs/FORECAST_FOLLOWUP_CHECKS.md). Tested on two fresh disjoint Bitbrains VM groups and in the corrected simulator. Better real-case point accuracy has not produced a predictive energy advantage; synthetic accuracy regresses. The default remains OLS.
 
+
+Energy evaluation now includes a separate no-migration reference and an opt-in short/long-job lifecycle study. Consolidation can save energy there, but the robust predictor still matches THR. See [benchmark findings and performance trade-offs](docs/FORECAST_FOLLOWUP_CHECKS.md). These controls do not replace the default five cases or PR2.
+

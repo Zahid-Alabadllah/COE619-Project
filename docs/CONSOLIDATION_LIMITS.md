@@ -29,3 +29,11 @@ Keep the accuracy candidate and planning-history guard separate from benchmark c
 Current evidence supports a modest forecasting improvement and removal of a planning regression. Predictive energy superiority over IQR remains unproved.
 
 Primary implementation source: the official [CloudSim Plus 8.0.0 source archive](https://repo.maven.apache.org/maven2/org/cloudsimplus/cloudsim-plus/8.0.0/cloudsim-plus-8.0.0-sources.jar), particularly VmSimple, VmSchedulerTimeShared, VmSchedulerAbstract and VmAllocationPolicyMigrationAbstract.
+
+## 23 November - Quantified energy bottleneck
+The corrected full-day heavy comparison makes the limitation concrete. THR/robust uses120.3333 active host-hours, IQR120.0833; a15-minute difference. At175W fixed active power this contributes0.04375kWh, close to their measured0.043875kWh gap. A forecast-based one-reading deferral reduced moves from two to one but left host-hours unchanged and slightly increased energy. A no-forecast delay produced the same heavy result, so the change was retired.
+
+For identical hosts, the model sums to175W times the number of active hosts plus75W times summed normalized allocated CPU. When delivered CPU work is comparable, repacking VMs among already active hosts offers little fixed-power saving. The next energy investigation should target a feasible reduction in active-host duration, while treating capacity admission, cold-start behavior and performance constraints explicitly. Better forecast MAE or fewer migrations alone is insufficient.
+
+## Separate lifecycle benchmark
+A no-migration reference beats the predictive policy in the fixed full-day heavy and day/night cases because the VM population is permanent and starts tightly packed. That is not a suitable sole test of energy savings from consolidation. A separate opt-in mixedJobs benchmark lets short jobs finish and releases their VMs; all policies receive identical synthetic job lengths and the same real CPU traces. Common24-hour measurements show genuine consolidation savings versus no migration, including40.41% in the heavy case. THR and robust LR match, and small nonzero sampled unmet demand must be reported. This fixes an evaluation gap; it does not prove a predictive energy gain. Exact protocol, caveats and run locations are in FORECAST_FOLLOWUP_CHECKS.md.

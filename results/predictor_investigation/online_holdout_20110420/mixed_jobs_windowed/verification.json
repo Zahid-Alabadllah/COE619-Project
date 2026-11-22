@@ -1,0 +1,87 @@
+{
+  "common_energy_and_sampled_demand_window_s": [
+    0,
+    86400
+  ],
+  "recorded_power_checks_zero_each": 30,
+  "same_completed_jobs_and_created_vm_counts": true,
+  "performance_cost_not_zero": true,
+  "comparison": {
+    "diurnal": {
+      "energy_kwh": 6.000527,
+      "no_migration_kwh": 9.004668,
+      "energy_reduction_percent": 33.362040666019006,
+      "unmet_demand": 0.0,
+      "reference_unmet_demand": 0.0,
+      "completed_jobs": 6,
+      "active_host_hours": 30.8329,
+      "reference_active_host_hours": 47.9994,
+      "slatah": 0.0,
+      "actual_clocks": [
+        87000.8,
+        86701.0
+      ]
+    },
+    "real_a": {
+      "energy_kwh": 19.966631,
+      "no_migration_kwh": 21.446918,
+      "energy_reduction_percent": 6.902096608939339,
+      "unmet_demand": 0.0,
+      "reference_unmet_demand": 0.0,
+      "completed_jobs": 10,
+      "active_host_hours": 111.5398,
+      "reference_active_host_hours": 119.9986,
+      "slatah": 0.0,
+      "actual_clocks": [
+        87000.2,
+        87000.2
+      ]
+    },
+    "real_b": {
+      "energy_kwh": 21.487827,
+      "no_migration_kwh": 21.487827,
+      "energy_reduction_percent": 0.0,
+      "unmet_demand": 0.0,
+      "reference_unmet_demand": 0.0,
+      "completed_jobs": 10,
+      "active_host_hours": 119.9986,
+      "reference_active_host_hours": 119.9986,
+      "slatah": 0.0,
+      "actual_clocks": [
+        86700.6,
+        86700.6
+      ]
+    },
+    "real_c": {
+      "energy_kwh": 17.460824,
+      "no_migration_kwh": 21.528711,
+      "energy_reduction_percent": 18.89517212619001,
+      "unmet_demand": 0.0,
+      "reference_unmet_demand": 0.0,
+      "completed_jobs": 13,
+      "active_host_hours": 96.7488,
+      "reference_active_host_hours": 119.9986,
+      "slatah": 0.0,
+      "actual_clocks": [
+        87000.3,
+        87000.4
+      ]
+    },
+    "heavy": {
+      "energy_kwh": 10.837014,
+      "no_migration_kwh": 18.186062,
+      "energy_reduction_percent": 40.41033182444886,
+      "unmet_demand": 7.946514812e-05,
+      "reference_unmet_demand": 0.0,
+      "completed_jobs": 12,
+      "active_host_hours": 54.0073,
+      "reference_active_host_hours": 95.9989,
+      "slatah": 0.0,
+      "actual_clocks": [
+        86700.6,
+        86700.4
+      ]
+    }
+  },
+  "predictive_advantage_over_thr_demonstrated": false
+}

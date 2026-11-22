@@ -176,6 +176,14 @@ public final class ConsolidationExperiment {
 
         final DatacenterSimple dc = createDatacenter();
         broker = new DatacenterBrokerSimple(simulation);
+        if (Boolean.getBoolean("coe619.mixedJobs")) {
+            // Separate lifecycle benchmark: completed batch VMs release their resources.
+            broker.setVmDestructionDelay(1);
+            System.out.println("MIXED_JOB_WORKLOAD shortMIperPE=5000000 longMIperPE=" + config.cloudletLength()
+                + " longVmIndexModulo4=3 finishedVmDestructionDelaySeconds=1");
+            System.out.println("MEASUREMENT_WINDOW start=0 end=" + config.durationSeconds()
+                + " energyAndDemandBounded=true end_time_sRetainsActualClock=true");
+        }
         broker.addOnVmsCreatedListener(info -> {
             allocationPolicy.setFindHostForVmFunction(null); // later placements use the policy
             broker.removeOnVmsCreatedListener(info.getListener());
@@ -220,6 +228,8 @@ public final class ConsolidationExperiment {
             return;
         }
         nextSample += SCHEDULING_INTERVAL;
+        final double sampleSeconds = Boolean.getBoolean("coe619.mixedJobs")
+            ? Math.max(0, Math.min(SCHEDULING_INTERVAL, config.durationSeconds() - now)) : SCHEDULING_INTERVAL;
         for (int i = 0; i < vms.size(); i++) {
             final Vm vm = vms.get(i);
             final Cloudlet c = cloudletList.get(i);
@@ -236,8 +246,8 @@ public final class ConsolidationExperiment {
                         now, vm.getHost().getId(), vm.getId(), demand, allocated);
                 }
             }
-            demandMipsSeconds += demand * SCHEDULING_INTERVAL;
-            unmetMipsSeconds += Math.max(0, demand - allocated) * SCHEDULING_INTERVAL;
+            demandMipsSeconds += demand * sampleSeconds;
+            unmetMipsSeconds += Math.max(0, demand - allocated) * sampleSeconds;
         }
     }
 
@@ -247,6 +257,7 @@ public final class ConsolidationExperiment {
         int activeHosts = 0;
         double activeSeconds = 0;
         int inactiveCpuEntries = 0;
+        final boolean boundedWindow = Boolean.getBoolean("coe619.mixedJobs");
         for (final Host host : hosts) {
             // The framework exposes a LinkedList: indexed access would be quadratic.
             final List<HostStateHistoryEntry> h = new ArrayList<>(host.getStateHistory());
@@ -263,10 +274,13 @@ public final class ConsolidationExperiment {
                 if (!prev.active()) {
                     continue;
                 }
-                final double dt = curr.time() - prev.time();
+                final double dt = (boundedWindow ? Math.min(curr.time(), config.durationSeconds()) : curr.time()) - prev.time();
+                if (dt <= 0) continue;
                 final double uPrev = HostCpuUtilization.fractionOfCapacity(host, prev);
                 final double uCurr = curr.active() ? HostCpuUtilization.fractionOfCapacity(host, curr) : uPrev;
-                energy += host.getPowerModel().getPower((uPrev + uCurr) / 2.0) * dt;
+                final double uEnd = boundedWindow && curr.time() > config.durationSeconds()
+                    ? uPrev + (uCurr - uPrev) * dt / (curr.time() - prev.time()) : uCurr;
+                energy += host.getPowerModel().getPower((uPrev + uEnd) / 2.0) * dt;
                 active += dt;
                 if (uPrev >= SATURATION) {
                     saturated += dt;
@@ -311,7 +325,8 @@ public final class ConsolidationExperiment {
         }
 
         final int finished = (int) broker.getCloudletFinishedList().stream()
-            .filter(c -> c.getStatus() == Cloudlet.Status.SUCCESS).count();
+            .filter(c -> c.getStatus() == Cloudlet.Status.SUCCESS)
+            .filter(c -> !boundedWindow || c.getFinishTime() <= config.durationSeconds()).count();
         if (Boolean.getBoolean("coe619.auditPower")) {
             System.out.printf(Locale.ROOT, "POWER_HISTORY_AUDIT scenario=%s policy=%s inactiveCpuEntries=%d%n",
                 config.scenario(), config.policy(), inactiveCpuEntries);
@@ -352,6 +367,10 @@ public final class ConsolidationExperiment {
                 .filter(h -> h.isSuitableForVm(vm))
                 .findFirst());
         dc.setVmAllocationPolicy(allocationPolicy);
+        if (Boolean.getBoolean("coe619.noMigrations")) {
+            dc.disableMigrations();
+            System.out.printf(Locale.ROOT, "NO_MIGRATION_REFERENCE scenario=%s policyLabel=%s%n", config.scenario(), config.policy());
+        }
         dc.setSchedulingInterval(SCHEDULING_INTERVAL);
         dc.addOnVmMigrationFinishListener(info -> {
             final Vm vm = info.getVm();
@@ -364,6 +383,12 @@ public final class ConsolidationExperiment {
             if (info.isMigrationSuccessful() && start != null) {
                 migrations++;
                 migrationTime.merge(vm, info.getTime() - start, Double::sum);
+                if (Boolean.getBoolean("coe619.predictorDiagnostics")) {
+                    System.out.printf(Locale.ROOT,
+                        "MIGRATION_AUDIT scenario=%s policy=%s vm=%d start=%.3f finish=%.3f source=%d destination=%d%n",
+                        config.scenario(), config.policy(), vm.getId(), start, info.getTime(),
+                        source == null ? -1 : source.getId(), vm.getHost().getId());
+                }
             }
             trace("t=%.0f migrated VM %d -> host %d", info.getTime(), vm.getId(), info.getVm().getHost().getId());
         });
@@ -424,8 +449,11 @@ public final class ConsolidationExperiment {
 
     private List<Cloudlet> createCloudlets() {
         final List<Cloudlet> list = new ArrayList<>();
-        for (final Path trace : config.traces()) {
-            final Cloudlet c = new CloudletSimple(config.cloudletLength(), VM_PES);
+        for (int i = 0; i < config.traces().size(); i++) {
+            final Path trace = config.traces().get(i);
+            final long length = Boolean.getBoolean("coe619.mixedJobs") && i % 4 != 3
+                ? 5_000_000 : config.cloudletLength();
+            final Cloudlet c = new CloudletSimple(length, VM_PES);
             c.setUtilizationModelCpu(new UtilizationModelPlanetLab(trace.toString(), SCHEDULING_INTERVAL));
             list.add(c);
         }

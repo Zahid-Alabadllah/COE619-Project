@@ -1,0 +1,7 @@
+{
+  "input_cohorts": 6,
+  "results_including_synthetic": 7,
+  "unique_cohort_keys": true,
+  "earlier_incomplete_key_collision_attempt_excluded": true,
+  "causal_future_perturbation_checks": 191
+}

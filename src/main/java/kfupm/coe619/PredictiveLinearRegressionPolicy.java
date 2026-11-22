@@ -236,6 +236,12 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
         final boolean reactive = super.isOverloaded(host);
         if (reactive) {
+            if (Boolean.getBoolean("coe619.predictorDiagnostics")) {
+                System.out.printf(java.util.Locale.ROOT,
+                    "REACTIVE_DECISION host=%d time=%.3f cpu=%.12f samples=%d forecastConsulted=false%n",
+                    host.getId(), host.getSimulation().clock(), host.getCpuMipsUtilization() / host.getTotalMipsCapacity(),
+                    recentActiveSamples(host).size());
+            }
             return true;
         }
 

@@ -5,6 +5,9 @@ param(
     [switch]$StablePlanning,
     [switch]$FullDay,
     [switch]$AuditPower,
+    [switch]$DecisionAudit,
+    [switch]$NoMigrations,
+    [switch]$MixedJobs,
     [ValidateRange(0,86400)][int]$IdleShutdownSeconds=0,
     [switch]$PowerGuard=$true
 )
@@ -28,6 +31,9 @@ try {
     if ($Model -eq 'robust_guard') { $properties += ' -Dcoe619.robustForecast=true' }
     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
     if ($AuditPower) { $properties += ' -Dcoe619.auditPower=true' }
+    if ($DecisionAudit) { $properties += ' -Dcoe619.predictorDiagnostics=true' }
+    if ($NoMigrations) { $properties += ' -Dcoe619.noMigrations=true' }
+    if ($MixedJobs) { $properties += ' -Dcoe619.mixedJobs=true' }
     $properties += " -Dcoe619.idleShutdownSeconds=$IdleShutdownSeconds"
     $properties += " -Dcoe619.powerGuard=$($PowerGuard.IsPresent.ToString().ToLowerInvariant())"
     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
@@ -46,6 +52,10 @@ try {
         day=$Day; model=$Model; java_options=$properties; framework_fix=$true; stable_planning=$StablePlanning.IsPresent; full_day=$FullDay.IsPresent
         cloudlet_length_mi_per_pe=$(if ($FullDay) { 1000000000 } else { 20000000 })
         power_audit=$AuditPower.IsPresent; idle_shutdown_seconds=$IdleShutdownSeconds
+        decision_audit=$DecisionAudit.IsPresent; migrations_disabled=$NoMigrations.IsPresent; mixed_jobs=$MixedJobs.IsPresent
+        energy_demand_window_seconds=$(if ($MixedJobs) { @(0,86400) } else { $null })
+        short_cloudlet_length_mi_per_pe=$(if ($MixedJobs) { 5000000 } else { $null })
+        completed_vm_destruction_delay_seconds=$(if ($MixedJobs) { 1 } else { $null })
         power_guard=$PowerGuard.IsPresent
         frozen_csv_sha256=$csvBefore; frozen_pr2_sha256=$reportBefore
         code_commit=(& git rev-parse HEAD); code_status=(@(& git status --short))

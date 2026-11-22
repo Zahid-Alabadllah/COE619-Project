@@ -1,0 +1,20 @@
+{
+  "recorded_utc": "2026-11-22T22:59:36.438940+00:00",
+  "scope": "Controlled benchmark on reused traces; lifecycle changes apply equally to all policies, separate from original or full-day fixed-population results",
+  "primary_question": "Does consolidation reduce active-host time and energy relative to no migration when completed short-job VMs release resources?",
+  "workload": "Three out of each four VM indices receive5000000 MI per PE; fourth receives fullDay1000000000 MI per PE; all submit at simulation start; destroy completed VM after1second; fixed traces unchanged",
+  "candidate": "Existing frozen opt-in robust selector, no settings changed",
+  "comparators": [
+    "THR",
+    "IQR",
+    "migration disabled reference"
+  ],
+  "secondary": [
+    "completed short jobs",
+    "zero recorded inactive-host CPU",
+    "sampled unmet demand",
+    "SLATAH",
+    "migrations"
+  ],
+  "caution": "No new population or energy superiority claim about all data centers; no VM arrivals in this controlled study"
+}

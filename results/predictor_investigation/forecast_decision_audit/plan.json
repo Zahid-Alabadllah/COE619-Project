@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-22T22:48:29.706346+00:00",
+  "scope": "Previously inspected fixed-placement data only; exploratory, no migration or energy simulation",
+  "primary": "Assess feasible next-step brief-overload deferral; report continued overloads and >95% outcomes, not only successful deferrals",
+  "secondary": "MAE/RMSE of robust-versus-OLS selector for synthetic trend recovery",
+  "choices": "Current CPU above80 and below95 may be deferred if forecast<=80.95 is an illustrative project safety ceiling, not an SLA guarantee. Delay control defers first80 crossing below95 for one step. No parameter search.",
+  "selector": "Choose bounded OLS versus robust/persistence by20 strictly earlier absolute errors, min10; warmup/tie robust/persistence",
+  "source_sha256": "a3fda85122ebced8a0768f9827205ed1e283f7be90e4dd725623189628140f5f",
+  "inputs": {
+    "results\\predictor_investigation\\bitbrains_holdout\\bitbrains_20130813_inputs.csv.gz": "c9637beb398705c618492cb253d40133a167fc046f9e56454144c36c3bfb528b",
+    "results\\predictor_investigation\\bitbrains_reserved_vms\\bitbrains_20130814_inputs.csv.gz": "9a63167db0362b4b437013ad5dab5eb34612e59eb25274dc64dc539626ba9f57",
+    "results\\predictor_investigation\\bitbrains_robust_reserved\\bitbrains_20130814_inputs.csv.gz": "70453880c874238cf1c64fc2f581a7e453cfa009d71aa05d0171997dae5b8a9d",
+    "results\\predictor_investigation\\bitbrains_robust_confirm\\bitbrains_20130813_inputs.csv.gz": "8ba7cf214dde736d819e80cc489a5f2f6fb478314b95ab08dc3d04f6ef4d32ec",
+    "results\\predictor_investigation\\complete_sequences_mean_confirm\\20110420_inputs.csv.gz": "8885344d7ea4de6a6e0817053394660bda8fa8c8eb5397cd5b10d917f546be38",
+    "results\\predictor_investigation\\complete_sequences_mean_confirm\\20110420_stress_inputs.csv.gz": "a78aa1264d843ae3a6eb32375263a73322c094ce2458438d9ec0452993d5617b"
+  }
+}

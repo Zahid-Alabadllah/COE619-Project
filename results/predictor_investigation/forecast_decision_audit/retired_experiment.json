@@ -1,0 +1,7 @@
+{
+  "base_commit": "d976ceb",
+  "patch_path": "scripts\\research\\attempts\\bounded_forecast_deferral.patch",
+  "patch_sha256": "2959b41dca24204bc47fa3f2d814e363df90ad320082e1aca98ea8f414a04aed",
+  "active_policy_options_retained": false,
+  "reason": "Heavy forecast deferral equals no-forecast delay; energy not improved"
+}
