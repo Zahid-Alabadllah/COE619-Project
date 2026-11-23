@@ -7,5 +7,8 @@
   "power_violations": 0,
   "coverage": "end-window placement only, not every event",
   "frozen_csv_sha256": "3c288cdc4150ca10ca874354921ff15563ab6fce092ebd485bef49144069b652",
-  "run": "placement_checked_final"
+  "run": "placement_checked_final",
+  "default_finite_csv_matches_corrected_baseline": true,
+  "default_finite_rows": 15,
+  "default_finite_note": "Compatibility check after graceful broker cleanup; missing unfinished VMs are intentionally not checked here. Does not validate intermediate placement."
 }

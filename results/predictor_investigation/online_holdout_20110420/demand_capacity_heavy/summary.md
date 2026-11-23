@@ -1,3 +1,9 @@
+# EXPLORATORY_UNMATCHED_WORKLOAD
+
+No FullDay flag: long jobs20million MI, unlike the1billion MI baseline. Not a paired energy comparison.
+
+Do not use this run to claim energy savings or model quality.
+
 | Case | Policy | Energy (kWh) | SLATAH | PDM | SLAV | Unmet demand | Migrations | Active host-hours |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | heavy | THR | 15.6710 | 0.000000 | 4.608e-05 | 0.000e+00 | 3.260e-04 | 36 | 82.75 |

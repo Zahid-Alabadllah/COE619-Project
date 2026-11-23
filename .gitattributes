@@ -14,3 +14,4 @@ results/predictor_investigation/scale_in_source_audit/*.patch -text
 results/predictor_investigation/scale_in_source_audit/ScaleInRoleRegression.java.txt -text
 
 results/predictor_investigation/forecast_scope_audit/frozen_evaluator.py.txt -text
+scripts/research/attempts/demand_underload_restoration_20261123.patch -text

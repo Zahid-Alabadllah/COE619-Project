@@ -1,3 +1,9 @@
+# INVALID_LOST_WORK
+
+Adding scheduler deallocation does not fix restoration; unfinished VMs still lost; lower energy is invalid.
+
+Do not use this run to claim energy savings or model quality.
+
 | Case | Policy | Energy (kWh) | SLATAH | PDM | SLAV | Unmet demand | Migrations | Active host-hours |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | heavy | THR | 6.3537 | 0.000000 | 3.495e-05 | 0.000e+00 | 5.121e-03 | 13 | 32.19 |

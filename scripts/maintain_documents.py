@@ -53,7 +53,7 @@ def main():
     candidates=[target/n for n in ("pr2-template","meeting-deck","framework-patch","source-check","meeting-build","classes","maven-status","generated-sources","test-classes","default-smoke","corrected-default-repeat","debug-smoke","mean-metric-regression")]
     # Essential research inputs/outputs are retained under results before cleanup.
     # The downloaded archive is reproducible from the pinned commit and digest.
-    candidates += [target/n for n in ("planetlab-source.zip","default-smoke.log","capacity-admission.txt","framework-compile.log","framework-repair.log","forecast-decision-audit.txt")]
+    candidates += [target/n for n in ("planetlab-source.zip","default-smoke.log","capacity-admission.txt","framework-compile.log","framework-repair.log","forecast-decision-audit.txt","forecast-scope-capacity.txt")]
     candidates += [target/n for n in ("bitbrains-fastStorage.zip","corrected-default-repeat.log","debug-smoke.log","debug-prepare.log","mean-metric-regression.log","full-day-hotspot.txt","full-day-history-size.txt","demand-power-hotspot.txt","demand-power-history.txt","power-compile.log","demand-compile.log","demand-repair.log")]
     if target.exists():
         candidates += [p for p in target.iterdir() if p.is_file() and (p.suffix==".png" or p.name.endswith("-build.txt") or p.name=="demo-verification.log")]

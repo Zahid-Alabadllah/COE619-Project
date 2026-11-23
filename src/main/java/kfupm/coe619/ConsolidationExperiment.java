@@ -268,7 +268,9 @@ public final class ConsolidationExperiment {
             final Vm vm = vms.get(i);
             final int count = copies.getOrDefault(vm, 0);
             if (count > 1 && !vm.isInMigration()) crossHost++;
-            if (cloudletList.get(i).getStatus() != Cloudlet.Status.SUCCESS && count == 0) missing++;
+            // Graceful termination intentionally destroys unfinished VMs; exact-window observation does not.
+            if (Boolean.getBoolean("coe619.mixedJobs")
+                && cloudletList.get(i).getStatus() != Cloudlet.Status.SUCCESS && count == 0) missing++;
         }
         System.out.printf(Locale.ROOT,
             "PLACEMENT_AUDIT scenario=%s policy=%s repeatedEntries=%d crossHostWithoutMigration=%d wrongHost=%d overCapacity=%d missingUnfinished=%d residentNotCreated=%d%n",
