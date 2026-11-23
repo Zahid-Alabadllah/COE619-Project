@@ -1,0 +1,216 @@
+{
+  "scope": "Post-run observed operational targets, including VM completion/off periods and migration interventions; no interpolated labels or learning changes",
+  "eligibility": "Host active and resident VM count>0 at issue, never based on future outcome",
+  "reference": "Recorded off=0, otherwise nearest active CPU observation in same power episode within1s; missing remains explicit",
+  "horizon_seconds": 86400.0,
+  "coverage": {
+    "diurnal": {
+      "issued": 1206,
+      "eligible": 783,
+      "active_observed": 700,
+      "eligible_active_observed": 700,
+      "missing_active_observation": 74,
+      "eligible_missing_active_observation": 74,
+      "eligible_scored_across_migration": 9,
+      "eligible_recovered_target": 9,
+      "recorded_off": 428,
+      "eligible_recorded_off": 7,
+      "ineligible_at_issue": 423,
+      "outside_window": 4,
+      "eligible_outside_window": 2
+    },
+    "real_a": {
+      "issued": 4755,
+      "eligible": 4313,
+      "active_observed": 2951,
+      "eligible_active_observed": 2951,
+      "missing_active_observation": 1319,
+      "eligible_missing_active_observation": 1319,
+      "eligible_scored_across_migration": 37,
+      "eligible_recovered_target": 37,
+      "recorded_off": 475,
+      "eligible_recorded_off": 35,
+      "ineligible_at_issue": 442,
+      "outside_window": 10,
+      "eligible_outside_window": 8
+    },
+    "real_b": {
+      "issued": 3755,
+      "eligible": 3755,
+      "active_observed": 3125,
+      "eligible_active_observed": 3125,
+      "missing_active_observation": 615,
+      "eligible_missing_active_observation": 615,
+      "outside_window": 15,
+      "eligible_outside_window": 15
+    },
+    "real_c": {
+      "issued": 3550,
+      "eligible": 2879,
+      "active_observed": 2259,
+      "eligible_active_observed": 2259,
+      "missing_active_observation": 604,
+      "eligible_missing_active_observation": 604,
+      "recorded_off": 677,
+      "eligible_recorded_off": 10,
+      "eligible_scored_across_migration": 18,
+      "eligible_recovered_target": 18,
+      "ineligible_at_issue": 671,
+      "outside_window": 10,
+      "eligible_outside_window": 6
+    },
+    "heavy": {
+      "issued": 4508,
+      "eligible": 1997,
+      "active_observed": 1694,
+      "eligible_active_observed": 1694,
+      "eligible_scored_across_migration": 30,
+      "eligible_recovered_target": 30,
+      "recorded_off": 2526,
+      "eligible_recorded_off": 24,
+      "missing_active_observation": 273,
+      "eligible_missing_active_observation": 273,
+      "ineligible_at_issue": 2511,
+      "outside_window": 15,
+      "eligible_outside_window": 6
+    }
+  },
+  "runtime_label_disagreements": {
+    "real_a": 433,
+    "real_b": 315,
+    "real_c": 30,
+    "heavy": 1000
+  },
+  "accuracy": {
+    "diurnal": {
+      "eligible": {
+        "candidate": {
+          "n": 707,
+          "mae_pp": 2.8475325148414177,
+          "rmse_pp": 4.861318988516376
+        },
+        "persistence": {
+          "n": 707,
+          "mae_pp": 2.6556223479490764,
+          "rmse_pp": 3.916673299923161
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 1128,
+          "mae_pp": 5.8995837659511405,
+          "rmse_pp": 7.75745670197446
+        },
+        "persistence": {
+          "n": 1128,
+          "mae_pp": 5.779299645390081,
+          "rmse_pp": 7.41490892291378
+        }
+      }
+    },
+    "real_a": {
+      "eligible": {
+        "candidate": {
+          "n": 2986,
+          "mae_pp": 2.1020174697650575,
+          "rmse_pp": 3.699941249991201
+        },
+        "persistence": {
+          "n": 2986,
+          "mae_pp": 2.3389400535833755,
+          "rmse_pp": 4.089366095369293
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 3426,
+          "mae_pp": 1.889849435119203,
+          "rmse_pp": 3.4579511431158796
+        },
+        "persistence": {
+          "n": 3426,
+          "mae_pp": 2.0963441330997594,
+          "rmse_pp": 3.821152162057014
+        }
+      }
+    },
+    "real_b": {
+      "eligible": {
+        "candidate": {
+          "n": 3125,
+          "mae_pp": 2.459622336519924,
+          "rmse_pp": 3.960774202257626
+        },
+        "persistence": {
+          "n": 3125,
+          "mae_pp": 2.743279999999959,
+          "rmse_pp": 4.548719600063297
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 3125,
+          "mae_pp": 2.459622336519924,
+          "rmse_pp": 3.960774202257626
+        },
+        "persistence": {
+          "n": 3125,
+          "mae_pp": 2.743279999999959,
+          "rmse_pp": 4.548719600063297
+        }
+      }
+    },
+    "real_c": {
+      "eligible": {
+        "candidate": {
+          "n": 2269,
+          "mae_pp": 3.4114943149295645,
+          "rmse_pp": 5.438816196151577
+        },
+        "persistence": {
+          "n": 2269,
+          "mae_pp": 4.0812307183781185,
+          "rmse_pp": 6.613013892791579
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 2936,
+          "mae_pp": 2.8612033721304986,
+          "rmse_pp": 4.820768921058846
+        },
+        "persistence": {
+          "n": 2936,
+          "mae_pp": 3.378789168937298,
+          "rmse_pp": 5.846038808137897
+        }
+      }
+    },
+    "heavy": {
+      "eligible": {
+        "candidate": {
+          "n": 1718,
+          "mae_pp": 3.779715034181199,
+          "rmse_pp": 5.598119117253879
+        },
+        "persistence": {
+          "n": 1718,
+          "mae_pp": 3.8226426076833495,
+          "rmse_pp": 5.582081448217025
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 4220,
+          "mae_pp": 11.54464465135633,
+          "rmse_pp": 13.781607004247242
+        },
+        "persistence": {
+          "n": 4220,
+          "mae_pp": 11.562120853080668,
+          "rmse_pp": 13.778958422225646
+        }
+      }
+    }
+  }
+}

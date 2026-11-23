@@ -1,0 +1,12 @@
+{
+  "legacy_forecasts": 17774,
+  "live_forecasts": 13727,
+  "removed_ineligible_forecasts": 4047,
+  "common_predictions_identical": true,
+  "all_other_csv_fields_identical": true,
+  "recorded_zero_power_checks": 60,
+  "reference_boundary_tests": 5,
+  "all_three_runs_power_checks": 90,
+  "evaluator_source_sha256": "33bd063af9e7f2ee5fcceadd1dc75b0d102ab028d87e7ba6a11e16ca611ea82b",
+  "late_capacity_scope": "Physical floor differs from80% destination check; not proven savings"
+}

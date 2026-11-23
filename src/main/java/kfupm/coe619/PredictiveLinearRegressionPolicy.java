@@ -234,6 +234,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
         final boolean robustModel = Boolean.getBoolean("coe619.robustForecast");
         final boolean online = Boolean.getBoolean("coe619.onlineForecast") || meanModel || robustModel;
         if (Boolean.getBoolean("coe619.evaluateForecast") || online) evaluatePending(host);
+        if (robustModel && Boolean.parseBoolean(System.getProperty("coe619.liveForecastOnly", "true"))
+            && (!host.isActive() || host.getVmList().isEmpty())) return false;
         final boolean reactive = super.isOverloaded(host);
         if (reactive) {
             if (Boolean.getBoolean("coe619.predictorDiagnostics")) {
@@ -278,6 +280,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                         .collect(java.util.stream.Collectors.joining(";"));
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_INPUT host=%d target=%.3f samples=%s%n",
                         host.getId(), target, input);
+                    System.out.printf(java.util.Locale.ROOT,
+                        "FORECAST_SCOPE host=%d target=%.3f issue=%s due=%s active=%s vms=%d%n",
+                        host.getId(), target, now, target, host.isActive(), host.getVmList().size());
                     if (meanModel) {
                         final String meanInput = meanSamples.stream().map(s -> s[0] + ":" + s[1])
                             .collect(java.util.stream.Collectors.joining(";"));

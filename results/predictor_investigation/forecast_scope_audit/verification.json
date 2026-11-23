@@ -1,0 +1,11 @@
+{
+  "legacy_all_host_csv_identical": true,
+  "energy_performance_work_and_migrations_unchanged": true,
+  "old_forecasts": 17774,
+  "live_forecasts": 13727,
+  "removed_ineligible_forecasts": 4047,
+  "common_predictions_identical": true,
+  "recorded_zero_power_checks": 60,
+  "reference_boundary_tests": 5,
+  "no_future_labels_used_for_learning": true
+}

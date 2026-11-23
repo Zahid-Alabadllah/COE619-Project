@@ -8,10 +8,15 @@ param(
     [switch]$DecisionAudit,
     [switch]$NoMigrations,
     [switch]$MixedJobs,
+    [switch]$AuditForecasts,
+    [switch]$AllHostForecasts,
     [ValidateRange(0,86400)][int]$IdleShutdownSeconds=0,
     [switch]$PowerGuard=$true
 )
 $ErrorActionPreference = 'Stop'
+if (($AuditForecasts -or $AllHostForecasts) -and $Model -ne 'robust_guard') {
+    throw 'This forecast-scope audit currently supports robust_guard only'
+}
 $codeRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Push-Location $codeRoot
 $priorJavaOptions = $env:JAVA_TOOL_OPTIONS
@@ -34,6 +39,8 @@ try {
     if ($DecisionAudit) { $properties += ' -Dcoe619.predictorDiagnostics=true' }
     if ($NoMigrations) { $properties += ' -Dcoe619.noMigrations=true' }
     if ($MixedJobs) { $properties += ' -Dcoe619.mixedJobs=true' }
+    if ($AuditForecasts) { $properties += " -Dcoe619.forecastAuditDirectory=$output/host_observations" }
+    if ($AllHostForecasts) { $properties += ' -Dcoe619.liveForecastOnly=false' }
     $properties += " -Dcoe619.idleShutdownSeconds=$IdleShutdownSeconds"
     $properties += " -Dcoe619.powerGuard=$($PowerGuard.IsPresent.ToString().ToLowerInvariant())"
     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
@@ -57,6 +64,7 @@ try {
         short_cloudlet_length_mi_per_pe=$(if ($MixedJobs) { 5000000 } else { $null })
         completed_vm_destruction_delay_seconds=$(if ($MixedJobs) { 1 } else { $null })
         observation_mode=$(if ($MixedJobs) { 'synchronous_exact_window' } else { 'graceful_recorded_histories' })
+        forecast_observations=$AuditForecasts.IsPresent; all_host_forecasts=$AllHostForecasts.IsPresent
         power_guard=$PowerGuard.IsPresent
         frozen_csv_sha256=$csvBefore; frozen_pr2_sha256=$reportBefore
         code_commit=(& git rev-parse HEAD); code_status=(@(& git status --short))

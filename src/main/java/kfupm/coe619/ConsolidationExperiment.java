@@ -146,6 +146,8 @@ public final class ConsolidationExperiment {
     private final Map<Vm, Double> migrationStart = new HashMap<>();
     private final Map<Vm, Host> migrationSource = new HashMap<>();
     private final Map<Vm, Double> migrationTime = new HashMap<>();
+    private record PowerObservation(double time, boolean active) { }
+    private final Map<Long, List<PowerObservation>> powerObservations = new HashMap<>();
     private int migrations;
     private int inactiveWorkSamples;
 
@@ -240,7 +242,45 @@ public final class ConsolidationExperiment {
             System.out.printf(Locale.ROOT, "POWER_AUDIT scenario=%s policy=%s inactiveWorkSamples=%d%n",
                 config.scenario(), config.policy(), inactiveWorkSamples);
         }
+        exportForecastObservations();
         return computeResult(dc, cloudlets);
+    }
+
+    /** Evaluation-only export; the predictor never reads this future observation file. */
+    private void exportForecastObservations() {
+        final String directory = System.getProperty("coe619.forecastAuditDirectory");
+        if (directory == null || config.policy() != Policy.LR) return;
+        final Path output = Path.of(directory).resolve(config.scenario() + ".csv.gz");
+        try {
+            Files.createDirectories(output.getParent());
+            try (var writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
+                new java.util.zip.GZIPOutputStream(Files.newOutputStream(output)), java.nio.charset.StandardCharsets.UTF_8))) {
+                writer.write("kind,host,time,active,allocated_mips,capacity_mips\n");
+                for (final Host host : hosts) {
+                    for (final HostStateHistoryEntry entry : host.getStateHistory()) {
+                        writer.write("cpu," + host.getId() + "," + entry.time() + "," + entry.active()
+                            + "," + entry.allocatedMips() + "," + host.getTotalMipsCapacity() + "\n");
+                    }
+                    for (final PowerObservation entry : powerObservations.getOrDefault(host.getId(), List.of())) {
+                        writer.write("power," + host.getId() + "," + entry.time() + "," + entry.active()
+                            + ",0," + host.getTotalMipsCapacity() + "\n");
+                    }
+                }
+            }
+            final List<String> jobs = new ArrayList<>();
+            // Vm.getStartTime can reset on allocation; it is not the original birth time.
+            jobs.add("vm,last_allocation_start,finish,completed,length_mi_per_pe,vm_pes,vm_mips,host_pes,host_mips");
+            for (int i = 0; i < vms.size(); i++) {
+                final Vm vm = vms.get(i);
+                final Cloudlet job = cloudletList.get(i);
+                final boolean completed = job.getStatus() == Cloudlet.Status.SUCCESS && job.getFinishTime() <= config.durationSeconds();
+                jobs.add(vm.getId() + "," + vm.getStartTime() + "," + (completed ? job.getFinishTime() : "")
+                    + "," + completed + "," + job.getLength() + "," + VM_PES + "," + VM_MIPS + "," + HOST_PES + "," + HOST_MIPS);
+            }
+            Files.write(output.resolveSibling(config.scenario() + "-jobs.csv"), jobs);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Cannot save forecast observations: " + output, ex);
+        }
     }
 
     /**
@@ -392,6 +432,15 @@ public final class ConsolidationExperiment {
                 .filter(h -> h.isSuitableForVm(vm))
                 .findFirst());
         dc.setVmAllocationPolicy(allocationPolicy);
+        if (System.getProperty("coe619.forecastAuditDirectory") != null && config.policy() == Policy.LR) {
+            for (final Host host : hosts) {
+                final List<PowerObservation> events = new ArrayList<>();
+                events.add(new PowerObservation(simulation.clock(), host.isActive()));
+                powerObservations.put(host.getId(), events);
+                host.addOnShutdownListener(info -> events.add(new PowerObservation(info.getTime(), false)));
+                host.addOnStartupListener(info -> events.add(new PowerObservation(info.getTime(), true)));
+            }
+        }
         if (Boolean.getBoolean("coe619.noMigrations")) {
             dc.disableMigrations();
             System.out.printf(Locale.ROOT, "NO_MIGRATION_REFERENCE scenario=%s policyLabel=%s%n", config.scenario(), config.policy());

@@ -12,3 +12,5 @@ scripts/research/attempts/bounded_forecast_deferral.patch -text
 scripts/research/attempts/source_scalein.patch -text
 results/predictor_investigation/scale_in_source_audit/*.patch -text
 results/predictor_investigation/scale_in_source_audit/ScaleInRoleRegression.java.txt -text
+
+results/predictor_investigation/forecast_scope_audit/frozen_evaluator.py.txt -text
