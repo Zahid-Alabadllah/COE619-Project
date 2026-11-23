@@ -1,0 +1,261 @@
+diff --git a/scripts/framework/MutableMigrationMapPatch.java b/scripts/framework/MutableMigrationMapPatch.java
+index a30b094..5abadd3 100644
+--- a/scripts/framework/MutableMigrationMapPatch.java
++++ b/scripts/framework/MutableMigrationMapPatch.java
+@@ -10,12 +10,23 @@ public class MutableMigrationMapPatch {
+   ClassWriter writer=new ClassWriter(ClassWriter.COMPUTE_MAXS);
+   int[] changes={0};
+   final boolean stable=args.length>2 && Boolean.parseBoolean(args[2]);
++  final boolean demand=args.length>3 && Boolean.parseBoolean(args[3]);
+   int[] orderedMaps={0};
+   int[] orderedHosts={0};
++  int[] demandSites={0};
++  final boolean restoreUnderload=args.length>4 && Boolean.parseBoolean(args[4]);
++  int[] underloadSites={0};
+   new ClassReader(original).accept(new ClassVisitor(Opcodes.ASM9,writer) {
+    @Override public MethodVisitor visitMethod(int access,String name,String desc,String sig,String[] exceptions) {
+-    MethodVisitor next=super.visitMethod(access,name,desc,sig,exceptions);
++    final boolean wrap=restoreUnderload && name.equals("updateMigrationMapFromUnderloadedHosts");
++    if(wrap) underloadSites[0]++;
++    MethodVisitor next=super.visitMethod(access,wrap?name+"Unrestored":name,desc,sig,exceptions);
+     return new MethodVisitor(Opcodes.ASM9,next) {
++     private int temporaryLocal=-1;
++     @Override public void visitVarInsn(int opcode,int variable) {
++      if(demand && name.equals("isNotHostOverloadedAfterAllocation") && opcode==Opcodes.ASTORE && temporaryLocal<0) temporaryLocal=variable;
++      super.visitVarInsn(opcode,variable);
++     }
+      @Override public void visitCode() {
+       super.visitCode();
+       if(stable && name.equals("getMigrationMapFromOverloadedHosts")) {
+@@ -36,7 +47,17 @@ public class MutableMigrationMapPatch {
+       } else super.visitTypeInsn(opcode,type);
+      }
+      @Override public void visitMethodInsn(int opcode,String owner,String method,String descriptor,boolean itf) {
+-      if(name.equals("getMigrationMapFromOverloadedHosts") && opcode==Opcodes.INVOKESTATIC && owner.equals("java/util/Collections") && method.equals("emptyMap") && descriptor.equals("()Ljava/util/Map;")) {
++      if(demand && name.equals("isNotHostOverloadedAfterAllocation") && method.equals("getHostCpuPercentRequested") && descriptor.equals("(Lorg/cloudsimplus/hosts/Host;)D")) {
++       if(temporaryLocal!=3) throw new IllegalStateException("Unexpected temporary VM local: "+temporaryLocal);
++       // Replace [this, host] with [host, originalCandidate, temporaryCopy].
++       super.visitInsn(Opcodes.SWAP);
++       super.visitInsn(Opcodes.POP);
++       super.visitVarInsn(Opcodes.ALOAD,2);
++       super.visitVarInsn(Opcodes.ALOAD,temporaryLocal);
++       super.visitMethodInsn(Opcodes.INVOKESTATIC,"kfupm/coe619/ConsolidationExperiment","prospectiveCpuDemand",
++        "(Lorg/cloudsimplus/hosts/Host;Lorg/cloudsimplus/vms/Vm;Lorg/cloudsimplus/vms/Vm;)D",false);
++       demandSites[0]++;
++      } else if(name.equals("getMigrationMapFromOverloadedHosts") && opcode==Opcodes.INVOKESTATIC && owner.equals("java/util/Collections") && method.equals("emptyMap") && descriptor.equals("()Ljava/util/Map;")) {
+        final String map=stable?"java/util/LinkedHashMap":"java/util/HashMap";
+        super.visitTypeInsn(Opcodes.NEW,map);
+        super.visitInsn(Opcodes.DUP);
+@@ -48,12 +69,34 @@ public class MutableMigrationMapPatch {
+      }
+     };
+    }
++   @Override public void visitEnd() {
++    if(restoreUnderload) {
++     final String owner="org/cloudsimplus/allocationpolicies/migration/VmAllocationPolicyMigrationAbstract";
++     MethodVisitor m=super.visitMethod(Opcodes.ACC_PRIVATE,"updateMigrationMapFromUnderloadedHosts","(Ljava/util/Set;Ljava/util/Map;)V",null,null);
++     m.visitCode();
++     m.visitVarInsn(Opcodes.ALOAD,0);m.visitMethodInsn(Opcodes.INVOKESPECIAL,owner,"saveAllocation","()V",false);
++     Label start=new Label(),end=new Label(),handler=new Label(),done=new Label();
++     m.visitTryCatchBlock(start,end,handler,null);m.visitLabel(start);
++     m.visitVarInsn(Opcodes.ALOAD,0);m.visitVarInsn(Opcodes.ALOAD,1);m.visitVarInsn(Opcodes.ALOAD,2);
++     m.visitMethodInsn(Opcodes.INVOKESPECIAL,owner,"updateMigrationMapFromUnderloadedHostsUnrestored","(Ljava/util/Set;Ljava/util/Map;)V",false);
++     m.visitLabel(end);m.visitVarInsn(Opcodes.ALOAD,0);m.visitMethodInsn(Opcodes.INVOKESPECIAL,owner,"restoreAllocation","()V",false);m.visitJumpInsn(Opcodes.GOTO,done);
++     m.visitLabel(handler);m.visitFrame(Opcodes.F_SAME1,0,null,1,new Object[]{"java/lang/Throwable"});
++     m.visitVarInsn(Opcodes.ASTORE,3);m.visitVarInsn(Opcodes.ALOAD,0);m.visitMethodInsn(Opcodes.INVOKESPECIAL,owner,"restoreAllocation","()V",false);
++     m.visitVarInsn(Opcodes.ALOAD,3);m.visitInsn(Opcodes.ATHROW);
++     m.visitLabel(done);m.visitFrame(Opcodes.F_SAME,0,null,0,null);m.visitInsn(Opcodes.RETURN);m.visitMaxs(0,0);m.visitEnd();
++    }
++    super.visitEnd();
++   }
+   },0);
+   if(changes[0]!=1) throw new IllegalStateException("Expected exactly one known defective return path, found "+changes[0]);
+   if(stable && (orderedMaps[0]!=4 || orderedHosts[0]!=1)) throw new IllegalStateException("Unexpected planning sites: maps="+orderedMaps[0]+" hosts="+orderedHosts[0]);
++  if(demand && demandSites[0]!=1) throw new IllegalStateException("Expected exactly one destination CPU site, found "+demandSites[0]);
++  if(restoreUnderload && underloadSites[0]!=1) throw new IllegalStateException("Unexpected underload wrapper sites: "+underloadSites[0]);
+   Path output=Path.of(args[1]).resolve(entry);
+   Files.createDirectories(output.getParent());Files.write(output,writer.toByteArray());
+   System.out.println("Applied one mutable-map repair to generated runtime classes; original dependency jar unchanged.");
+   if(stable) System.out.println("Opt-in stable planning: four insertion-ordered maps and ID-sorted overloaded sources.");
++  if(restoreUnderload) System.out.println("Opt-in compatibility: restore physical placement after underload planning, including exceptions.");
++  if(demand) System.out.println("Opt-in benchmark: destination CPU threshold uses current cloudlet demand; physical admission unchanged.");
+  }
+ }
+diff --git a/scripts/repair_cloudsim.ps1 b/scripts/repair_cloudsim.ps1
+index 7adb3f6..5b9cf6f 100644
+--- a/scripts/repair_cloudsim.ps1
++++ b/scripts/repair_cloudsim.ps1
+@@ -1,4 +1,4 @@
+-param([switch]$StablePlanning)
++param([switch]$StablePlanning, [switch]$DemandPlacement, [switch]$RestoreUnderload)
+ $ErrorActionPreference = "Stop"
+ $codeRoot = Split-Path $PSScriptRoot -Parent
+ Push-Location $codeRoot
+@@ -10,7 +10,7 @@ try {
+     $originalHash = (Get-FileHash -LiteralPath $simJar -Algorithm SHA256).Hash
+     & javac --release 17 -cp $asmJar -d target/framework-patch scripts/framework/MutableMigrationMapPatch.java
+     if ($LASTEXITCODE -ne 0) { throw "Patch tool compilation failed" }
+-    & java -cp "target/framework-patch;$asmJar" MutableMigrationMapPatch $simJar target/meeting-build/classes $StablePlanning.IsPresent.ToString().ToLowerInvariant()
++    & java -cp "target/framework-patch;$asmJar" MutableMigrationMapPatch $simJar target/meeting-build/classes $StablePlanning.IsPresent.ToString().ToLowerInvariant() $DemandPlacement.IsPresent.ToString().ToLowerInvariant() $RestoreUnderload.IsPresent.ToString().ToLowerInvariant()
+     if ($LASTEXITCODE -ne 0) { throw "CloudSim compatibility repair failed" }
+     if ((Get-FileHash -LiteralPath $simJar -Algorithm SHA256).Hash -ne $originalHash) { throw "Original dependency changed unexpectedly" }
+ } finally { Pop-Location }
+diff --git a/scripts/research/CapacityAdmissionCheck.java b/scripts/research/CapacityAdmissionCheck.java
+index fc472a0..8215428 100644
+--- a/scripts/research/CapacityAdmissionCheck.java
++++ b/scripts/research/CapacityAdmissionCheck.java
+@@ -35,7 +35,7 @@ public final class CapacityAdmissionCheck {
+                 var check = VmAllocationPolicyMigrationAbstract.class.getDeclaredMethod("isNotHostOverloadedAfterAllocation", Host.class, Vm.class);
+                 check.setAccessible(true);
+                 boolean allowed = (boolean) check.invoke(policy, host, candidate);
+-                boolean expected = false;
++                boolean expected = args.length > 0 && Boolean.parseBoolean(args[0]);
+                 if (allowed != expected) throw new AssertionError("Unexpected fourth-VM migration eligibility: " + allowed);
+                 System.out.println("PASS: idle fourth VM migration allowed=" + allowed + "; physical CPU admission is checked separately.");
+             }
+@@ -50,6 +50,24 @@ public final class CapacityAdmissionCheck {
+         if (host.getCpuPercentUtilization() != 0) throw new AssertionError("No cloudlet CPU work expected");
+         System.out.println("PASS: four idle VMs reserve all 8000 host MIPS; fifth rejected by CPU admission despite spare RAM/BW.");
+         System.out.println("Trace CPU usage and reserved virtual CPU capacity are different quantities.");
++        host.destroyVm(host.getVmList().get(0));
++        Vm temporary = demandVm(10, .9);
++        if (!host.createTemporaryVm(temporary).fully()) throw new AssertionError("Temporary VM should fit");
++        host.destroyVm(host.getVmList().get(0));
++        Vm resident = demandVm(11, .6);
++        if (!host.createVm(resident).fully()) throw new AssertionError("Resident should fit");
++        double projected = ConsolidationExperiment.prospectiveCpuDemand(host, demandVm(12, .4), temporary);
++        if (Math.abs(projected - .25) > 1e-12) throw new AssertionError("Clone counted in demand: " + projected);
++        double sameResident = ConsolidationExperiment.prospectiveCpuDemand(host, resident, temporary);
++        if (Math.abs(sameResident - .15) > 1e-12) throw new AssertionError("Candidate counted twice: " + sameResident);
++        host.destroyTemporaryVm(temporary);
++        System.out.println("PASS: projected demand excludes the temporary clone and never counts a resident candidate twice.");
++    }
++
++    private static Vm demandVm(int id, double usage) {
++        return new VmSimple(id, 1000, 2) {
++            @Override public double getCpuPercentRequested(double time) { return usage; }
++        }.setRam(2048).setBw(1000).setSize(10000);
+     }
+ 
+     private static Vm vm(int id) {
+diff --git a/scripts/research/run_forecast_validation.ps1 b/scripts/research/run_forecast_validation.ps1
+index 2c1a84e..244c172 100644
+--- a/scripts/research/run_forecast_validation.ps1
++++ b/scripts/research/run_forecast_validation.ps1
+@@ -4,6 +4,9 @@ param(
+     [string]$Label = '',
+     [switch]$StablePlanning,
+     [switch]$FullDay,
++    [switch]$DemandPlacement,
++    [switch]$RestoreUnderload,
++    [ValidateSet("","diurnal","real_a","real_b","real_c","heavy")][string]$Scenario = "",
+     [switch]$AuditPower,
+     [switch]$DecisionAudit,
+     [switch]$NoMigrations,
+@@ -34,6 +37,7 @@ try {
+     if ($Model -in @('online_guard','mean_guard','robust_guard')) { $properties += ' -Dcoe619.planningHistoryGuard=true' }
+     if ($Model -eq 'mean_guard') { $properties += ' -Dcoe619.meanForecast=true' }
+     if ($Model -eq 'robust_guard') { $properties += ' -Dcoe619.robustForecast=true' }
++    if ($RestoreUnderload) { $properties += ' -Dcoe619.restoreUnderload=true' }
+     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
+     if ($AuditPower) { $properties += ' -Dcoe619.auditPower=true' }
+     if ($DecisionAudit) { $properties += ' -Dcoe619.predictorDiagnostics=true' }
+@@ -50,7 +54,7 @@ try {
+     New-Item -ItemType Directory -Path target -Force | Out-Null
+     $started = (Get-Date).ToUniversalTime().ToString('o')
+     $env:JAVA_TOOL_OPTIONS = $properties
+-    & ./scripts/run.ps1 -FrameworkFix -StablePlanning:$StablePlanning -OutputDir $output *> $log
++    & ./scripts/run.ps1 -FrameworkFix -StablePlanning:$StablePlanning -DemandPlacement:$DemandPlacement -RestoreUnderload:$RestoreUnderload -Scenario $Scenario -OutputDir $output *> $log
+     if ($LASTEXITCODE -ne 0) { throw 'Simulation failed; retain target log for diagnosis' }
+     if ((Get-FileHash -LiteralPath results/experiments.csv -Algorithm SHA256).Hash -ne $csvBefore) { throw 'Frozen CSV changed' }
+     if ((Get-FileHash -LiteralPath docs/progress_report_2/PR2_Progress_Report_II.pdf -Algorithm SHA256).Hash -ne $reportBefore) { throw 'Frozen PR2 changed' }
+@@ -58,6 +62,7 @@ try {
+         started_utc=$started; completed_utc=(Get-Date).ToUniversalTime().ToString('o')
+         day=$Day; model=$Model; java_options=$properties; framework_fix=$true; stable_planning=$StablePlanning.IsPresent; full_day=$FullDay.IsPresent
+         cloudlet_length_mi_per_pe=$(if ($FullDay) { 1000000000 } else { 20000000 })
++        restore_underload=$RestoreUnderload.IsPresent; demand_placement=$DemandPlacement.IsPresent; scenario=$Scenario
+         power_audit=$AuditPower.IsPresent; idle_shutdown_seconds=$IdleShutdownSeconds
+         decision_audit=$DecisionAudit.IsPresent; migrations_disabled=$NoMigrations.IsPresent; mixed_jobs=$MixedJobs.IsPresent
+         energy_demand_window_seconds=$(if ($MixedJobs) { @(0,86400) } else { $null })
+diff --git a/scripts/run.ps1 b/scripts/run.ps1
+index 53d329b..fa6d348 100644
+--- a/scripts/run.ps1
++++ b/scripts/run.ps1
+@@ -1,16 +1,17 @@
+-param([switch]$FrameworkFix=$true, [switch]$StablePlanning=$true, [switch]$PrepareDebug, [string]$Scenario = "", [string]$OutputDir = "results/demo")
++param([switch]$FrameworkFix=$true, [switch]$StablePlanning=$true, [switch]$PrepareDebug, [switch]$DemandPlacement, [switch]$RestoreUnderload, [string]$Scenario = "", [string]$OutputDir = "results/demo")
+ $ErrorActionPreference = "Stop"
+ $debugReady = $false
+ Push-Location (Split-Path $PSScriptRoot -Parent)
+ try {
+     if ($StablePlanning -and !$FrameworkFix) { throw 'StablePlanning requires the explicit FrameworkFix research run' }
++    if ($DemandPlacement -and (!$FrameworkFix -or !$StablePlanning)) { throw 'DemandPlacement requires FrameworkFix and StablePlanning' }
+     $jdk = Join-Path $env:USERPROFILE ".jdk/jdk-25.0.2"
+     if (Test-Path $jdk) { $env:JAVA_HOME = $jdk; $env:Path = "$jdk/bin;$env:Path" }
+     & python (Join-Path $PSScriptRoot "framework/clear_patch.py")
+     if ($LASTEXITCODE -ne 0) { throw "Cannot clear stale framework override" }
+     & mvn -q compile "-Dcoe619.build.directory=target/meeting-build" dependency:build-classpath "-Dmdep.outputFile=target/meeting-build/classpath.txt"
+     if ($LASTEXITCODE -ne 0) { throw "Maven failed" }
+-    if ($FrameworkFix) { & (Join-Path $PSScriptRoot "repair_cloudsim.ps1") -StablePlanning:$StablePlanning }
++    if ($FrameworkFix) { & (Join-Path $PSScriptRoot "repair_cloudsim.ps1") -StablePlanning:$StablePlanning -DemandPlacement:$DemandPlacement -RestoreUnderload:$RestoreUnderload }
+     $cp = "target/meeting-build/classes;" + (Get-Content target/meeting-build/classpath.txt -Raw).Trim()
+     if ($PrepareDebug) { $debugReady = $true; return }
+     if ($Scenario) { & java -cp $cp kfupm.coe619.ExperimentRunner $Scenario --output $OutputDir }
+diff --git a/src/main/java/kfupm/coe619/ConsolidationExperiment.java b/src/main/java/kfupm/coe619/ConsolidationExperiment.java
+index 3892011..d478b0d 100644
+--- a/src/main/java/kfupm/coe619/ConsolidationExperiment.java
++++ b/src/main/java/kfupm/coe619/ConsolidationExperiment.java
+@@ -62,6 +62,15 @@ public final class ConsolidationExperiment {
+             super(ram, bandwidth, storage, pes);
+         }
+ 
++        @Override
++        public void destroyAllVms() {
++            if (Boolean.getBoolean("coe619.restoreUnderload")) {
++                for (final Vm vm : new ArrayList<Vm>(getVmList()))
++                    getVmScheduler().deallocatePesFromVm(vm);
++            }
++            super.destroyAllVms();
++        }
++
+         @Override
+         public double updateProcessing(final double time) {
+             final double deadline = getIdleShutdownDeadline();
+@@ -76,6 +85,19 @@ public final class ConsolidationExperiment {
+         }
+     }
+ 
++    /** Research-only destination test using present demand; physical admission remains separate. */
++    public static double prospectiveCpuDemand(final Host host, final Vm candidate, final Vm temporaryCopy) {
++        final double capacity = host.getTotalMipsCapacity();
++        if (capacity <= 0) throw new IllegalStateException("Destination has no CPU capacity");
++        final double now = host.getSimulation().clock();
++        double demand = candidate.getCpuPercentRequested(now) * candidate.getTotalMipsCapacity();
++        for (final Vm resident : host.getVmList()) {
++            if (resident != temporaryCopy && resident != candidate)
++                demand += resident.getCpuPercentRequested(now) * resident.getTotalMipsCapacity();
++        }
++        return demand / capacity;
++    }
++
+     public static final double UPPER_THRESHOLD = 0.80;
+     public static final double IQR_SAFETY = 0.75;
+     public static final int LR_WINDOW = 10;
+@@ -278,6 +300,17 @@ public final class ConsolidationExperiment {
+                     + "," + completed + "," + job.getLength() + "," + VM_PES + "," + VM_MIPS + "," + HOST_PES + "," + HOST_MIPS);
+             }
+             Files.write(output.resolveSibling(config.scenario() + "-jobs.csv"), jobs);
++            final List<String> placements = new ArrayList<>();
++            placements.add("host,active,vm,created,job_status,finished,broker_exec_member");
++            for (final Host host : hosts) {
++                for (final Vm vm : host.getVmList()) {
++                    final int index = vms.indexOf(vm);
++                    final Cloudlet job = index < 0 ? Cloudlet.NULL : cloudletList.get(index);
++                    placements.add(host.getId() + "," + host.isActive() + "," + vm.getId() + "," + vm.isCreated()
++                        + "," + job.getStatus() + "," + job.getFinishTime() + "," + broker.getVmExecList().contains(vm));
++                }
++            }
++            Files.write(output.resolveSibling(config.scenario() + "-residents.csv"), placements);
+         } catch (IOException ex) {
+             throw new IllegalStateException("Cannot save forecast observations: " + output, ex);
+         }

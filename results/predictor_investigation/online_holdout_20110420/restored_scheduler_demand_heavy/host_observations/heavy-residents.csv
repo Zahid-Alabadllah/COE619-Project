@@ -1,0 +1,2 @@
+host,active,vm,created,job_status,finished,broker_exec_member
+3,true,3,true,INEXEC,-1.0,true

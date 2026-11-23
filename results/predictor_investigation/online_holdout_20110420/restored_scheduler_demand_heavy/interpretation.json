@@ -1,0 +1,7 @@
+{
+  "status": "invalid_lost_work",
+  "note": "Adding scheduler deallocation does not fix restoration; unfinished VMs still lost; lower energy is invalid.",
+  "date": "2026-11-23",
+  "default_policy_changed": false,
+  "pr2_changed": false
+}

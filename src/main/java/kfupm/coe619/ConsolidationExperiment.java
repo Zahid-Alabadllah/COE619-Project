@@ -242,8 +242,39 @@ public final class ConsolidationExperiment {
             System.out.printf(Locale.ROOT, "POWER_AUDIT scenario=%s policy=%s inactiveWorkSamples=%d%n",
                 config.scenario(), config.policy(), inactiveWorkSamples);
         }
+        auditPlacement();
         exportForecastObservations();
         return computeResult(dc, cloudlets);
+    }
+
+    /** End-window correctness check only; never changes the migration policy. */
+    private void auditPlacement() {
+        if (!Boolean.getBoolean("coe619.auditPlacement")) return;
+        final Map<Vm, Integer> copies = new java.util.IdentityHashMap<>();
+        int repeated = 0, wrongHost = 0, overCapacity = 0, missing = 0, crossHost = 0, notCreated = 0;
+        for (final Host host : hosts) {
+            final var seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<Vm, Boolean>());
+            double reserved = 0;
+            for (final Vm vm : host.getVmList()) {
+                if (!seen.add(vm)) repeated++;
+                copies.merge(vm, 1, Integer::sum);
+                if (!vm.isCreated() && !vm.isInMigration()) notCreated++;
+                reserved += vm.getTotalMipsCapacity();
+                if (vm.getHost() != host && !host.getVmsMigratingIn().contains(vm)) wrongHost++;
+            }
+            if (reserved > host.getTotalMipsCapacity() + 1e-9) overCapacity++;
+        }
+        for (int i = 0; i < vms.size(); i++) {
+            final Vm vm = vms.get(i);
+            final int count = copies.getOrDefault(vm, 0);
+            if (count > 1 && !vm.isInMigration()) crossHost++;
+            if (cloudletList.get(i).getStatus() != Cloudlet.Status.SUCCESS && count == 0) missing++;
+        }
+        System.out.printf(Locale.ROOT,
+            "PLACEMENT_AUDIT scenario=%s policy=%s repeatedEntries=%d crossHostWithoutMigration=%d wrongHost=%d overCapacity=%d missingUnfinished=%d residentNotCreated=%d%n",
+            config.scenario(), config.policy(), repeated, crossHost, wrongHost, overCapacity, missing, notCreated);
+        if (repeated + crossHost + wrongHost + overCapacity + missing + notCreated != 0)
+            throw new IllegalStateException("Invalid end-window placement; do not use these experiment metrics");
     }
 
     /** Evaluation-only export; the predictor never reads this future observation file. */

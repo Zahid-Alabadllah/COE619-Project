@@ -5,6 +5,7 @@ param(
     [switch]$StablePlanning,
     [switch]$FullDay,
     [switch]$AuditPower,
+    [switch]$AuditPlacement,
     [switch]$DecisionAudit,
     [switch]$NoMigrations,
     [switch]$MixedJobs,
@@ -35,6 +36,7 @@ try {
     if ($Model -eq 'mean_guard') { $properties += ' -Dcoe619.meanForecast=true' }
     if ($Model -eq 'robust_guard') { $properties += ' -Dcoe619.robustForecast=true' }
     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
+    if ($AuditPlacement) { $properties += ' -Dcoe619.auditPlacement=true' }
     if ($AuditPower) { $properties += ' -Dcoe619.auditPower=true' }
     if ($DecisionAudit) { $properties += ' -Dcoe619.predictorDiagnostics=true' }
     if ($NoMigrations) { $properties += ' -Dcoe619.noMigrations=true' }
@@ -58,6 +60,7 @@ try {
         started_utc=$started; completed_utc=(Get-Date).ToUniversalTime().ToString('o')
         day=$Day; model=$Model; java_options=$properties; framework_fix=$true; stable_planning=$StablePlanning.IsPresent; full_day=$FullDay.IsPresent
         cloudlet_length_mi_per_pe=$(if ($FullDay) { 1000000000 } else { 20000000 })
+        placement_audit=$AuditPlacement.IsPresent
         power_audit=$AuditPower.IsPresent; idle_shutdown_seconds=$IdleShutdownSeconds
         decision_audit=$DecisionAudit.IsPresent; migrations_disabled=$NoMigrations.IsPresent; mixed_jobs=$MixedJobs.IsPresent
         energy_demand_window_seconds=$(if ($MixedJobs) { @(0,86400) } else { $null })

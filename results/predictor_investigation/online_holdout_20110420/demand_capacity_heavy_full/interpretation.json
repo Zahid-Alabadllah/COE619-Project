@@ -1,0 +1,7 @@
+{
+  "status": "invalid_placement",
+  "note": "Duplicate resident VM references later confirmed by the identical residents audit run; do not interpret energy as policy quality.",
+  "date": "2026-11-23",
+  "default_policy_changed": false,
+  "pr2_changed": false
+}

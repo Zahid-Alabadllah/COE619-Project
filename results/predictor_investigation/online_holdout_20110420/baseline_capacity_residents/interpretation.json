@@ -1,0 +1,7 @@
+{
+  "status": "diagnostic_baseline",
+  "note": "Original heavy policy restored: four unfinished long VMs appear once each on two hosts. End-state check only.",
+  "date": "2026-11-23",
+  "default_policy_changed": false,
+  "pr2_changed": false
+}

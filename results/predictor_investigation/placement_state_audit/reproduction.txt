@@ -1,0 +1,4 @@
+Command: compile scripts/research/UnderloadPlanningCheck.java against unchanged CloudSim Plus8.0.0 and run kfupm.coe619.UnderloadPlanningCheck.
+REPRODUCED: planning added the same VM to two physical host lists before migration started.
+Source contains VM=true; target contains VM=true; migration=false
+The fixture calls the private underload planning method with a mutable map, so the separate immutable-map repair is not responsible.

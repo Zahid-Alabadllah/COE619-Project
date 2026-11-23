@@ -1,0 +1,4 @@
+[34mINFO  0.00: VmAllocationPolicy: Underloaded hosts: Host 0/DC 1
+[0;39m[34mINFO  0.00: VmAllocationPolicy: VMs to be reallocated from the underloaded Host 0/DC 1: 0
+[0;39mREPRODUCED: planning added the same VM to two physical host lists before migration started.
+Source contains VM=true; target contains VM=true; migration=false

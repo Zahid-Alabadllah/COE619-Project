@@ -1,0 +1,7 @@
+{
+  "status": "exploratory_unmatched_workload",
+  "note": "No FullDay flag: long jobs20million MI, unlike the1billion MI baseline. Not a paired energy comparison.",
+  "date": "2026-11-23",
+  "default_policy_changed": false,
+  "pr2_changed": false
+}

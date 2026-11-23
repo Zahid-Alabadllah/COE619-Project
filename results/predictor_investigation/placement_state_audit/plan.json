@@ -1,0 +1,16 @@
+{
+  "recorded": "2026-11-23",
+  "type": "retrospective experiment inventory, not preregistration",
+  "patch_base_commit": "26ebac8",
+  "prototype_patch": "scripts/research/attempts/demand_underload_restoration_20261123.patch",
+  "hypothesis": "A shared destination CPU-demand rule could remove the reserved-capacity packing barrier.",
+  "observed_blocker": "Underload planning mutates physical placement; naive generic restoration loses work.",
+  "acceptance_criteria": [
+    "same input workload and24h window",
+    "no duplicated/missing unfinished VMs",
+    "same completed-job counts before comparing energy",
+    "power invariants",
+    "reactive ablation before predictive attribution"
+  ],
+  "outcome": "Rejected all placement/restoration prototypes; retained only opt-in observational correctness audit. No prediction gain or energy saving claimed."
+}

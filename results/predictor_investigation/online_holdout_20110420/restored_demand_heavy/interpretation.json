@@ -1,0 +1,7 @@
+{
+  "status": "invalid_lost_work",
+  "note": "Generic save/restore attempt loses unfinished VMs and completes only6short jobs instead of12; lower energy is invalid.",
+  "date": "2026-11-23",
+  "default_policy_changed": false,
+  "pr2_changed": false
+}
