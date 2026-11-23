@@ -1,0 +1,151 @@
+15420:
+2026-11-23 03:04:12
+Full thread dump OpenJDK 64-Bit Server VM (25.0.2+10-LTS mixed mode, sharing):
+
+Threads class SMR info:
+_java_thread_list=0x000001966eec8290, length=11, elements={
+0x000001964648c3e0, 0x000001966580aa40, 0x000001966580b4a0, 0x000001966580d590,
+0x000001966580f2b0, 0x0000019665811e80, 0x00000196658151f0, 0x0000019665816880,
+0x0000019665831520, 0x0000019668183140, 0x000001966818dd80
+}
+
+"main" #3 [17492] prio=5 os_prio=0 cpu=52437.50ms elapsed=226.35s tid=0x000001964648c3e0 nid=17492 runnable  [0x000000255a5fd000]
+   java.lang.Thread.State: RUNNABLE
+	at java.util.stream.AbstractPipeline.wrapSink(java.base@25.0.2/AbstractPipeline.java:608)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.2/AbstractPipeline.java:560)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(java.base@25.0.2/ReduceOps.java:921)
+	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.2/AbstractPipeline.java:265)
+	at java.util.stream.LongPipeline.reduce(java.base@25.0.2/LongPipeline.java:501)
+	at java.util.stream.LongPipeline.sum(java.base@25.0.2/LongPipeline.java:459)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract.totalAllExecCloudletsPes(CloudletSchedulerAbstract.java:181)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract.getAvailableMipsByPe(CloudletSchedulerAbstract.java:162)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract.getAbsoluteCloudletCpuUtilizationForAllPes(CloudletSchedulerAbstract.java:1124)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract.lambda$getRequestedOrAllocatedCpuPercentUtilization$14(CloudletSchedulerAbstract.java:1109)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract$$Lambda/0x00000000121061c0.applyAsDouble(Unknown Source)
+	at java.util.stream.ReferencePipeline$6$1.accept(java.base@25.0.2/ReferencePipeline.java:265)
+	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.2/ReferencePipeline.java:214)
+	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(java.base@25.0.2/ArrayList.java:1716)
+	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.2/AbstractPipeline.java:570)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.2/AbstractPipeline.java:560)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(java.base@25.0.2/ReduceOps.java:921)
+	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.2/AbstractPipeline.java:265)
+	at java.util.stream.DoublePipeline.collect(java.base@25.0.2/DoublePipeline.java:544)
+	at java.util.stream.DoublePipeline.sum(java.base@25.0.2/DoublePipeline.java:453)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract.getRequestedOrAllocatedCpuPercentUtilization(CloudletSchedulerAbstract.java:1110)
+	at org.cloudsimplus.schedulers.cloudlet.CloudletSchedulerAbstract.getAllocatedCpuPercent(CloudletSchedulerAbstract.java:1103)
+	at org.cloudsimplus.vms.VmSimple.getCpuPercentUtilization(VmSimple.java:367)
+	at org.cloudsimplus.vms.VmSimple.getTotalCpuMipsUtilization(VmSimple.java:407)
+	at org.cloudsimplus.vms.VmSimple.getTotalCpuMipsUtilization(VmSimple.java:402)
+	at org.cloudsimplus.hosts.HostSimple$$Lambda/0x0000000012105d50.applyAsDouble(Unknown Source)
+	at java.util.stream.ReferencePipeline$6$1.accept(java.base@25.0.2/ReferencePipeline.java:265)
+	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(java.base@25.0.2/ArrayList.java:1716)
+	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.2/AbstractPipeline.java:570)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.2/AbstractPipeline.java:560)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(java.base@25.0.2/ReduceOps.java:921)
+	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.2/AbstractPipeline.java:265)
+	at java.util.stream.DoublePipeline.collect(java.base@25.0.2/DoublePipeline.java:544)
+	at java.util.stream.DoublePipeline.sum(java.base@25.0.2/DoublePipeline.java:453)
+	at org.cloudsimplus.hosts.HostSimple.getCpuMipsUtilization(HostSimple.java:1167)
+	at org.cloudsimplus.hosts.HostSimple.addStateHistory(HostSimple.java:1269)
+	at org.cloudsimplus.hosts.HostSimple.updateProcessing(HostSimple.java:393)
+	at kfupm.coe619.ConsolidationExperiment$MigrationAwareHost.updateProcessing(ConsolidationExperiment.java:72)
+	at org.cloudsimplus.datacenters.DatacenterSimple.updateHostsProcessing(DatacenterSimple.java:733)
+	at org.cloudsimplus.datacenters.DatacenterSimple.updateCloudletProcessing(DatacenterSimple.java:762)
+	at org.cloudsimplus.datacenters.DatacenterSimple.processVmEvents(DatacenterSimple.java:334)
+	at org.cloudsimplus.datacenters.DatacenterSimple.processEvent(DatacenterSimple.java:239)
+	at org.cloudsimplus.core.CloudSimEntity.run(CloudSimEntity.java:321)
+	at org.cloudsimplus.core.CloudSim.executeRunnableEntities(CloudSim.java:493)
+	at org.cloudsimplus.core.CloudSim.runClockTickAndProcessFutureEvents(CloudSim.java:416)
+	at org.cloudsimplus.core.CloudSim.notifyEndOfSimulationToEntities(CloudSim.java:296)
+	at org.cloudsimplus.core.CloudSim.finish(CloudSim.java:180)
+	at org.cloudsimplus.core.CloudSim.start(CloudSim.java:217)
+	at org.cloudsimplus.core.CloudSimPlus.start(CloudSimPlus.java:38)
+	at kfupm.coe619.ConsolidationExperiment.execute(ConsolidationExperiment.java:214)
+	at kfupm.coe619.ConsolidationExperiment.run(ConsolidationExperiment.java:167)
+	at kfupm.coe619.ExperimentRunner.main(ExperimentRunner.java:43)
+
+"Reference Handler" #14 [22776] daemon prio=10 os_prio=2 cpu=0.00ms elapsed=226.32s tid=0x000001966580aa40 nid=22776 waiting on condition  [0x000000255adff000]
+   java.lang.Thread.State: RUNNABLE
+	at java.lang.ref.Reference.waitForReferencePendingList(java.base@25.0.2/Native Method)
+	at java.lang.ref.Reference.processPendingReferences(java.base@25.0.2/Reference.java:246)
+	at java.lang.ref.Reference$ReferenceHandler.run(java.base@25.0.2/Reference.java:208)
+
+"Finalizer" #15 [7052] daemon prio=8 os_prio=1 cpu=0.00ms elapsed=226.32s tid=0x000001966580b4a0 nid=7052 in Object.wait()  [0x000000255aeff000]
+   java.lang.Thread.State: WAITING (on object monitor)
+	at java.lang.Object.wait0(java.base@25.0.2/Native Method)
+	- waiting on <0x0000000703000078> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.Object.wait(java.base@25.0.2/Object.java:389)
+	at java.lang.Object.wait(java.base@25.0.2/Object.java:351)
+	at java.lang.ref.ReferenceQueue.remove0(java.base@25.0.2/ReferenceQueue.java:137)
+	at java.lang.ref.ReferenceQueue.remove(java.base@25.0.2/ReferenceQueue.java:215)
+	- locked <0x0000000703000078> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.Finalizer$FinalizerThread.run(java.base@25.0.2/Finalizer.java:165)
+
+"Signal Dispatcher" #16 [12520] daemon prio=9 os_prio=2 cpu=0.00ms elapsed=226.32s tid=0x000001966580d590 nid=12520 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Attach Listener" #17 [11316] daemon prio=5 os_prio=2 cpu=0.00ms elapsed=226.32s tid=0x000001966580f2b0 nid=11316 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Service Thread" #18 [18332] daemon prio=9 os_prio=0 cpu=15.62ms elapsed=226.32s tid=0x0000019665811e80 nid=18332 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Monitor Deflation Thread" #19 [21904] daemon prio=9 os_prio=0 cpu=0.00ms elapsed=226.32s tid=0x00000196658151f0 nid=21904 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"C2 CompilerThread0" #20 [8740] daemon prio=9 os_prio=2 cpu=2984.38ms elapsed=226.32s tid=0x0000019665816880 nid=8740 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"C1 CompilerThread0" #23 [6808] daemon prio=9 os_prio=2 cpu=703.12ms elapsed=226.32s tid=0x0000019665831520 nid=6808 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"Notification Thread" #24 [22624] daemon prio=9 os_prio=0 cpu=0.00ms elapsed=226.31s tid=0x0000019668183140 nid=22624 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Common-Cleaner" #25 [24300] daemon prio=8 os_prio=1 cpu=0.00ms elapsed=226.29s tid=0x000001966818dd80 nid=24300 in Object.wait()  [0x000000255b6ff000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait0(java.base@25.0.2/Native Method)
+	- waiting on <0x0000000703002040> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.Object.wait(java.base@25.0.2/Object.java:389)
+	at java.lang.ref.ReferenceQueue.remove0(java.base@25.0.2/ReferenceQueue.java:123)
+	at java.lang.ref.ReferenceQueue.remove(java.base@25.0.2/ReferenceQueue.java:201)
+	- locked <0x0000000703002040> (a java.lang.ref.ReferenceQueue$Lock)
+	at jdk.internal.ref.CleanerImpl.run(java.base@25.0.2/CleanerImpl.java:146)
+	at java.lang.Thread.runWith(java.base@25.0.2/Thread.java:1487)
+	at java.lang.Thread.run(java.base@25.0.2/Thread.java:1474)
+	at jdk.internal.misc.InnocuousThread.run(java.base@25.0.2/InnocuousThread.java:148)
+
+"G1 Conc#1" os_prio=2 cpu=20343.75ms elapsed=196.93s tid=0x0000019668d94eb0 nid=11560 runnable  
+
+"GC Thread#7" os_prio=2 cpu=130187.50ms elapsed=222.77s tid=0x0000019668d93d70 nid=23520 runnable  
+
+"GC Thread#6" os_prio=2 cpu=128312.50ms elapsed=222.77s tid=0x0000019668d941c0 nid=16156 runnable  
+
+"GC Thread#5" os_prio=2 cpu=131109.38ms elapsed=225.37s tid=0x0000019668d95300 nid=6556 runnable  
+
+"GC Thread#4" os_prio=2 cpu=130156.25ms elapsed=225.37s tid=0x0000019668d45fb0 nid=12880 runnable  
+
+"GC Thread#3" os_prio=2 cpu=127765.62ms elapsed=225.37s tid=0x0000019668d45b80 nid=24304 runnable  
+
+"GC Thread#2" os_prio=2 cpu=131406.25ms elapsed=225.37s tid=0x0000019668d45340 nid=8624 runnable  
+
+"GC Thread#1" os_prio=2 cpu=135390.62ms elapsed=225.37s tid=0x0000019668d44f10 nid=21112 runnable  
+
+"VM Thread" os_prio=2 cpu=562.50ms elapsed=226.33s tid=0x00000196657f7250 nid=1584 runnable  
+
+"VM Periodic Task Thread" os_prio=2 cpu=15.62ms elapsed=226.34s tid=0x00000196657e6460 nid=11676 waiting on condition  
+
+"G1 Service" os_prio=2 cpu=46.88ms elapsed=226.35s tid=0x00000196656b17b0 nid=23836 runnable  
+
+"G1 Refine#0" os_prio=2 cpu=0.00ms elapsed=226.35s tid=0x00000196656aec90 nid=6420 runnable  
+
+"G1 Conc#0" os_prio=2 cpu=20234.38ms elapsed=226.35s tid=0x00000196656927b0 nid=4220 runnable  
+
+"G1 Main Marker" os_prio=2 cpu=0.00ms elapsed=226.35s tid=0x0000019648997240 nid=16592 runnable  
+
+"GC Thread#0" os_prio=2 cpu=125875.00ms elapsed=226.35s tid=0x00000196489817d0 nid=18224 runnable  
+
+JNI global refs: 8, weak refs: 0
+

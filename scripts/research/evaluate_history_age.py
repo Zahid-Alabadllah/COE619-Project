@@ -31,7 +31,7 @@ def main():
             duplicates+=issued_key in issued
             issued[issued_key]=age
         elif line.startswith('FORECAST_ERROR'):
-            m=re.search(r'host=(\d+) target=([\d.]+) actual=([-+\d.]+) forecast=([-+\d.]+) persistence=([-+\d.]+)',line)
+            m=re.search(r'host=(\d+) target=([\d.]+) actual=([-+\deE.]+) forecast=([-+\deE.]+) persistence=([-+\deE.]+)',line)
             key=m[1],m[2]
             if key not in inputs:continue
             age=inputs[key]
@@ -75,3 +75,4 @@ def main():
 
 
 if __name__=='__main__':main()
+

@@ -1,0 +1,6 @@
+{
+  "status": "Stopped incomplete; no final comparison CSV, not an energy result",
+  "cause": "Framework finish drains future events without rechecking termination; new scale-in planning continued beyond requested86400seconds",
+  "last_observed_clock_s": 395100.978,
+  "action": "Stopped verified owned JVM and launcher, cleared framework override; will stop migrations at the benchmark horizon"
+}

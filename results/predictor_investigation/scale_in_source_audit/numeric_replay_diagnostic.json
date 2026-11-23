@@ -1,0 +1,17 @@
+{
+  "legacy_log": "bounded_after_scalein_cleanup",
+  "case": "real_c",
+  "host": 4,
+  "target": 52800.683,
+  "rounded_log_reconstructed_loss_difference": -5.551115123125783e-17,
+  "resolution": "Round-trip double diagnostics and sequential Java-like loss accumulation; no forecaster decision code changed",
+  "precise_forecasts_checked": 17774,
+  "max_replay_difference": 0,
+  "scored_active_targets": 10711,
+  "exclusions": {
+    "migration": 174,
+    "missing_sample": 6818,
+    "pending_at_end": 71
+  },
+  "unaccounted": 0
+}

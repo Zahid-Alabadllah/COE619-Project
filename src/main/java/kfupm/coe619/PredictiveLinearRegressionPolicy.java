@@ -287,7 +287,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                     System.out.printf(java.util.Locale.ROOT, "FORECAST_BLEND host=%d target=%.3f weight=%.12f online=%s model=%s%n",
                         host.getId(), target, weight, online, robustModel ? "robust_selected" : meanModel ? "mean_selected_bounded" : "trend");
                     if (robustModel) System.out.printf(java.util.Locale.ROOT,
-                        "FORECAST_ROBUST host=%d target=%.3f raw=%.12f selected=%.12f%n", host.getId(), target, robust[0], robust[1]);
+                        "FORECAST_ROBUST host=%d target=%.3f raw=%s selected=%s%n", host.getId(), target, robust[0], robust[1]);
                 }
             }
         }
@@ -346,7 +346,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
                         }
                         if (Boolean.getBoolean("coe619.evaluateForecast")) {
                             System.out.printf(java.util.Locale.ROOT,
-                                "FORECAST_ERROR host=%d target=%.3f actual=%.12f forecast=%.12f persistence=%.12f%n",
+                                "FORECAST_ERROR host=%d target=%.3f actual=%s forecast=%s persistence=%s%n",
                                 host.getId(), item.target(), observed, item.estimate(), item.naive());
                         }
                         iterator.remove();

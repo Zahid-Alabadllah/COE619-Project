@@ -1,0 +1,40 @@
+{
+  "started_utc": "2026-11-23T00:05:50.9322153Z",
+  "completed_utc": "2026-11-23T00:06:02.7212750Z",
+  "day": "20110420",
+  "model": "control",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.disableForecast=true -Dcoe619.fullDay=true -Dcoe619.auditPower=true -Dcoe619.noMigrations=true -Dcoe619.mixedJobs=true -Dcoe619.idleShutdownSeconds=0 -Dcoe619.powerGuard=true -Dcoe619.researchWorkloads=results/predictor_investigation/online_holdout_20110420/manifests",
+  "framework_fix": true,
+  "stable_planning": true,
+  "full_day": true,
+  "cloudlet_length_mi_per_pe": 1000000000,
+  "power_audit": true,
+  "idle_shutdown_seconds": 0,
+  "decision_audit": false,
+  "migrations_disabled": true,
+  "mixed_jobs": true,
+  "scale_in": "none",
+  "energy_demand_window_seconds": [
+    0,
+    86400
+  ],
+  "short_cloudlet_length_mi_per_pe": 5000000,
+  "completed_vm_destruction_delay_seconds": 1,
+  "power_guard": true,
+  "frozen_csv_sha256": "3C288CDC4150CA10CA874354921FF15563AB6FCE092EBD485BEF49144069B652",
+  "frozen_pr2_sha256": "175CA9F545ADB1E16D77D0FF5DC3E4895CF9B9AE33D247E6A16AC911085A75DA",
+  "code_commit": "0aff4c9b24460a7b0672fae55d58c169457b5e41",
+  "code_status": [
+    " M scripts/research/run_forecast_validation.ps1",
+    " M src/main/java/kfupm/coe619/ConsolidationExperiment.java",
+    " M src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java",
+    "?? .maintenance-check.json",
+    "?? results/predictor_investigation/online_holdout_20110420/bounded_scalein_baseline/",
+    "?? results/predictor_investigation/online_holdout_20110420/bounded_scalein_current/",
+    "?? results/predictor_investigation/online_holdout_20110420/bounded_scalein_forecast/",
+    "?? results/predictor_investigation/online_holdout_20110420/bounded_scalein_no_migration/",
+    "?? results/predictor_investigation/scale_in_source_audit/",
+    "?? scripts/research/ScaleInRoleRegression.java",
+    "?? src/main/resources/planetlab/active/"
+  ]
+}

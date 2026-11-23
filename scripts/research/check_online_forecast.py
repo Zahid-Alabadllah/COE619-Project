@@ -84,7 +84,7 @@ def main():
                 inputs[host,target_text]['mean_selected'] = mean if choose_mean else trend
                 checks += 1
             elif line.startswith('FORECAST_ERROR'):
-                match = re.search(r'host=(\d+) target=([\d.]+) actual=([-+\d.]+) forecast=([-+\d.]+) persistence=([-+\d.]+)', line)
+                match = re.search(r'host=(\d+) target=([\d.]+) actual=([-+\deE.]+) forecast=([-+\deE.]+) persistence=([-+\deE.]+)', line)
                 host, target_text, actual_text, predicted_text, latest_text = match.groups()
                 actual, predicted = float(actual_text), float(predicted_text)
                 row = inputs[host, target_text]
@@ -136,3 +136,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

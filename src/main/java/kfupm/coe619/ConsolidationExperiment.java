@@ -172,7 +172,8 @@ public final class ConsolidationExperiment {
         if (Boolean.getBoolean("coe619.evaluateForecast")) {
             System.out.println("CASE_START scenario=" + config.scenario() + " policy=" + config.policy());
         }
-        simulation.terminateAt(config.durationSeconds());
+        final boolean boundedObservation = Boolean.getBoolean("coe619.mixedJobs");
+        if (!boundedObservation) simulation.terminateAt(config.durationSeconds());
 
         final DatacenterSimple dc = createDatacenter();
         broker = new DatacenterBrokerSimple(simulation);
@@ -199,9 +200,33 @@ public final class ConsolidationExperiment {
 
         final int n = vms.size();
         cloudletList = cloudlets;
-        simulation.addOnClockTickListener(info -> sampleDemand(info.getTime()));
+        simulation.addOnClockTickListener(info -> {
+            // The framework drains pending events after terminateAt. New experimental
+            // migrations must not create further work outside their measurement window.
+            if (Boolean.getBoolean("coe619.mixedJobs")
+                && info.getTime() >= config.durationSeconds() && dc.isMigrationsEnabled()) {
+                dc.disableMigrations();
+                System.out.printf(Locale.ROOT, "MIGRATION_HORIZON_REACHED time=%.3f limit=%.3f%n",
+                    info.getTime(), config.durationSeconds());
+            }
+            sampleDemand(info.getTime());
+        });
 
-        simulation.start();
+        if (boundedObservation) {
+            // Public synchronous API avoids the framework's unbounded final-event
+            // drain when an experimental policy keeps scheduling future actions.
+            simulation.startSync();
+            while (simulation.clock() < config.durationSeconds()) {
+                simulation.runFor(config.durationSeconds() - simulation.clock());
+            }
+            dc.disableMigrations();
+            hosts.forEach(host -> host.updateProcessing(config.durationSeconds()));
+            sampleDemand(config.durationSeconds());
+            simulation.abort(); // intentional observation cutoff, not a failed experiment
+            System.out.printf(Locale.ROOT, "BOUNDED_OBSERVATION_COMPLETE time=%.3f%n", simulation.clock());
+        } else {
+            simulation.start();
+        }
 
         if (Boolean.getBoolean("coe619.evaluateForecast") && allocationPolicy instanceof PredictiveLinearRegressionPolicy predictor) {
             predictor.finishForecastEvaluation();

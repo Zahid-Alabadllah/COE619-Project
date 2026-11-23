@@ -123,3 +123,24 @@ Validated results: online_holdout_20110420/mixed_jobs_windowed and mixed_jobs_wi
 ```
 
 Use new labels to preserve earlier evidence. The next targeted question is whether forecast-aware source selection or shutdown timing adds anything beyond an equally informed reactive rule. The library's isUnderloaded is used for both source selection and destination filtering; modifying it globally can accidentally exclude all candidate destinations. Investigate those roles separately before another policy change. No further reserved Bitbrains outcomes have been used.
+
+## 23 November continuation - Source-role test and exact observation
+Tested supplementing source-host underload detection with either current allocated CPU or the frozen robust forecast, using the existing35% underload setting. Destination filtering and physical admission stayed unchanged. A standalone test verified source/destination separation, current-CPU ablation, stale/membership guards and exception-safe role restoration. This is exploratory reuse of the same lifecycle benchmark, with no further reserved VM data opened.
+
+The first attempts did not complete normally: the framework's shutdown routine drains future events without rechecking the requested termination time. Disabling new migrations at the horizon was insufficient because cloudlet-processing events continued. Those attempts were stopped, their logs/patches saved as incomplete, and no final comparison was claimed from them.
+
+MixedJobs now uses the public startSync/runFor API to observe exactly86400seconds, updates host state at that boundary, and intentionally stops without the final-event drain. This is a bounded observation of unfinished long jobs, not a claim that all jobs finished. All compared variants use the same stopping rule; default non-MixedJobs behavior is unchanged. The latest baseline/reference are bounded_roundtrip_audit and bounded_scalein_no_migration. Earlier windowed studies remain historical measurements under graceful shutdown and must not be silently mixed with this exact-stop protocol.
+
+| Exact-day case | Established robust policy kWh | Forecast-source variant | Current-CPU source control |
+|---|---:|---:|---:|
+| Day/night |6.000442|9.402495|9.780807|
+| Heavy |10.837014|11.180551|11.182174|
+
+Both new variants lose to the established policy. Several runs record different energy despite zero completed migrations; planning/probe timing or state effects therefore remain a concern. Do not attribute small forecast-versus-current differences to proven predictive utility. The source-rule option was removed, with exact patch against0aff4c9 retained at scripts/research/attempts/source_scalein.patch and its standalone test archived in scale_in_source_audit. Active code retains only the bounded-observation and diagnostic improvements, not the unsuccessful scale-in policy.
+
+Seven completed batches pass210 recorded power checks. All exact-observation rows stop at86400.0. Removing the rule leaves the full15-row baseline CSV byte-identical, and the original non-MixedJobs benchmark CSV is also byte-identical to its prior reference. The archived failed attempts are not included in those successful-check counts.
+
+Replay initially exposed a near-tie: cumulative losses differed by only5.55e-17 when reconstructed from rounded logs. Actual CPU, forecasts and raw robust estimates are now serialized with round-trip double precision; parsers accept scientific notation. The independent verifier uses the same sequential IEEE-754 loss accumulation as Java. With these diagnostics, all17,774 issued forecasts replay exactly (maximum difference0), and the CSV is unchanged. This is a logging/verifier correction, not a new predictor or accuracy gain. Older12-decimal logs can be insufficient to resolve a tied model choice.
+
+Coverage matters:10,711 of those forecasts have matched active-host target readings;174 are excluded after migration,6,818 lack a matching active sample, and71 remain pending when observation stops (not all are future targets). None is unexplained. Many unscored calls reuse old active history after a host empties; the reported MAE is conditional on matched active targets, not a full-trajectory result. The next measurement task should define eligibility and handling of targets spanning VM completion fairly, rather than silently dropping hard targets or searching more models on these same scores. Point forecasting itself remains unchanged, and predictive energy advantage is unresolved.
+

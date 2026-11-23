@@ -59,6 +59,7 @@ def main():
         candidates += [p for p in target.iterdir() if p.is_file() and (p.suffix==".png" or p.name.endswith("-build.txt") or p.name=="demo-verification.log")]
     candidates+=list(ROOT.glob(".chart-data-*"))
     candidates += [CODE/'scripts/research/__pycache__']
+    candidates += [target/'forecast-20110420-mixed_scalein_forecast.log']
     candidates += [p for p in (CODE/"docs").rglob("*") if p.is_file() and p.suffix in (".aux",".out",".log",".toc",".fls",".fdb_latexmk")]
     candidates += [CODE/n for n in ("target-demo.log","target-stats.log","fixed-workloads.log","fixed-repeat.log","fixed-stats.log","source-cleanup-verification.log","source-compile-check.log","five-files-check.log")]
     total=0

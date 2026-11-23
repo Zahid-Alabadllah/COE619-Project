@@ -1,0 +1,113 @@
+diff --git a/scripts/research/run_forecast_validation.ps1 b/scripts/research/run_forecast_validation.ps1
+index baa3863..4222d11 100644
+--- a/scripts/research/run_forecast_validation.ps1
++++ b/scripts/research/run_forecast_validation.ps1
+@@ -8,10 +8,12 @@ param(
+     [switch]$DecisionAudit,
+     [switch]$NoMigrations,
+     [switch]$MixedJobs,
++    [ValidateSet('none','current','forecast')][string]$ScaleIn='none',
+     [ValidateRange(0,86400)][int]$IdleShutdownSeconds=0,
+     [switch]$PowerGuard=$true
+ )
+ $ErrorActionPreference = 'Stop'
++if ($ScaleIn -ne 'none' -and $Model -ne 'robust_guard') { throw 'Scale-in comparisons require robust_guard' }
+ $codeRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+ Push-Location $codeRoot
+ $priorJavaOptions = $env:JAVA_TOOL_OPTIONS
+@@ -34,6 +36,7 @@ try {
+     if ($DecisionAudit) { $properties += ' -Dcoe619.predictorDiagnostics=true' }
+     if ($NoMigrations) { $properties += ' -Dcoe619.noMigrations=true' }
+     if ($MixedJobs) { $properties += ' -Dcoe619.mixedJobs=true' }
++    if ($ScaleIn -ne 'none') { $properties += " -Dcoe619.scaleInMode=$ScaleIn" }
+     $properties += " -Dcoe619.idleShutdownSeconds=$IdleShutdownSeconds"
+     $properties += " -Dcoe619.powerGuard=$($PowerGuard.IsPresent.ToString().ToLowerInvariant())"
+     $properties += " -Dcoe619.researchWorkloads=$root/manifests"
+@@ -53,6 +56,7 @@ try {
+         cloudlet_length_mi_per_pe=$(if ($FullDay) { 1000000000 } else { 20000000 })
+         power_audit=$AuditPower.IsPresent; idle_shutdown_seconds=$IdleShutdownSeconds
+         decision_audit=$DecisionAudit.IsPresent; migrations_disabled=$NoMigrations.IsPresent; mixed_jobs=$MixedJobs.IsPresent
++        scale_in=$ScaleIn
+         energy_demand_window_seconds=$(if ($MixedJobs) { @(0,86400) } else { $null })
+         short_cloudlet_length_mi_per_pe=$(if ($MixedJobs) { 5000000 } else { $null })
+         completed_vm_destruction_delay_seconds=$(if ($MixedJobs) { 1 } else { $null })
+diff --git a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+index c62561a..39d3d35 100644
+--- a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
++++ b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+@@ -52,6 +52,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+     private final Map<Long, List<Pending>> pending = new HashMap<>();
+     private final Map<Long, OnlineBlend> onlineBlends = new HashMap<>();
+     private final Map<Long, List<? extends Vm>> originalPlanningVms = new HashMap<>();
++    private record ScaleInSnapshot(double time, double current, double forecast) { }
++    private final Map<Long, ScaleInSnapshot> scaleInSnapshots = new HashMap<>();
++    private boolean selectingDestination;
+     private long predictionCount;
+ 
+     /**
+@@ -164,6 +167,7 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+     public void resetAfterMigration(final Host host, final double time) {
+         generation.merge(host.getId(), 1L, Long::sum);
+         robustPairs.remove(host.getId());
++        scaleInSnapshots.remove(host.getId());
+         if (Boolean.getBoolean("coe619.robustForecast") && Boolean.getBoolean("coe619.evaluateForecast")) {
+             System.out.printf(java.util.Locale.ROOT, "FORECAST_ROBUST_RESET host=%d time=%.3f%n", host.getId(), time);
+         }
+@@ -206,7 +210,8 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+ 
+     @Override
+     public Map<Vm, Host> getOptimizedAllocationMap(final List<? extends Vm> vmList) {
+-        if (!Boolean.getBoolean("coe619.planningHistoryGuard")) return super.getOptimizedAllocationMap(vmList);
++        if (!Boolean.getBoolean("coe619.planningHistoryGuard") && System.getProperty("coe619.scaleInMode") == null)
++            return super.getOptimizedAllocationMap(vmList);
+         for (final Host host : getHostList()) {
+             originalPlanningVms.put(host.getId(), List.copyOf(host.getVmList()));
+         }
+@@ -217,6 +222,37 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+         }
+     }
+ 
++    @Override
++    protected java.util.Optional<Host> findHostForVmInternal(final Vm vm, final java.util.function.Predicate<Host> predicate) {
++        final boolean previous = selectingDestination;
++        selectingDestination = true;
++        try {
++            return super.findHostForVmInternal(vm, predicate);
++        } finally {
++            selectingDestination = previous;
++        }
++    }
++
++    @Override
++    public boolean isUnderloaded(final Host host) {
++        final boolean baseline = super.isUnderloaded(host);
++        final String mode = System.getProperty("coe619.scaleInMode");
++        if (baseline || selectingDestination || mode == null) return baseline;
++        final ScaleInSnapshot snapshot = scaleInSnapshots.get(host.getId());
++        final List<? extends Vm> original = originalPlanningVms.get(host.getId());
++        if (snapshot == null || original == null || original.isEmpty()
++            || Math.abs(snapshot.time() - host.getSimulation().clock()) > 1e-6
++            || host.getVmList().size() != original.size() || !host.getVmList().containsAll(original)) return false;
++        final double value = "forecast".equals(mode) ? snapshot.forecast() : snapshot.current();
++        final boolean underloaded = value < getUnderUtilizationThreshold();
++        if (underloaded && Boolean.getBoolean("coe619.evaluateForecast")) {
++            System.out.printf(java.util.Locale.ROOT,
++                "SCALE_IN_SOURCE host=%d time=%.3f mode=%s current=%.12f forecast=%.12f threshold=%.3f%n",
++                host.getId(), snapshot.time(), mode, snapshot.current(), snapshot.forecast(), getUnderUtilizationThreshold());
++        }
++        return underloaded;
++    }
++
+     @Override
+     public boolean isOverloaded(final Host host) {
+         final List<? extends Vm> original = originalPlanningVms.get(host.getId());
+@@ -267,6 +303,9 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+         final double[] robust = robustModel ? robustPairs.computeIfAbsent(host.getId(), id -> new RobustPairs())
+             .predict(now, samples.get(0)[1]) : new double[]{Double.NaN, Double.NaN};
+         final double forecast = robustModel ? robust[1] : meanModel ? Math.max(0, Math.min(1, selectedEstimate)) : selectedEstimate;
++        if (System.getProperty("coe619.scaleInMode") != null) {
++            scaleInSnapshots.put(host.getId(), new ScaleInSnapshot(now, samples.get(0)[1], forecast));
++        }
+         if (Boolean.getBoolean("coe619.evaluateForecast") || online) {
+             final List<Pending> queue = pending.computeIfAbsent(host.getId(), id -> new ArrayList<>());
+             final double target = now + horizonSeconds;

@@ -1,0 +1,67 @@
+package kfupm.coe619;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.cloudsimplus.core.CloudSimPlus;
+import org.cloudsimplus.datacenters.DatacenterSimple;
+import org.cloudsimplus.hosts.Host;
+import org.cloudsimplus.hosts.HostSimple;
+import org.cloudsimplus.resources.Pe;
+import org.cloudsimplus.resources.PeSimple;
+import org.cloudsimplus.schedulers.vm.VmSchedulerTimeShared;
+import org.cloudsimplus.selectionpolicies.VmSelectionPolicyMinimumMigrationTime;
+import org.cloudsimplus.vms.VmSimple;
+
+/** Checks the scientific distinction between source and destination underload tests. */
+public final class ScaleInRoleRegression {
+    @SuppressWarnings("unchecked")
+    public static void main(String[] args) throws Exception {
+        var sim=new CloudSimPlus();
+        List<Pe> pes=new ArrayList<>();
+        for(int i=0;i<8;i++)pes.add(new PeSimple(1000));
+        var host=new HostSimple(16384,10000,1000000,pes);
+        host.setRamProvisioner(new HostLocalResourceProvisioner(host.getRamProvisioner().getPmResource()));
+        host.setBwProvisioner(new HostLocalResourceProvisioner(host.getBwProvisioner().getPmResource()));
+        host.setVmScheduler(new VmSchedulerTimeShared());
+        var policy=new PredictiveLinearRegressionPolicy(new VmSelectionPolicyMinimumMigrationTime(),.8,10,300);
+        new DatacenterSimple(sim,List.of(host)).setVmAllocationPolicy(policy);
+        for(int i=0;i<2;i++)if(!host.createVm(new VmSimple(i,1000,2).setRam(2048).setBw(1000).setSize(10000)).fully())
+            throw new AssertionError("Fixture VM admission");
+        if(policy.isUnderloaded(host))throw new AssertionError("Reserved CPU is50%, above35%");
+        var snapshotsField=PredictiveLinearRegressionPolicy.class.getDeclaredField("scaleInSnapshots");
+        snapshotsField.setAccessible(true);
+        var snapshots=(Map<Long,Object>)snapshotsField.get(policy);
+        var originalsField=PredictiveLinearRegressionPolicy.class.getDeclaredField("originalPlanningVms");
+        originalsField.setAccessible(true);
+        var originals=(Map<Long,List<?>>)originalsField.get(policy);
+        originals.put(host.getId(),List.copyOf(host.getVmList()));
+        var constructor=Class.forName("kfupm.coe619.PredictiveLinearRegressionPolicy$ScaleInSnapshot")
+            .getDeclaredConstructor(double.class,double.class,double.class);
+        constructor.setAccessible(true);
+        snapshots.put(host.getId(),constructor.newInstance(0,.4,.1));
+        try {
+            System.setProperty("coe619.scaleInMode","forecast");
+            if(!policy.isUnderloaded(host))throw new AssertionError("Forecast source expected");
+            System.setProperty("coe619.scaleInMode","current");
+            if(policy.isUnderloaded(host))throw new AssertionError("Current CPU source must differ");
+            System.setProperty("coe619.scaleInMode","forecast");
+            policy.findHostForVmInternal(host.getVmList().getFirst(),candidate->{
+                if(policy.isUnderloaded(candidate))throw new AssertionError("Destination must keep original resource rule");
+                return false;
+            });
+            if(!policy.isUnderloaded(host))throw new AssertionError("Restore source role after selection");
+            try {
+                policy.findHostForVmInternal(host.getVmList().getFirst(),candidate->{throw new IllegalStateException("fixture");});
+                throw new AssertionError("Expected predicate failure");
+            } catch(IllegalStateException expected) { }
+            if(!policy.isUnderloaded(host))throw new AssertionError("Restore source role after exception");
+            snapshots.put(host.getId(),constructor.newInstance(-300,.1,.1));
+            if(policy.isUnderloaded(host))throw new AssertionError("Stale snapshot excluded");
+            snapshots.put(host.getId(),constructor.newInstance(0,.1,.1));
+            originals.put(host.getId(),List.of(host.getVmList().getFirst()));
+            if(policy.isUnderloaded(host))throw new AssertionError("Changed planning membership excluded");
+        } finally { System.clearProperty("coe619.scaleInMode"); }
+        System.out.println("PASS: source/target separation, current ablation, stale/membership guards and exception restoration");
+    }
+}

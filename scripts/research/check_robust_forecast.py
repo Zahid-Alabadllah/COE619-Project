@@ -29,22 +29,28 @@ def main():
                 assert all(t<=float(target)-300+.001 for t,u in samples)
                 inputs[host,target]=dict(latest=samples[0][1])
             elif line.startswith('FORECAST_ROBUST '):
-                host,target,raw,selected=re.search(r'host=(\d+) target=([\d.]+) raw=([-+\d.]+) selected=([-+\d.]+)',line).groups()
+                host,target,raw,selected=re.search(r'host=(\d+) target=([\d.]+) raw=([-+\deE.]+) selected=([-+\deE.]+)',line).groups()
                 history,ready=states.setdefault(host,(deque(maxlen=20),[]))
                 issue=float(target)-300
                 history.extend(x for x in ready if x[0]<issue-1e-6)
                 ready[:]=[x for x in ready if x[0]>=issue-1e-6]
                 latest=inputs[host,target]['latest']
                 expected_raw=robust_pair([(x[1],x[2]) for x in history],latest)
-                choose=len(history)>=10 and sum(abs(x[3]-x[2]) for x in history)<sum(abs(x[1]-x[2]) for x in history)
+                # Match the Java learner's IEEE-754 accumulation order. Python's
+                # compensated float sum can reverse a mathematically tied decision.
+                robust_loss=persistence_loss=0.0
+                for x in history:
+                    robust_loss+=abs(x[3]-x[2])
+                    persistence_loss+=abs(x[1]-x[2])
+                choose=len(history)>=10 and robust_loss<persistence_loss
                 expected=expected_raw if choose else latest
                 difference=max(abs(float(raw)-expected_raw),abs(float(selected)-expected))
                 maximum=max(maximum,difference)
-                assert difference<1e-6,(case,host,target,raw,selected,expected_raw,expected)
+                assert difference<1e-6,(case,host,target,raw,selected,expected_raw,expected,robust_loss,persistence_loss,robust_loss-persistence_loss)
                 inputs[host,target].update(raw=float(raw),selected=float(selected))
                 checks+=1
             elif line.startswith('FORECAST_ERROR'):
-                host,target,actual,forecast,latest=re.search(r'host=(\d+) target=([\d.]+) actual=([-+\d.]+) forecast=([-+\d.]+) persistence=([-+\d.]+)',line).groups()
+                host,target,actual,forecast,latest=re.search(r'host=(\d+) target=([\d.]+) actual=([-+\deE.]+) forecast=([-+\deE.]+) persistence=([-+\deE.]+)',line).groups()
                 row=inputs[host,target];actual=float(actual)
                 assert abs(float(forecast)-row['selected'])<1e-9
                 states[host][1].append((float(target),row['latest'],actual,row['raw']))
@@ -60,3 +66,4 @@ def main():
 
 
 if __name__=='__main__':main()
+

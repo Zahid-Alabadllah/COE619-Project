@@ -56,6 +56,7 @@ try {
         energy_demand_window_seconds=$(if ($MixedJobs) { @(0,86400) } else { $null })
         short_cloudlet_length_mi_per_pe=$(if ($MixedJobs) { 5000000 } else { $null })
         completed_vm_destruction_delay_seconds=$(if ($MixedJobs) { 1 } else { $null })
+        observation_mode=$(if ($MixedJobs) { 'synchronous_exact_window' } else { 'graceful_recorded_histories' })
         power_guard=$PowerGuard.IsPresent
         frozen_csv_sha256=$csvBefore; frozen_pr2_sha256=$reportBefore
         code_commit=(& git rev-parse HEAD); code_status=(@(& git status --short))
