@@ -44,7 +44,3 @@ Next research: source versus destination decision accounting, prediction-trigger
 20 November checkpoint: forecast coverage is fully reconciled (6,341 issued, 6,293 scored, two migration exclusions, 46 simulation-end exclusions). Independent causal replay passes; results CSV unchanged and power checks zero. This logging-only checkpoint adds no forecasting or energy superiority claim. PR2 form completed and renamed to PR2_202045160.docx/pdf. Next research must keep independent-provider persistence baseline and reserved-data discipline.
 
 20 November follow-up: tested an absolute-error-optimal persistence blend on already inspected inputs. It improves MAE only on the first Bitbrains group and does not provide a dependable cross-workload improvement. Kept offline; existing Java remains unchanged. Regime diagnosis shows Bitbrains is mostly below 10% CPU and a few errors dominate RMSE. Evidence and table in FORECAST_FOLLOWUP_CHECKS.md. Remaining 994 archive VM files untouched. Current PR2 files renamed to PR2_202045160 and now included in automatic document synchronization; temporary PR2 previews cleaned after source preservation.
-
-
-
-
