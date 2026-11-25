@@ -1,0 +1,32 @@
+{
+  "review_date": "2026-11-25",
+  "report_work_cutoff": "2026-11-15",
+  "deadline_from_user_announcement": "2026-11-26",
+  "pages": 3,
+  "orientations": [
+    "portrait",
+    "landscape",
+    "portrait"
+  ],
+  "all_pages_visually_inspected": true,
+  "template_geometry_grid_merges_preserved": true,
+  "headers_footers_media_styles_preserved_except_revision_ids": true,
+  "second_checkbox_checked_visually": true,
+  "id_only_on_cover": true,
+  "clickable_free_paper_verified": true,
+  "track_changes_and_comment_markers": false,
+  "advisor_signature": "blank; not fabricated",
+  "scoped_changes": [
+    "cover deadline and report period",
+    "clarified initial OLS and fixed-workload achievements",
+    "chart completion-status verification at Week15, not invented completion dates",
+    "plain-language SLA metric approximations",
+    "historical energy accounting qualification; later predictor results excluded",
+    "left-aligned answer text"
+  ],
+  "docx_sha256": "12a3bb03df81dbf6b4b3a3f693090609a9cad1e51108c900d978e38fd8e427ea",
+  "pdf_sha256": "ade4fd5ca0e53501cecb23057f8b7c8d1783db058822dc635178eefcdf091571",
+  "template_sha256": "0f7501627f5b495197c1b8a3454d2c60884d078cdbfd48884a431ad4a799f673",
+  "historical_csv_sha256": "3c288cdc4150ca10ca874354921ff15563ab6fce092ebd485bef49144069b652",
+  "renderer": "Native Microsoft Word PDF export and bundled Poppler page inspection; packaged renderer unavailable because LibreOffice is absent."
+}
