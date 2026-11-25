@@ -10,7 +10,7 @@
   ],
   "all_pages_visually_inspected": true,
   "template_geometry_grid_merges_preserved": true,
-  "headers_footers_media_styles_preserved_except_revision_ids": true,
+  "headers_footers_media_styles_preserved_except_revision_ids": false,
   "second_checkbox_checked_visually": true,
   "id_only_on_cover": true,
   "clickable_free_paper_verified": true,
@@ -24,9 +24,65 @@
     "historical energy accounting qualification; later predictor results excluded",
     "left-aligned answer text"
   ],
-  "docx_sha256": "12a3bb03df81dbf6b4b3a3f693090609a9cad1e51108c900d978e38fd8e427ea",
-  "pdf_sha256": "ade4fd5ca0e53501cecb23057f8b7c8d1783db058822dc635178eefcdf091571",
+  "docx_sha256": "706b6c289df82c67e858f84e62b515b71b9849b9f4d418969bbdd4c9795c69ea",
+  "pdf_sha256": "cc3bde9e5d26d56d5b8cfb18b4cfef7d8d6bee74b9c620553e593cade5d97361",
   "template_sha256": "0f7501627f5b495197c1b8a3454d2c60884d078cdbfd48884a431ad4a799f673",
   "historical_csv_sha256": "3c288cdc4150ca10ca874354921ff15563ab6fce092ebd485bef49144069b652",
-  "renderer": "Native Microsoft Word PDF export and bundled Poppler page inspection; packaged renderer unavailable because LibreOffice is absent."
+  "renderer": "Native Microsoft Word PDF export and bundled Poppler page inspection; packaged renderer unavailable because LibreOffice is absent.",
+  "headers_footers_media_styles_semantically_preserved": true,
+  "word_resave_metadata": "Revision IDs and non-overlapping logo z-order numbers changed; logo coordinates, sizes, images, header/footer text and fields are unchanged.",
+  "chart_revision": {
+    "date": "2026-11-25",
+    "all_seven_milestone_groups_named": true,
+    "green_completed_by_markers": [
+      [
+        4,
+        10
+      ],
+      [
+        7,
+        10
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        13,
+        15
+      ]
+    ],
+    "no_invented_percentages": true,
+    "t261_grid_only": true,
+    "unused_columns": [
+      16,
+      24
+    ],
+    "t262_targets_in_task_labels": true,
+    "initial_predictor_not_claimed_complete": true,
+    "task_titles_consistent_bold_and_left_aligned": true,
+    "non_chart_accomplishments_and_scientific_limitations_unchanged": true,
+    "template_hash_preserved": true,
+    "generator_uses_disposable_working_template": true,
+    "grey_target_weeks_visual_and_generator_verified": [
+      [
+        3
+      ],
+      [
+        6
+      ],
+      [
+        9,
+        10
+      ],
+      [
+        13,
+        15
+      ],
+      [],
+      [],
+      []
+    ],
+    "single_line_caption_clarifies_terms_and_status": true
+  }
 }
