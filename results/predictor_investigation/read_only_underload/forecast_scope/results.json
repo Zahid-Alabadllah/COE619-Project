@@ -1,0 +1,250 @@
+{
+  "scope": "Post-run observed operational targets, including VM completion/off periods and migration interventions; no interpolated labels or learning changes",
+  "eligibility": "Host active and resident VM count>0 at issue, never based on future outcome",
+  "reference": "Recorded off=0, otherwise nearest active CPU observation in same power episode within1s; missing remains explicit",
+  "horizon_seconds": 86400.0,
+  "coverage": {
+    "diurnal": {
+      "issued": 783,
+      "eligible": 783,
+      "active_observed": 700,
+      "eligible_active_observed": 700,
+      "missing_active_observation": 74,
+      "eligible_missing_active_observation": 74,
+      "eligible_scored_across_migration": 9,
+      "eligible_recovered_target": 9,
+      "recorded_off": 7,
+      "eligible_recorded_off": 7,
+      "outside_window": 2,
+      "eligible_outside_window": 2
+    },
+    "real_a": {
+      "issued": 4313,
+      "eligible": 4313,
+      "active_observed": 2951,
+      "eligible_active_observed": 2951,
+      "missing_active_observation": 1319,
+      "eligible_missing_active_observation": 1319,
+      "eligible_scored_across_migration": 37,
+      "eligible_recovered_target": 37,
+      "recorded_off": 35,
+      "eligible_recorded_off": 35,
+      "outside_window": 8,
+      "eligible_outside_window": 8
+    },
+    "real_b": {
+      "issued": 3755,
+      "eligible": 3755,
+      "active_observed": 3125,
+      "eligible_active_observed": 3125,
+      "missing_active_observation": 615,
+      "eligible_missing_active_observation": 615,
+      "outside_window": 15,
+      "eligible_outside_window": 15
+    },
+    "real_c": {
+      "issued": 2879,
+      "eligible": 2879,
+      "active_observed": 2259,
+      "eligible_active_observed": 2259,
+      "missing_active_observation": 604,
+      "eligible_missing_active_observation": 604,
+      "recorded_off": 10,
+      "eligible_recorded_off": 10,
+      "eligible_scored_across_migration": 18,
+      "eligible_recovered_target": 18,
+      "outside_window": 6,
+      "eligible_outside_window": 6
+    },
+    "heavy": {
+      "issued": 1568,
+      "eligible": 1568,
+      "active_observed": 1206,
+      "eligible_active_observed": 1206,
+      "recorded_off": 48,
+      "eligible_recorded_off": 48,
+      "eligible_recovered_target": 52,
+      "missing_active_observation": 310,
+      "eligible_missing_active_observation": 310,
+      "eligible_scored_across_migration": 38,
+      "outside_window": 4,
+      "eligible_outside_window": 4
+    }
+  },
+  "runtime_label_disagreements": {
+    "real_a": 433,
+    "real_b": 315,
+    "real_c": 30
+  },
+  "accuracy": {
+    "diurnal": {
+      "eligible": {
+        "candidate": {
+          "n": 707,
+          "mae_pp": 2.8475325148414177,
+          "rmse_pp": 4.861318988516376
+        },
+        "persistence": {
+          "n": 707,
+          "mae_pp": 2.6556223479490764,
+          "rmse_pp": 3.916673299923161
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 707,
+          "mae_pp": 2.8475325148414177,
+          "rmse_pp": 4.861318988516376
+        },
+        "persistence": {
+          "n": 707,
+          "mae_pp": 2.6556223479490764,
+          "rmse_pp": 3.916673299923161
+        }
+      }
+    },
+    "real_a": {
+      "eligible": {
+        "candidate": {
+          "n": 2986,
+          "mae_pp": 2.1020174697650575,
+          "rmse_pp": 3.699941249991201
+        },
+        "persistence": {
+          "n": 2986,
+          "mae_pp": 2.3389400535833755,
+          "rmse_pp": 4.089366095369293
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 2986,
+          "mae_pp": 2.1020174697650575,
+          "rmse_pp": 3.699941249991201
+        },
+        "persistence": {
+          "n": 2986,
+          "mae_pp": 2.3389400535833755,
+          "rmse_pp": 4.089366095369293
+        }
+      }
+    },
+    "real_b": {
+      "eligible": {
+        "candidate": {
+          "n": 3125,
+          "mae_pp": 2.459622336519924,
+          "rmse_pp": 3.960774202257626
+        },
+        "persistence": {
+          "n": 3125,
+          "mae_pp": 2.743279999999959,
+          "rmse_pp": 4.548719600063297
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 3125,
+          "mae_pp": 2.459622336519924,
+          "rmse_pp": 3.960774202257626
+        },
+        "persistence": {
+          "n": 3125,
+          "mae_pp": 2.743279999999959,
+          "rmse_pp": 4.548719600063297
+        }
+      }
+    },
+    "real_c": {
+      "eligible": {
+        "candidate": {
+          "n": 2269,
+          "mae_pp": 3.4114943149295645,
+          "rmse_pp": 5.438816196151577
+        },
+        "persistence": {
+          "n": 2269,
+          "mae_pp": 4.0812307183781185,
+          "rmse_pp": 6.613013892791579
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 2269,
+          "mae_pp": 3.4114943149295645,
+          "rmse_pp": 5.438816196151577
+        },
+        "persistence": {
+          "n": 2269,
+          "mae_pp": 4.0812307183781185,
+          "rmse_pp": 6.613013892791579
+        }
+      }
+    },
+    "heavy": {
+      "eligible": {
+        "candidate": {
+          "n": 1254,
+          "mae_pp": 4.532895935484341,
+          "rmse_pp": 7.0275009766501375
+        },
+        "persistence": {
+          "n": 1254,
+          "mae_pp": 5.2303329346092715,
+          "rmse_pp": 7.26056643692818
+        }
+      },
+      "all_issued": {
+        "candidate": {
+          "n": 1254,
+          "mae_pp": 4.532895935484341,
+          "rmse_pp": 7.0275009766501375
+        },
+        "persistence": {
+          "n": 1254,
+          "mae_pp": 5.2303329346092715,
+          "rmse_pp": 7.26056643692818
+        }
+      }
+    }
+  },
+  "late_capacity": {
+    "diurnal": {
+      "scope": "Late phase after all short jobs finish; fixed one-long-per-initial-host setup. Policy floor applies to THR/robust80% reserved-CPU placement, not all possible policies.",
+      "last_short_finish_s": 25162.801052631577,
+      "unfinished_long_jobs": 2,
+      "late_hours": 17.010333040935674,
+      "physical_nominal_vms_per_host": 4,
+      "reserved80_destination_vms_per_host": 3,
+      "physical_capacity_hosts": 1,
+      "policy_capacity_hosts": 1,
+      "actual_power_on_host_hours": 17.010333040935674,
+      "policy_floor_host_hours": 17.010333040935674,
+      "difference_between_capacity_floors_fixed_power_kwh": 0.0,
+      "caution": "Difference is structural under the current placement check, not proven recoverable energy or predictive savings. VM start column is allocation time and is not used as a birth timestamp."
+    },
+    "real_a": {
+      "scope": "Not all short jobs completed; late-long-job bound not evaluated"
+    },
+    "real_b": {
+      "scope": "Not all short jobs completed; late-long-job bound not evaluated"
+    },
+    "real_c": {
+      "scope": "Not all short jobs completed; late-long-job bound not evaluated"
+    },
+    "heavy": {
+      "scope": "Late phase after all short jobs finish; fixed one-long-per-initial-host setup. Policy floor applies to THR/robust80% reserved-CPU placement, not all possible policies.",
+      "last_short_finish_s": 10244.362574257426,
+      "unfinished_long_jobs": 4,
+      "late_hours": 21.15434372937294,
+      "physical_nominal_vms_per_host": 4,
+      "reserved80_destination_vms_per_host": 3,
+      "physical_capacity_hosts": 1,
+      "policy_capacity_hosts": 2,
+      "actual_power_on_host_hours": 42.37979856985699,
+      "policy_floor_host_hours": 42.30868745874588,
+      "difference_between_capacity_floors_fixed_power_kwh": 3.702010152640264,
+      "caution": "Difference is structural under the current placement check, not proven recoverable energy or predictive savings. VM start column is allocation time and is not used as a birth timestamp."
+    }
+  }
+}

@@ -1,0 +1,21 @@
+vm,trace,capacity_mips,job_start,job_finish,job_status,last_vm_start,vm_stop,vm_execution_seconds,completed_transfer_seconds,pending_transfer_seconds,observed_end
+0,"results\predictor_investigation\online_holdout_20110420\traces\146-179_surfsnel_dsl_internl_net_arizona_beta",2000.0,0.1,54345.44636363637,SUCCESS,0.0,54346.44636363637,54346.44636363637,0.0,0.0,86400.0
+1,"results\predictor_investigation\online_holdout_20110420\traces\75-130-96-13_static_oxfr_ma_charter_com_uka_p2pns",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+2,"results\predictor_investigation\online_holdout_20110420\traces\csplanetlab4_kaist_ac_kr_uw_oneswarm",2000.0,0.1,52310.42241379311,SUCCESS,0.0,52311.42241379311,52311.42241379311,0.0,0.0,86400.0
+3,"results\predictor_investigation\online_holdout_20110420\traces\host3-plb_loria_fr_princeton_codeen",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+4,"results\predictor_investigation\online_holdout_20110420\traces\iraplab2_iralab_uni-karlsruhe_de_ uofathens_zoi",2000.0,0.1,26469.718421052632,SUCCESS,0.0,26470.718421052632,26470.718421052632,0.0,0.0,86400.0
+5,"results\predictor_investigation\online_holdout_20110420\traces\kupl1_ittc_ku_edu_ufmg_p2ptv",2000.0,0.1,55942.94647058825,SUCCESS,0.0,55943.94647058825,55943.94647058825,0.0,0.0,86400.0
+6,"results\predictor_investigation\online_holdout_20110420\traces\mtuplanetlab2_cs_mtu_edu_uw_oneswarm",2000.0,0.1,39900.71842105263,SUCCESS,0.0,39901.71842105263,39901.71842105263,0.0,0.0,86400.0
+7,"results\predictor_investigation\online_holdout_20110420\traces\node-2_mcgillplanetlab_org_uka_p2pns",2000.0,0.1,-1.0,INEXEC,55947.33327058825,55947.33327058825,0.0,3.276799999999639,0.0,86400.0
+8,"results\predictor_investigation\online_holdout_20110420\traces\onelab11_pl_sophia_inria_fr_root",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+9,"results\predictor_investigation\online_holdout_20110420\traces\peeramide_irisa_fr_irisaple_wup",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+10,"results\predictor_investigation\online_holdout_20110420\traces\pl1_eng_monash_edu_au_uw_oneswarm",2000.0,0.1,41560.354285714304,SUCCESS,0.0,41561.354285714304,41561.354285714304,0.0,0.0,86400.0
+11,"results\predictor_investigation\online_holdout_20110420\traces\pl1_rcc_uottawa_ca_uw_oneswarm",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+12,"results\predictor_investigation\online_holdout_20110420\traces\pl2_ucs_indiana_edu_irisaple_HEAP",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+13,"results\predictor_investigation\online_holdout_20110420\traces\plab1_cs_ust_hk_uw_oneswarm",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+14,"results\predictor_investigation\online_holdout_20110420\traces\plab2_nec-labs_com_uw_oneswarm",2000.0,0.1,14222.852000000003,SUCCESS,0.0,14223.852000000003,14223.852000000003,0.0,0.0,86400.0
+15,"results\predictor_investigation\online_holdout_20110420\traces\planet-lab1_ufabc_edu_br_nyu_d",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+16,"results\predictor_investigation\online_holdout_20110420\traces\planet1_att_nodes_planet-lab_org_uw_oneswarm",2000.0,0.1,11529.992926829269,SUCCESS,0.0,11530.992926829269,11530.992926829269,0.0,0.0,86400.0
+17,"results\predictor_investigation\online_holdout_20110420\traces\planet1_scs_cs_nyu_edu_irisaple_HEAP",2000.0,0.1,85132.15666666673,SUCCESS,0.0,85133.15666666673,85133.15666666673,0.0,0.0,86400.0
+18,"results\predictor_investigation\online_holdout_20110420\traces\planet2_cs_rochester_edu_uw_oneswarm",2000.0,0.1,40156.36724137932,SUCCESS,0.0,40157.36724137932,40157.36724137932,0.0,0.0,86400.0
+19,"results\predictor_investigation\online_holdout_20110420\traces\planetlab-01_kusa_ac_jp_uw_seattle",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0

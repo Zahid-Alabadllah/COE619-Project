@@ -1,5 +1,7 @@
 # Bounded forecasting follow-up
 
+27 November: [UNDERLOAD_PLANNING_AUDIT.md](UNDERLOAD_PLANNING_AUDIT.md) records the opt-in numeric planner, controlled legacy failure, repeated 15-policy-row checks and exact replay of 13,298 robust forecasts. The repaired heavy case still has no predictive energy advantage. A separate migration-clock audit finds 18 migrated VM instances omitted by legacy PDM; corrected capacity-time estimates are companions, not overwritten historical results. No model retuning or reserved-data consumption.
+
 Recorded 18 November 2026. These checks use previously inspected inputs and are exploratory, not new independent validation. No new Java model was adopted.
 
 ## Persistence blend

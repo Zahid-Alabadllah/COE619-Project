@@ -244,7 +244,43 @@ public final class ConsolidationExperiment {
         }
         auditPlacement();
         exportForecastObservations();
+        exportMigrationMetricAudit();
         return computeResult(dc, cloudlets);
+    }
+
+    /** Observation only: audit migration costs and VM timing without changing stored metrics. */
+    private void exportMigrationMetricAudit() {
+        final String directory = System.getProperty("coe619.metricAuditDirectory");
+        if (directory == null) return;
+        if (!Boolean.getBoolean("coe619.mixedJobs")) {
+            throw new IllegalStateException("Migration metric audit requires exact-window observation");
+        }
+        final double end = Math.min(simulation.clock(), config.durationSeconds());
+        final List<String> rows = new ArrayList<>();
+        rows.add("vm,trace,capacity_mips,job_start,job_finish,job_status,last_vm_start,vm_stop,vm_execution_seconds,completed_transfer_seconds,pending_transfer_seconds,observed_end,finished_work_mi,legacy_denominator_mi,job_length_mi");
+        for (int i = 0; i < vms.size(); i++) {
+            final Vm vm = vms.get(i);
+            final Cloudlet job = cloudletList.get(i);
+            final Double pending = migrationStart.get(vm);
+            final double pendingSeconds = pending == null ? 0 : Math.max(0, end - pending);
+            double finishedWork = 0;
+            for (org.cloudsimplus.cloudlets.CloudletExecution finished : vm.getCloudletScheduler().getCloudletFinishedList()) {
+                finishedWork += finished.getCloudlet().getTotalLength();
+            }
+            final double legacyDenominator = finishedWork > 0 ? finishedWork : vm.getTotalMipsCapacity() * vm.getTotalExecutionTime();
+            final String trace = "\"" + config.traces().get(i).toString().replace("\"", "\"\"") + "\"";
+            rows.add(vm.getId() + "," + trace + "," + vm.getTotalMipsCapacity() + "," + job.getExecStartTime()
+                + "," + job.getFinishTime() + "," + job.getStatus() + "," + vm.getStartTime() + "," + vm.getStopTime()
+                + "," + vm.getTotalExecutionTime() + "," + migrationTime.getOrDefault(vm, 0.0)
+                + "," + pendingSeconds + "," + end + "," + finishedWork + "," + legacyDenominator + "," + job.getTotalLength());
+        }
+        try {
+            final Path output = Path.of(directory).resolve(config.scenario() + "-" + config.policy() + "-vms.csv");
+            Files.createDirectories(output.getParent());
+            Files.write(output, rows);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Cannot export migration metric audit", ex);
+        }
     }
 
     /** End-window correctness check only; never changes the migration policy. */

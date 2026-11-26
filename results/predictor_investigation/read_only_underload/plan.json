@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-27",
+  "hypothesis": "Numeric underload reservations can plan complete-source evacuation without mutating physical hosts or losing work.",
+  "model": "frozen robust/persistence predictor; no new model or tuning",
+  "controlled_case": {
+    "hosts": 3,
+    "vms": 12,
+    "vm_cpu_percent": [
+      80,
+      80,
+      80,
+      10,
+      80,
+      80,
+      40,
+      10,
+      80,
+      80,
+      80,
+      10
+    ],
+    "samples_per_vm": 288,
+    "sample_seconds": 300,
+    "short_mi_per_pe": 5000000,
+    "long_mi_per_pe": 1000000000,
+    "long_vm_indices": [
+      3,
+      7,
+      11
+    ],
+    "window_seconds": 86400,
+    "expected_finished_short_jobs": 9,
+    "purpose": "Correctness regression with known opportunities, not a fresh empirical accuracy/energy benchmark."
+  },
+  "acceptance": [
+    "deep physical state unchanged across planning",
+    "atomic group and exception rollback",
+    "physical CPU/RAM/BW/storage respected",
+    "no loss of unfinished jobs",
+    "zero observed off-host CPU and final placement violations",
+    "same policies and inputs for controls",
+    "default benchmark/PR2 protected"
+  ],
+  "restrictions": [
+    "skip all hosts with in-flight transfers",
+    "honor excluded source/destination sets",
+    "strict nominal requested-CPU destination rule remains",
+    "do not attribute common repair savings to forecasting"
+  ],
+  "frozen_files": {
+    "results/experiments.csv": "3c288cdc4150ca10ca874354921ff15563ab6fce092ebd485bef49144069b652",
+    "docs/progress_report_2/coordinator_template/PR2_202045160.pdf": "1ddc0b590ee72539932e57baf1ab1e7db0120433a69fb600ebd12880d3bc6683",
+    "docs/progress_report_2/coordinator_template/PR2_202045160.docx": "55270d4b8a35825b1e4d77cb79fe19df779b889dec70669aa36182d2b4d4c418"
+  }
+}

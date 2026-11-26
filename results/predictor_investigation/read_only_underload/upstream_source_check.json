@@ -1,0 +1,13 @@
+{
+  "checked": "2026-11-27",
+  "version": "8.5.7",
+  "artifact": "org.cloudsimplus:cloudsimplus",
+  "source_url": "https://repo.maven.apache.org/maven2/org/cloudsimplus/cloudsimplus/8.5.7/cloudsimplus-8.5.7-sources.jar",
+  "sha256": "8d3efcacfc661b2f1e018e279761fc4ae1e5584a770b2022d20930568688966c",
+  "source_methods_present": [
+    "updateMigrationMapFromUnderloadedHosts",
+    "getNewVmPlacementFromUnderloadedHost",
+    "saveAllocation",
+    "restoreAllocation"
+  ]
+}

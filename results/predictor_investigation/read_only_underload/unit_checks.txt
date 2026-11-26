@@ -1,0 +1,22 @@
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: successful planning leaves residency, resources, PE state, VM state and lifetime unchanged; repeatable.
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: reserved CPU and exact threshold boundary match library semantics.
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: incomplete source evacuation is atomic for CPU, RAM, bandwidth and storage.
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: excluded targets and existing incoming migrations are left alone.
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: shared reservations account for prior overload plans and multiple source groups.
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: injected exception after a staged group leaves state and output map unchanged.
+PASS: already-invalid duplicate residency is rejected before planning.
+PLAN_STATE_AUDIT time=0.000000 unchanged=true
+PASS: public optimizer returns a move without physical mutation and reports underload status.

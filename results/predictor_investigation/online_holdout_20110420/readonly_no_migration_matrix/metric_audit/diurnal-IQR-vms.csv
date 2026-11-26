@@ -1,0 +1,9 @@
+vm,trace,capacity_mips,job_start,job_finish,job_status,last_vm_start,vm_stop,vm_execution_seconds,completed_transfer_seconds,pending_transfer_seconds,observed_end
+0,"src\main\resources\planetlab\diurnal\trace_0.txt",2000.0,0.1,23100.0,SUCCESS,0.0,23101.0,23101.0,0.0,0.0,86400.0
+1,"src\main\resources\planetlab\diurnal\trace_1.txt",2000.0,0.1,25162.977894736843,SUCCESS,0.0,25163.977894736843,25163.977894736843,0.0,0.0,86400.0
+2,"src\main\resources\planetlab\diurnal\trace_2.txt",2000.0,0.1,23991.26111111111,SUCCESS,0.0,23992.26111111111,23992.26111111111,0.0,0.0,86400.0
+3,"src\main\resources\planetlab\diurnal\trace_3.txt",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+4,"src\main\resources\planetlab\diurnal\trace_4.txt",2000.0,0.1,23366.204210526317,SUCCESS,0.0,23367.204210526317,23367.204210526317,0.0,0.0,86400.0
+5,"src\main\resources\planetlab\diurnal\trace_5.txt",2000.0,0.1,24463.3,SUCCESS,0.0,24464.3,24464.3,0.0,0.0,86400.0
+6,"src\main\resources\planetlab\diurnal\trace_6.txt",2000.0,0.1,24123.344634146342,SUCCESS,0.0,24124.344634146342,24124.344634146342,0.0,0.0,86400.0
+7,"src\main\resources\planetlab\diurnal\trace_7.txt",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0

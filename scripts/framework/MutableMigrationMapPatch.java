@@ -10,11 +10,23 @@ public class MutableMigrationMapPatch {
   ClassWriter writer=new ClassWriter(ClassWriter.COMPUTE_MAXS);
   int[] changes={0};
   final boolean stable=args.length>2 && Boolean.parseBoolean(args[2]);
+  final boolean readOnly=args.length>3 && Boolean.parseBoolean(args[3]);
+  int[] readOnlySites={0};
   int[] orderedMaps={0};
   int[] orderedHosts={0};
   new ClassReader(original).accept(new ClassVisitor(Opcodes.ASM9,writer) {
    @Override public MethodVisitor visitMethod(int access,String name,String desc,String sig,String[] exceptions) {
     MethodVisitor next=super.visitMethod(access,name,desc,sig,exceptions);
+    if(readOnly && name.equals("updateMigrationMapFromUnderloadedHosts")) {
+     readOnlySites[0]++;
+     next.visitCode();
+     next.visitVarInsn(Opcodes.ALOAD,0);
+     next.visitVarInsn(Opcodes.ALOAD,0);next.visitVarInsn(Opcodes.ALOAD,1);next.visitVarInsn(Opcodes.ALOAD,2);
+     next.visitMethodInsn(Opcodes.INVOKESTATIC,"kfupm/coe619/UnderloadReservationPlanner","plan",
+      "(Lorg/cloudsimplus/allocationpolicies/migration/VmAllocationPolicyMigrationAbstract;Ljava/util/Set;Ljava/util/Map;)Z",false);
+     next.visitFieldInsn(Opcodes.PUTFIELD,"org/cloudsimplus/allocationpolicies/migration/VmAllocationPolicyMigrationAbstract","underloaded","Z");
+     next.visitInsn(Opcodes.RETURN);next.visitMaxs(0,0);next.visitEnd();return null;
+    }
     return new MethodVisitor(Opcodes.ASM9,next) {
      @Override public void visitCode() {
       super.visitCode();
@@ -51,9 +63,11 @@ public class MutableMigrationMapPatch {
   },0);
   if(changes[0]!=1) throw new IllegalStateException("Expected exactly one known defective return path, found "+changes[0]);
   if(stable && (orderedMaps[0]!=4 || orderedHosts[0]!=1)) throw new IllegalStateException("Unexpected planning sites: maps="+orderedMaps[0]+" hosts="+orderedHosts[0]);
+  if(readOnly && readOnlySites[0]!=1) throw new IllegalStateException("Unexpected underload planning site count: "+readOnlySites[0]);
   Path output=Path.of(args[1]).resolve(entry);
   Files.createDirectories(output.getParent());Files.write(output,writer.toByteArray());
   System.out.println("Applied one mutable-map repair to generated runtime classes; original dependency jar unchanged.");
+  if(readOnly) System.out.println("Research-only: underload planning uses numeric reservations, with real host state untouched.");
   if(stable) System.out.println("Opt-in stable planning: four insertion-ordered maps and ID-sorted overloaded sources.");
  }
 }

@@ -1,0 +1,17 @@
+vm,trace,capacity_mips,job_start,job_finish,job_status,last_vm_start,vm_stop,vm_execution_seconds,completed_transfer_seconds,pending_transfer_seconds,observed_end
+0,"results\predictor_investigation\online_holdout_20110420\traces\planetlab1_s3_kth_se_tauple_planet_39",2000.0,0.1,5799.133333333333,SUCCESS,0.0,5800.133333333333,5800.133333333333,0.0,0.0,86400.0
+1,"results\predictor_investigation\online_holdout_20110420\traces\planetlab1-buenosaires_lan_redclara_net_purdue_2",2000.0,0.1,5750.568965517241,SUCCESS,0.0,5751.568965517241,5751.568965517241,0.0,0.0,86400.0
+2,"results\predictor_investigation\online_holdout_20110420\traces\planetlab-node3_it-sudparis_eu_cambridge_spe24",2000.0,0.1,6139.986842105263,SUCCESS,0.0,6140.986842105263,6140.986842105263,0.0,0.0,86400.0
+3,"results\predictor_investigation\online_holdout_20110420\traces\planet1_scs_cs_nyu_edu_colostate_557",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+4,"results\predictor_investigation\online_holdout_20110420\traces\planetlab2_s3_kth_se_tauple_planet_39",2000.0,0.1,6313.643749999999,SUCCESS,0.0,6314.643749999999,6314.643749999999,0.0,0.0,86400.0
+5,"results\predictor_investigation\online_holdout_20110420\traces\planetlab4_mini_pw_edu_pl_waseda_ow",2000.0,0.1,6849.087647058823,SUCCESS,0.0,6850.087647058823,6850.087647058823,0.0,0.0,86400.0
+6,"results\predictor_investigation\online_holdout_20110420\traces\peeramide_irisa_fr_ethzcs_tracegatherer",2000.0,0.1,7623.039534883721,SUCCESS,0.0,7624.039534883721,7624.039534883721,0.0,0.0,86400.0
+7,"results\predictor_investigation\online_holdout_20110420\traces\planetlab-5_eecs_cwru_edu_princeton_codeen",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+8,"results\predictor_investigation\online_holdout_20110420\traces\planetlab4_mini_pw_edu_pl_purdue_2",2000.0,0.1,8357.795652173914,SUCCESS,0.0,8358.795652173914,8358.795652173914,0.0,0.0,86400.0
+9,"results\predictor_investigation\online_holdout_20110420\traces\planetlab2_s3_kth_se_sics_peerialism",2000.0,0.1,8077.864705882353,SUCCESS,0.0,8078.864705882353,8078.864705882353,0.0,0.0,86400.0
+10,"results\predictor_investigation\online_holdout_20110420\traces\planetlab7_cs_duke_edu_tut_overlay1",2000.0,0.1,9464.879047619048,SUCCESS,0.0,9465.879047619048,9465.879047619048,0.0,0.0,86400.0
+11,"results\predictor_investigation\online_holdout_20110420\traces\planetlab7_cs_duke_edu_tut_overlay2",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0
+12,"results\predictor_investigation\online_holdout_20110420\traces\planetlab1_eas_asu_edu_princeton_contdist",2000.0,0.1,10219.408118811882,SUCCESS,0.0,10220.408118811882,10220.408118811882,0.0,0.0,86400.0
+13,"results\predictor_investigation\online_holdout_20110420\traces\planetlab01_cs_tcd_ie_rnp_dcc_ufjf",2000.0,0.1,9542.836666666668,SUCCESS,0.0,9543.836666666668,9543.836666666668,0.0,0.0,86400.0
+14,"results\predictor_investigation\online_holdout_20110420\traces\planetlab3_csail_mit_edu_uofathens_zoi",2000.0,0.1,10185.394193548387,SUCCESS,0.0,10186.394193548387,10186.394193548387,0.0,0.0,86400.0
+15,"results\predictor_investigation\online_holdout_20110420\traces\plgmu4_ite_gmu_edu_uofathens_zoi",2000.0,0.1,-1.0,INEXEC,0.0,-1.0,86400.0,0.0,0.0,86400.0

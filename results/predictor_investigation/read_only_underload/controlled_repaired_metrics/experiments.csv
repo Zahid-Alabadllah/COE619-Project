@@ -1,0 +1,4 @@
+scenario,policy,seed,hosts,vms,energy_j,energy_kwh,slatah,pdm,slav,esv,unmet_demand,migrations,active_host_hours,vms_created,cloudlets_finished,end_time_s,lr_predictions,lr_predictive_triggers
+controlled_underload,THR,0,3,12,19756810.07,5.488003,0.000000000e+00,0.000000000e+00,0.000000000e+00,0.000000000e+00,0.000000000e+00,2,29.2493,12,9,86400.0,0,0
+controlled_underload,IQR,0,3,12,18706941.58,5.196373,0.000000000e+00,0.000000000e+00,0.000000000e+00,0.000000000e+00,0.000000000e+00,2,27.5826,12,9,86400.0,0,0
+controlled_underload,LR,0,3,12,19756810.07,5.488003,0.000000000e+00,0.000000000e+00,0.000000000e+00,0.000000000e+00,0.000000000e+00,2,29.2493,12,9,86400.0,681,0

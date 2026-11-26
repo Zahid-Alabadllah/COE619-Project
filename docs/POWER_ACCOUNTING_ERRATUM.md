@@ -1,5 +1,7 @@
 # Energy accounting erratum: 18 November 2026
 
+27 November follow-up: [UNDERLOAD_PLANNING_AUDIT.md](UNDERLOAD_PLANNING_AUDIT.md) records another simulator correctness issue and a separate PDM omission. Zero recorded off-host CPU alone does not validate migration placement or migration-cost denominators. Preserve these distinctions when citing any intermediate energy/performance result.
+
 **Historical energy comparisons from the instant-shutdown configuration must be revalidated before being used as evidence of energy savings.** The stored PR2/report CSV is preserved as historical output, not silently replaced. Quiet cases without migration were unaffected in the reproduced audit; migrating cases require corrected runs.
 
 ## Plain explanation

@@ -1,0 +1,10 @@
+{
+  "completed_utc": "2026-11-26T22:29:27.7231569Z",
+  "started_utc": "2026-11-26T22:29:16.5110917Z",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.planningHistoryGuard=true -Dcoe619.robustForecast=true -Dcoe619.mixedJobs=true -Dcoe619.auditPower=true -Dcoe619.auditPlacement=true -Dcoe619.auditPlanning=true -Dcoe619.predictorDiagnostics=true -Dcoe619.forecastAuditDirectory=results/predictor_investigation/read_only_underload/controlled_no_migrations/host_observations -Dcoe619.noMigrations=true",
+  "exit_code": 0,
+  "code_commit": "709dfe42447a4698a7121dcab9c26ce96fb2a4d5",
+  "planner_sha256": "9C9F4FC2F5A1CB74D1E24B70FF19F775722E79CE122632D385E9BD29F45A82DB",
+  "mode": "no_migrations",
+  "expected_legacy_failure": false
+}

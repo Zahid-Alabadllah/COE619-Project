@@ -1,0 +1,10 @@
+{
+  "code_commit": "709dfe42447a4698a7121dcab9c26ce96fb2a4d5",
+  "expected_legacy_failure": false,
+  "exit_code": 0,
+  "completed_utc": "2026-11-26T22:31:13.6230451Z",
+  "mode": "repaired",
+  "started_utc": "2026-11-26T22:31:01.7094260Z",
+  "java_options": "-Dcoe619.spacedHistory=true -Dcoe619.evaluateForecast=true -Dcoe619.onlineForecast=true -Dcoe619.planningHistoryGuard=true -Dcoe619.robustForecast=true -Dcoe619.mixedJobs=true -Dcoe619.metricAuditDirectory=results/predictor_investigation/read_only_underload/controlled_repaired_metrics/metric_audit -Dcoe619.auditPower=true -Dcoe619.auditPlacement=true -Dcoe619.auditPlanning=true -Dcoe619.predictorDiagnostics=true -Dcoe619.forecastAuditDirectory=results/predictor_investigation/read_only_underload/controlled_repaired_metrics/host_observations",
+  "planner_sha256": "9C9F4FC2F5A1CB74D1E24B70FF19F775722E79CE122632D385E9BD29F45A82DB"
+}

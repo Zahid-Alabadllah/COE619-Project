@@ -1,5 +1,7 @@
 # Framework repair and fresh-day validation
 
+27 November: a separate underload path mutates physical VM lists during planning. The opt-in numeric reservation repair and its resource/exception/integration checks are documented in [UNDERLOAD_PLANNING_AUDIT.md](UNDERLOAD_PLANNING_AUDIT.md). It is separate from the default mutable-map repair below; enabling only FrameworkFix does not replace underload planning.
+
 **Later correction:** see POWER_ACCOUNTING_ERRATUM.md before using historical energy examples. The current run helper enables this repair/stable planning by default after power-corrected paths exposed the old defect. Earlier opt-in descriptions below record that stage of the investigation.
 
 ## Repair
