@@ -61,6 +61,7 @@ def main():
     candidates += [CODE/'scripts/research/__pycache__']
     candidates += [target/'forecast-20110420-mixed_scalein_forecast.log']
     candidates += [target/n for n in ('cloudsimplus-8.5.7-sources.jar', 'underload_final_build.log', 'underload_default_isolation.log')]
+    candidates += [target/n for n in ('underload_demand_build.log', 'admission_verification.txt', 'underload_verify.log')]
     candidates += [p for p in (CODE/"docs").rglob("*") if p.is_file() and p.suffix in (".aux",".out",".log",".toc",".fls",".fdb_latexmk")]
     candidates += [CODE/n for n in ("target-demo.log","target-stats.log","fixed-workloads.log","fixed-repeat.log","fixed-stats.log","source-cleanup-verification.log","source-compile-check.log","five-files-check.log")]
     total=0

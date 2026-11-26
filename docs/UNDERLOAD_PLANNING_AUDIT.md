@@ -43,3 +43,17 @@ Beloglazov and Buyya (2012) define migration degradation using estimated lost pe
 Evidence: `results/predictor_investigation/read_only_underload/` and `online_holdout_20110420/readonly_validated_matrix/`. `verification.json` records frozen report/CSV hashes, repeated-result comparisons and audit counts. `forecast_replay.json`, `forecast_scope/` and `matrix_pdm_audit.json` retain the separate forecasting and metric results.
 
 Next, keep this repaired planning path fixed while testing forecast-driven decisions against the same reactive control. Do not change the predictor and placement rule together or credit a shared repair to prediction. Before final performance claims, adopt and clearly label a consistent migration-cost denominator. PR2, original results and the 738 reserved Bitbrains VM files remain untouched.
+
+## Follow-up: destination admission did not unlock predictive savings
+
+Two controlled extensions were tested on the same inspected five cases, with all existing predictor settings frozen. Both remain archived experiments; neither runtime option is retained.
+
+First, the shared underload destination threshold used current requested CPU instead of full reserved capacity, retaining all physical resource limits. This slightly reduced real_a energy (19.966630 to 19.908306 kWh) and real_c energy (17.460764 to 17.095535 kWh), but added a real_a migration. The predictive extension could veto a destination using its already-issued five-minute forecast, with no new fit or learner update. Its full 15-row CSV was identical to the reactive control. A heavy diagnostic confirmed two usable forecast checks, with no veto.
+
+Second, the same shared current-demand criterion also selected underloaded source hosts, while retaining nominal destination exclusions. This created more opportunities: 3,860 usable forecast admission checks, but still no veto or CSV difference. The shared change reduced real_b energy from 21.487826 to 18.790083 kWh, but increased real_c energy from 17.460764 to 18.845225 kWh and increased its migrations from two to six. This is a mixed policy tradeoff, not a dependable improvement.
+
+All five completed follow-up batches (63 policy runs including the three-row diagnostic) retain matching finished-job counts and windows and pass recorded power/final-placement checks. The main predictive matrix also passes 14,472 exact forecast replay checks. Companion migration-cost calculations remain separate. No new reserved data were opened.
+
+Reproduce the retired variants using the archived patches against `ce69810`: `scripts/research/attempts/readonly_demand_admission.patch` and `readonly_demand_source_admission.patch`. Plans were saved before their runs. `verify_admission_experiment.py` checks the preserved controls and writes `admission_result.json`.
+
+The limitation is now more specific: reusing the existing target host's forecast while assuming incoming VMs keep their current demand did not change these admission decisions. This does not disprove all predictive placement approaches. A future test should forecast the prospective VM group, preserve VM histories across migration, and compare against the same current-demand packing control. That is a new decision experiment, not permission to claim an energy win from the current point-error improvement.

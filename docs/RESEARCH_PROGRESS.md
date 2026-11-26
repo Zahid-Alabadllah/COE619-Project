@@ -2,6 +2,8 @@
 
 27 November continuation: [Underload planning and migration-cost audit](UNDERLOAD_PLANNING_AUDIT.md). Numeric planning passes controlled fault/control and repeated full comparisons; 13,298 exact forecast replays. Found and separately quantified omitted migration costs caused by reset VM clocks. Heavy predictive energy still equals THR and exceeds IQR. Default benchmark/PR2 frozen; actual work date retained.
 
+27 November follow-up: two shared current-demand placement variants and a frozen host-forecast admission veto tested with matching controls. Five batches/63 policy runs; 3,860 usable checks in the broader variant but zero forecast vetoes and identical predictive/control CSV. Shared changes have mixed energy/migration tradeoffs. Retired runtime options and preserved patches, plans and negative results; no new model or reserved-data consumption.
+
 **Current priority correction:** POWER_ACCOUNTING_ERRATUM.md explains a confirmed off-host-CPU/energy omission. Current default and corrected candidate pass recorded power audits; old energy comparisons are historical, not current validated savings.
 
 These are actual completed checkpoints. Work completed early can be reported transparently in Term 262 after its calendar is supplied. Keep actual experiment/commit dates. PR2 and its completed Term 261 evidence remain frozen.

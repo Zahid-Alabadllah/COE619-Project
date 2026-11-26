@@ -1,0 +1,156 @@
+diff --git a/scripts/research/UnderloadReservationPlanner.java b/scripts/research/UnderloadReservationPlanner.java
+index 36dc3e0..17cce2c 100644
+--- a/scripts/research/UnderloadReservationPlanner.java
++++ b/scripts/research/UnderloadReservationPlanner.java
+@@ -9,26 +9,32 @@ import org.cloudsimplus.vms.Vm;
+ public final class UnderloadReservationPlanner {
+     private UnderloadReservationPlanner() { }
+     private static final class Room {
+-        double reservedCpu, allocatedCpu;
++        double reservedCpu, allocatedCpu, demandCpu;
+         long ram, bw, storage;
+         Room(Host host) {
+             reservedCpu = host.getVmList().stream().mapToDouble(Vm::getTotalCpuMipsRequested).sum();
+             allocatedCpu = host.getVmList().stream().mapToDouble(host::getTotalAllocatedMipsForVm).sum();
++            if (Boolean.getBoolean("coe619.underloadDemandAdmission"))
++                demandCpu = host.getVmList().stream().mapToDouble(UnderloadReservationPlanner::demand).sum();
+             ram = host.getRam().getAvailableResource();
+             bw = host.getBw().getAvailableResource();
+             storage = host.getStorage().getAvailableResource();
+         }
+         Room(Room original) {
+-            reservedCpu=original.reservedCpu; allocatedCpu=original.allocatedCpu;
++            reservedCpu=original.reservedCpu; allocatedCpu=original.allocatedCpu; demandCpu=original.demandCpu;
+             ram=original.ram; bw=original.bw; storage=original.storage;
+         }
+         void reserve(Vm vm) {
+             reservedCpu += vm.getTotalCpuMipsRequested();
+             allocatedCpu += vm.getTotalCpuMipsRequested();
++            if (Boolean.getBoolean("coe619.underloadDemandAdmission")) demandCpu += demand(vm);
+             ram -= vm.getRam().getCapacity(); bw -= vm.getBw().getCapacity();
+             storage -= vm.getStorage().getCapacity();
+         }
+     }
++    private static double demand(Vm vm) {
++        return vm.getCpuPercentRequested() * vm.getTotalMipsCapacity();
++    }
+     private static boolean transferring(Host host) {
+         return !host.getVmsMigratingIn().isEmpty() || !host.getVmsMigratingOut().isEmpty();
+     }
+@@ -134,7 +140,27 @@ public final class UnderloadReservationPlanner {
+                     double cpu = vm.getTotalCpuMipsRequested();
+                     if (room.reservedCpu + cpu > capacity + 1e-9 || room.ram < vm.getRam().getCapacity()
+                         || room.bw < vm.getBw().getCapacity() || room.storage < vm.getStorage().getCapacity()) continue;
+-                    if ((room.reservedCpu + cpu) / capacity > policy.getOverUtilizationThreshold(target)) continue;
++                    double admittedCpu = Boolean.getBoolean("coe619.underloadDemandAdmission")
++                        ? room.demandCpu + demand(vm) : room.reservedCpu + cpu;
++                    if (Boolean.getBoolean("coe619.predictiveUnderloadAdmission")
++                        && policy instanceof PredictiveLinearRegressionPolicy predictive) {
++                        double forecast = predictive.currentPlanningForecast(target);
++                        System.out.printf(java.util.Locale.ROOT,"ADMISSION_FORECAST_CHECK time=%s host=%d vm=%d available=%s current=%s forecast=%s%n",
++                            target.getSimulation().clock(),target.getId(),vm.getId(),Double.isFinite(forecast),admittedCpu/capacity,forecast);
++                        if (Double.isFinite(forecast)) {
++                            // The incoming VMs retain their current demand in both controls.
++                            // Only the existing target group's already-issued forecast differs.
++                            double originalDemand = target.getVmList().stream().mapToDouble(UnderloadReservationPlanner::demand).sum();
++                            double projected = Math.max(room.demandCpu, forecast * capacity + room.demandCpu - originalDemand) + demand(vm);
++                            if (admittedCpu / capacity <= policy.getOverUtilizationThreshold(target)
++                                && projected / capacity > policy.getOverUtilizationThreshold(target)) {
++                                System.out.printf(java.util.Locale.ROOT,"ADMISSION_FORECAST_VETO time=%s host=%d vm=%d current=%s projected=%s forecast=%s%n",
++                                    target.getSimulation().clock(),target.getId(),vm.getId(),admittedCpu/capacity,projected/capacity,forecast);
++                            }
++                            admittedCpu = projected;
++                        }
++                    }
++                    if (admittedCpu / capacity > policy.getOverUtilizationThreshold(target)) continue;
+                     double cost = target.getPowerModel().getPower((room.allocatedCpu + cpu) / capacity)
+                         - target.getPowerModel().getPower();
+                     if (cost < bestCost) { bestCost=cost; best=target; }
+diff --git a/scripts/research/UnderloadReservationPlannerCheck.java b/scripts/research/UnderloadReservationPlannerCheck.java
+index 469e1f1..a9984c7 100644
+--- a/scripts/research/UnderloadReservationPlannerCheck.java
++++ b/scripts/research/UnderloadReservationPlannerCheck.java
+@@ -114,6 +114,16 @@ public final class UnderloadReservationPlannerCheck {
+         catch(IllegalStateException ex) {require(ex.getMessage().contains("Duplicate VM"),"Wrong invalid-state failure");threw=true;}
+         require(threw && map.isEmpty() && before.equals(snapshot(f)),"Invalid input should be rejected without modification");
+         System.out.println("PASS: already-invalid duplicate residency is rejected before planning.");
++        System.setProperty("coe619.underloadDemandAdmission","true");
++        try {
++            f=fixture(1,3);before=snapshot(f);map=new LinkedHashMap<>();
++            UnderloadReservationPlanner.plan(f.policy(),Set.of(),map);
++            require(map.size()==1 && before.equals(snapshot(f)),"Idle fourth VM should fit without mutation under demand admission");
++            f=fixture(1,4);before=snapshot(f);map=new LinkedHashMap<>();
++            UnderloadReservationPlanner.plan(f.policy(),Set.of(),map);
++            require(map.isEmpty() && before.equals(snapshot(f)),"Demand admission must still reject fifth VM at physical limit");
++        } finally {System.clearProperty("coe619.underloadDemandAdmission");}
++        System.out.println("PASS: optional current-demand admission accepts idle fourth VM but rejects physical fifth.");
+         if(args.length>0 && args[0].equals("public")) {
+             f=fixture(1,2);before=snapshot(f);map=f.policy().getOptimizedAllocationMap(f.vms());
+             require(map.size()==1 && before.equals(snapshot(f)) && f.policy().isUnderloaded(),"Patched public dispatch failed");
+diff --git a/scripts/research/run_forecast_validation.ps1 b/scripts/research/run_forecast_validation.ps1
+index d2e51e4..d76a3a9 100644
+--- a/scripts/research/run_forecast_validation.ps1
++++ b/scripts/research/run_forecast_validation.ps1
+@@ -4,6 +4,8 @@ param(
+     [string]$Label = '',
+     [switch]$StablePlanning,
+     [switch]$ReadOnlyUnderload,
++    [switch]$UnderloadDemandAdmission,
++    [switch]$PredictiveUnderloadAdmission,
+     [ValidateSet("","diurnal","real_a","real_b","real_c","heavy")][string]$Scenario = "",
+     [switch]$FullDay,
+     [switch]$AuditPower,
+@@ -22,6 +24,8 @@ if (($AuditForecasts -or $AllHostForecasts) -and $Model -ne 'robust_guard') {
+     throw 'This forecast-scope audit currently supports robust_guard only'
+ }
+ if ($AuditMetrics -and !$MixedJobs) { throw 'Migration metric audit currently requires exact-window MixedJobs observation' }
++if ($UnderloadDemandAdmission -and !$ReadOnlyUnderload) { throw 'Demand admission requires numeric underload planning' }
++if ($PredictiveUnderloadAdmission -and (!$UnderloadDemandAdmission -or $Model -ne 'robust_guard')) { throw 'Predictive admission requires robust_guard and demand admission' }
+ $codeRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+ Push-Location $codeRoot
+ $priorJavaOptions = $env:JAVA_TOOL_OPTIONS
+@@ -40,6 +44,8 @@ try {
+     if ($Model -eq 'mean_guard') { $properties += ' -Dcoe619.meanForecast=true' }
+     if ($Model -eq 'robust_guard') { $properties += ' -Dcoe619.robustForecast=true' }
+     if ($ReadOnlyUnderload) { $properties += ' -Dcoe619.auditPlanning=true' }
++    if ($UnderloadDemandAdmission) { $properties += ' -Dcoe619.underloadDemandAdmission=true' }
++    if ($PredictiveUnderloadAdmission) { $properties += ' -Dcoe619.predictiveUnderloadAdmission=true' }
+     if ($FullDay) { $properties += ' -Dcoe619.fullDay=true' }
+     if ($AuditMetrics) { $properties += " -Dcoe619.metricAuditDirectory=$output/metric_audit" }
+     if ($AuditPlacement) { $properties += ' -Dcoe619.auditPlacement=true' }
+@@ -75,6 +81,8 @@ try {
+         day=$Day; model=$Model; java_options=$properties; framework_fix=$true; stable_planning=$StablePlanning.IsPresent; full_day=$FullDay.IsPresent
+         cloudlet_length_mi_per_pe=$(if ($FullDay) { 1000000000 } else { 20000000 })
+         read_only_underload=$ReadOnlyUnderload.IsPresent; scenario=$Scenario
++        underload_demand_admission=$UnderloadDemandAdmission.IsPresent
++        predictive_underload_admission=$PredictiveUnderloadAdmission.IsPresent
+         metric_audit=$AuditMetrics.IsPresent
+         placement_audit=$AuditPlacement.IsPresent
+         power_audit=$AuditPower.IsPresent; idle_shutdown_seconds=$IdleShutdownSeconds
+diff --git a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+index bbdd574..aa78455 100644
+--- a/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
++++ b/src/main/java/kfupm/coe619/PredictiveLinearRegressionPolicy.java
+@@ -384,6 +384,22 @@ public class PredictiveLinearRegressionPolicy extends VmAllocationPolicyMigratio
+         pending.clear();
+     }
+ 
++    // Research admission experiment: reuse an already-issued forecast without fitting,
++    // updating the learner or accepting stale/post-migration predictions.
++    double currentPlanningForecast(final Host host) {
++        if (!Boolean.getBoolean("coe619.predictiveUnderloadAdmission")
++            || !host.isActive() || !host.getVmsMigratingIn().isEmpty() || !host.getVmsMigratingOut().isEmpty()) return Double.NaN;
++        final List<? extends Vm> original = originalPlanningVms.get(host.getId());
++        if (original == null || original.size() != host.getVmList().size()
++            || !original.containsAll(host.getVmList())) return Double.NaN;
++        final double due = host.getSimulation().clock() + horizonSeconds;
++        for (final Pending item : pending.getOrDefault(host.getId(), List.of())) {
++            if (Math.abs(item.target() - due) < 1e-6
++                && item.generation() == generation.getOrDefault(host.getId(), 0L)) return item.estimate();
++        }
++        return Double.NaN;
++    }
++
+     /** Number of times a forecast was computed. */
+     public long getPredictionCount() {
+         return predictionCount;

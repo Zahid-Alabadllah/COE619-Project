@@ -1,0 +1,8 @@
+{
+ "date":"2026-11-27", "base_commit":"ce69810",
+ "hypothesis":"A frozen forecast can veto packing that looks safe now but predicts a destination crossing 80% five minutes later, potentially avoiding a later move.",
+ "control":"readonly_demand_matrix; same source eligibility, physical resources, current incoming VM demand, power ranking and robust predictor.",
+ "rule":"For LR only use max(current target demand, already-issued target forecast plus demand of other proposed incoming VMs), then add candidate current demand. No new fit or learner update; unavailable/stale/changed-group forecasts fall back to current demand.",
+ "restrictions":["no new model tuning or data", "no forecasting candidate VM future demand", "no change to overload placement path", "THR and IQR must remain byte-identical to demand control", "report negative/zero results"],
+ "success_criteria":["same completed jobs and window", "recorded power/placement audits pass", "compare energy,migrations,sampled CPU shortfall; no automatic winner claim"]
+}

@@ -1,0 +1,303 @@
+{
+  "rows": [
+    {
+      "scenario": "diurnal",
+      "policy": "THR",
+      "baseline_kwh": 6.000264,
+      "demand_kwh": 6.000264,
+      "delta_kwh": 0.0,
+      "baseline_migrations": 1,
+      "demand_migrations": 1,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "diurnal",
+      "policy": "IQR",
+      "baseline_kwh": 6.000264,
+      "demand_kwh": 6.000264,
+      "delta_kwh": 0.0,
+      "baseline_migrations": 1,
+      "demand_migrations": 1,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "diurnal",
+      "policy": "LR",
+      "baseline_kwh": 6.000264,
+      "demand_kwh": 6.000264,
+      "delta_kwh": 0.0,
+      "baseline_migrations": 1,
+      "demand_migrations": 1,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_a",
+      "policy": "THR",
+      "baseline_kwh": 19.96663,
+      "demand_kwh": 19.908306,
+      "delta_kwh": -0.05832399999999893,
+      "baseline_migrations": 1,
+      "demand_migrations": 2,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_a",
+      "policy": "IQR",
+      "baseline_kwh": 19.96663,
+      "demand_kwh": 19.908306,
+      "delta_kwh": -0.05832399999999893,
+      "baseline_migrations": 1,
+      "demand_migrations": 2,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_a",
+      "policy": "LR",
+      "baseline_kwh": 19.96663,
+      "demand_kwh": 19.908306,
+      "delta_kwh": -0.05832399999999893,
+      "baseline_migrations": 1,
+      "demand_migrations": 2,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_b",
+      "policy": "THR",
+      "baseline_kwh": 21.487826,
+      "demand_kwh": 21.487826,
+      "delta_kwh": 0.0,
+      "baseline_migrations": 0,
+      "demand_migrations": 0,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_b",
+      "policy": "IQR",
+      "baseline_kwh": 21.487826,
+      "demand_kwh": 21.487826,
+      "delta_kwh": 0.0,
+      "baseline_migrations": 0,
+      "demand_migrations": 0,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_b",
+      "policy": "LR",
+      "baseline_kwh": 21.487826,
+      "demand_kwh": 21.487826,
+      "delta_kwh": 0.0,
+      "baseline_migrations": 0,
+      "demand_migrations": 0,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_c",
+      "policy": "THR",
+      "baseline_kwh": 17.460764,
+      "demand_kwh": 17.095535,
+      "delta_kwh": -0.36522899999999936,
+      "baseline_migrations": 2,
+      "demand_migrations": 2,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_c",
+      "policy": "IQR",
+      "baseline_kwh": 17.460764,
+      "demand_kwh": 17.095535,
+      "delta_kwh": -0.36522899999999936,
+      "baseline_migrations": 2,
+      "demand_migrations": 2,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "real_c",
+      "policy": "LR",
+      "baseline_kwh": 17.460764,
+      "demand_kwh": 17.095535,
+      "delta_kwh": -0.36522899999999936,
+      "baseline_migrations": 2,
+      "demand_migrations": 2,
+      "baseline_sampled_shortfall": 0.0,
+      "demand_sampled_shortfall": 0.0
+    },
+    {
+      "scenario": "heavy",
+      "policy": "THR",
+      "baseline_kwh": 10.956979,
+      "demand_kwh": 10.956819,
+      "delta_kwh": -0.0001600000000010482,
+      "baseline_migrations": 3,
+      "demand_migrations": 3,
+      "baseline_sampled_shortfall": 7.94631049e-05,
+      "demand_sampled_shortfall": 7.941698043e-05
+    },
+    {
+      "scenario": "heavy",
+      "policy": "IQR",
+      "baseline_kwh": 10.910594,
+      "demand_kwh": 10.892061,
+      "delta_kwh": -0.01853299999999969,
+      "baseline_migrations": 3,
+      "demand_migrations": 3,
+      "baseline_sampled_shortfall": 4.541303962e-05,
+      "demand_sampled_shortfall": 4.540663657e-05
+    },
+    {
+      "scenario": "heavy",
+      "policy": "LR",
+      "baseline_kwh": 10.956979,
+      "demand_kwh": 10.956819,
+      "delta_kwh": -0.0001600000000010482,
+      "baseline_migrations": 3,
+      "demand_migrations": 3,
+      "baseline_sampled_shortfall": 7.94631049e-05,
+      "demand_sampled_shortfall": 7.941698043e-05
+    }
+  ],
+  "forecast_control_csv_identical": true,
+  "heavy_forecast_admission_checks": 2,
+  "heavy_available_forecasts": 2,
+  "heavy_forecast_vetoes": 0,
+  "predictive_energy_advantage": false,
+  "decision": "Retire both experimental runtime options; preserve shared-admission findings and the null forecasting result.",
+  "demand_source_extension": {
+    "rows": [
+      {
+        "scenario": "diurnal",
+        "policy": "THR",
+        "baseline_kwh": 6.000264,
+        "demand_source_kwh": 5.993576,
+        "baseline_migrations": 1,
+        "demand_source_migrations": 1
+      },
+      {
+        "scenario": "diurnal",
+        "policy": "IQR",
+        "baseline_kwh": 6.000264,
+        "demand_source_kwh": 5.993576,
+        "baseline_migrations": 1,
+        "demand_source_migrations": 1
+      },
+      {
+        "scenario": "diurnal",
+        "policy": "LR",
+        "baseline_kwh": 6.000264,
+        "demand_source_kwh": 5.993576,
+        "baseline_migrations": 1,
+        "demand_source_migrations": 1
+      },
+      {
+        "scenario": "real_a",
+        "policy": "THR",
+        "baseline_kwh": 19.96663,
+        "demand_source_kwh": 19.799016,
+        "baseline_migrations": 1,
+        "demand_source_migrations": 5
+      },
+      {
+        "scenario": "real_a",
+        "policy": "IQR",
+        "baseline_kwh": 19.96663,
+        "demand_source_kwh": 19.799016,
+        "baseline_migrations": 1,
+        "demand_source_migrations": 5
+      },
+      {
+        "scenario": "real_a",
+        "policy": "LR",
+        "baseline_kwh": 19.96663,
+        "demand_source_kwh": 19.799016,
+        "baseline_migrations": 1,
+        "demand_source_migrations": 5
+      },
+      {
+        "scenario": "real_b",
+        "policy": "THR",
+        "baseline_kwh": 21.487826,
+        "demand_source_kwh": 18.790083,
+        "baseline_migrations": 0,
+        "demand_source_migrations": 4
+      },
+      {
+        "scenario": "real_b",
+        "policy": "IQR",
+        "baseline_kwh": 21.487826,
+        "demand_source_kwh": 18.790083,
+        "baseline_migrations": 0,
+        "demand_source_migrations": 4
+      },
+      {
+        "scenario": "real_b",
+        "policy": "LR",
+        "baseline_kwh": 21.487826,
+        "demand_source_kwh": 18.790083,
+        "baseline_migrations": 0,
+        "demand_source_migrations": 4
+      },
+      {
+        "scenario": "real_c",
+        "policy": "THR",
+        "baseline_kwh": 17.460764,
+        "demand_source_kwh": 18.845225,
+        "baseline_migrations": 2,
+        "demand_source_migrations": 6
+      },
+      {
+        "scenario": "real_c",
+        "policy": "IQR",
+        "baseline_kwh": 17.460764,
+        "demand_source_kwh": 18.845225,
+        "baseline_migrations": 2,
+        "demand_source_migrations": 6
+      },
+      {
+        "scenario": "real_c",
+        "policy": "LR",
+        "baseline_kwh": 17.460764,
+        "demand_source_kwh": 18.845225,
+        "baseline_migrations": 2,
+        "demand_source_migrations": 6
+      },
+      {
+        "scenario": "heavy",
+        "policy": "THR",
+        "baseline_kwh": 10.956979,
+        "demand_source_kwh": 10.956819,
+        "baseline_migrations": 3,
+        "demand_source_migrations": 3
+      },
+      {
+        "scenario": "heavy",
+        "policy": "IQR",
+        "baseline_kwh": 10.910594,
+        "demand_source_kwh": 10.889791,
+        "baseline_migrations": 3,
+        "demand_source_migrations": 3
+      },
+      {
+        "scenario": "heavy",
+        "policy": "LR",
+        "baseline_kwh": 10.956979,
+        "demand_source_kwh": 10.956819,
+        "baseline_migrations": 3,
+        "demand_source_migrations": 3
+      }
+    ],
+    "forecast_control_csv_identical": true,
+    "available_forecast_checks": 3860,
+    "vetoes": 0,
+    "decision": "Retire: mixed shared-policy energy changes and no added forecast effect."
+  }
+}

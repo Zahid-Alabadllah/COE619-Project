@@ -1,0 +1,8 @@
+{
+ "date":"2026-11-27","base_commit":"ce69810",
+ "motivation":"The destination-only predictive rule had only two heavy-case opportunities and vetoed neither. Nominal source eligibility rejects a half-populated low-demand host even when all its VMs could fit elsewhere.",
+ "change":"Shared actual-current-demand source eligibility below the existing lower threshold. Destination target exclusions remain nominal, as before, to avoid excluding all quiet destinations. Physical and demand-admission checks unchanged.",
+ "arms":["current-demand source and destination control","same with frozen five-minute destination forecast veto for LR only"],
+ "inputs":"same five fixed inspected cases; no fresh validation claims or reserved files",
+ "acceptance":["complete-source evacuation only","all jobs/window consistent","zero recorded power and placement violations","THR/IQR byte-identical across arms","compare sampled shortfall and migration costs as well as energy","retire variants without demonstrated predictive value"]
+}

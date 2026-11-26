@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-27",
+  "base_commit": "ce69810",
+  "question": "Does current-demand admission remove a reserved-capacity obstacle to underload consolidation under the validated numeric planner?",
+  "scope": "Shared current-demand destination threshold only; source eligibility, power ranking, physical CPU/RAM/BW/storage, model and workload unchanged. Overload-placement path unchanged.",
+  "comparison": "Five fixed cases / THR,IQR,robust LR versus readonly_validated_matrix; all are inspected development data, not fresh validation.",
+  "acceptance": ["same finished jobs and observation window", "unchanged physical planning states", "zero observed power/placement violations", "report energy, migration and sampled shortfall tradeoffs", "no predictive saving claim for a shared change"],
+  "reserved_workload_files_consumed": 0
+}
