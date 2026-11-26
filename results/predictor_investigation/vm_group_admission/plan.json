@@ -1,0 +1,10 @@
+{
+ "date":"2026-11-27","base_commit":"a3d6306",
+ "hypothesis":"Forecast every prospective member VM, including incoming VMs, using only that VM's earlier demand samples; sum CPU MIPS before destination admission.",
+ "model":"Existing frozen robust/persistence learner reused per VM; 20 resolved pairs, min10, five-minute horizon. VM identity carries its history across moves. No parameter tuning.",
+ "causality":"Samples recorded in existing demand observation loop without extra simulator events; only samples strictly before the planning time can train. Training pairs require 300s spacing within1s. No trace future reads.",
+ "control":"Same numeric source/destination demand packing, same physical filters, same observations, current demand only. Existing host-level overload model unchanged.",
+ "admission":"Conservative maximum of current prospective demand and summed VM forecast; retains physical CPU/RAM/BW/storage. No completion schedule knowledge.",
+ "inputs":"Five already inspected cases, development study only; no reserved data.",
+ "acceptance":["observe-only control matches earlier control CSV", "equal jobs/window", "zero recorded power/placement violations", "report null/negative results and costs", "no universal superiority claim"]
+}
