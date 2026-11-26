@@ -1,0 +1,60 @@
+{
+  "common_groups": 9579,
+  "changed_groups": 104,
+  "completed_groups": 10,
+  "changed_completed_groups": 0,
+  "changed_groups_with_physical_slot_shortage": 104,
+  "migration_events_identical": true,
+  "migration_events": 18,
+  "all_15_csv_rows_identical": true,
+  "zero_power_checks": 150,
+  "clean_final_placement_checks": 75,
+  "limitation": "Physical-slot bound uses this benchmark's identical VM resource sizes and eligible destination set; not a universal cloud capacity bound.",
+  "examples": [
+    {
+      "case": "real_a",
+      "time": "15300.852000000003",
+      "source": "0",
+      "current": "2:3;0:4",
+      "forecast": "2:4;0:3",
+      "needed": 4,
+      "physical_slots": 2
+    },
+    {
+      "case": "real_a",
+      "time": "15300.962000000003",
+      "source": "0",
+      "current": "2:3;0:4",
+      "forecast": "2:4;0:3",
+      "needed": 4,
+      "physical_slots": 2
+    },
+    {
+      "case": "real_a",
+      "time": "27300.718421052632",
+      "source": "3",
+      "current": "12:1;15:4",
+      "forecast": "12:4;15:1",
+      "needed": 3,
+      "physical_slots": 2
+    },
+    {
+      "case": "real_a",
+      "time": "27300.828421052633",
+      "source": "3",
+      "current": "12:1;15:4",
+      "forecast": "12:4;15:1",
+      "needed": 3,
+      "physical_slots": 2
+    },
+    {
+      "case": "real_a",
+      "time": "28800.828421052633",
+      "source": "0",
+      "current": "0:1;2:4;3:3",
+      "forecast": "0:1;2:3;3:4",
+      "needed": 4,
+      "physical_slots": 3
+    }
+  ]
+}

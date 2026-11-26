@@ -1,5 +1,7 @@
 # Research milestones recorded on 18 November 2026
 
+27 November packing continuation: forecast ranking changes104tentative plans, all physically short of eligible slots; none of10completedplans changes. Tested one frozen alternating-CPU-size sensitivity study: no energy gain, real_b very slightly worse. Seven completed batches105policy runs,210zero recorded power/105clean final placementchecks. Exact per-VM replays and matching reactive controls preserved; experimental flags retired. Evidence forecast_packing_rank and heterogeneous_packing_rank. Rootmaster updated;49%weeklyusedsafecheckpoint preserves50%remainingreserve. No PR2 or reserved-data change.
+
 27 November continuation: [Underload planning and migration-cost audit](UNDERLOAD_PLANNING_AUDIT.md). Numeric planning passes controlled fault/control and repeated full comparisons; 13,298 exact forecast replays. Found and separately quantified omitted migration costs caused by reset VM clocks. Heavy predictive energy still equals THR and exceeds IQR. Default benchmark/PR2 frozen; actual work date retained.
 
 27 November follow-up: two shared current-demand placement variants and a frozen host-forecast admission veto tested with matching controls. Five batches/63 policy runs; 3,860 usable checks in the broader variant but zero forecast vetoes and identical predictive/control CSV. Shared changes have mixed energy/migration tradeoffs. Retired runtime options and preserved patches, plans and negative results; no new model or reserved-data consumption.

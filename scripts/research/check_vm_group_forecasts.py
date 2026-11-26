@@ -1,5 +1,6 @@
 """Independent replay and past-only audit for the archived VM-group experiment."""
 import csv
+import argparse
 import gzip
 import json
 from collections import defaultdict, deque
@@ -35,8 +36,14 @@ class Model:
 
 
 def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--run',default='vm_group_predictive')
+    parser.add_argument('--control',default='vm_group_observation_control')
+    parser.add_argument('--output',type=Path,default=ROOT/'vm_group_admission/verification.json')
+    parser.add_argument('--allow-lr-change',action='store_true')
+    args=parser.parse_args()
     counts=defaultdict(int);maximum=0.;changed=0
-    path=RUNS/'vm_group_predictive/simulation.log.gz'
+    path=RUNS/args.run/'simulation.log.gz'
     for line in gzip.open(path,'rt'):
         if line.startswith('CASE_START '):
             samples=defaultdict(list);models=defaultdict(Model)
@@ -61,12 +68,18 @@ def main():
                 assert f'{key}=0' in line
             counts['clean_final_placement_checks']+=1
     assert counts['vm_forecasts'] and counts['zero_power_checks']==30 and counts['clean_final_placement_checks']==15
-    a=(RUNS/'vm_group_observation_control/experiments.csv').read_bytes()
-    b=(RUNS/'vm_group_predictive/experiments.csv').read_bytes()
-    assert a==b
+    a=(RUNS/args.control/'experiments.csv').read_bytes()
+    b=(RUNS/args.run/'experiments.csv').read_bytes()
+    if not args.allow_lr_change:assert a==b
+    else:
+        left=list(csv.DictReader(a.decode().splitlines()));right=list(csv.DictReader(b.decode().splitlines()))
+        assert len(left)==len(right)==15
+        for x,y in zip(left,right):
+            for key in ('scenario','policy','vms_created','cloudlets_finished','end_time_s'):assert x[key]==y[key]
+            if x['policy']!='LR':assert x==y
     result=dict(counts=counts,max_replay_difference=maximum,forecasts_differing_from_persistence=changed,
-        past_only_training_verified=True,control_csv_identical=True,predictive_energy_advantage=False)
-    (ROOT/'vm_group_admission/verification.json').write_text(json.dumps(result,indent=2)+'\n')
+        past_only_training_verified=True,control_csv_identical=a==b,predictive_energy_advantage=False)
+    args.output.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result,indent=2))
 
 

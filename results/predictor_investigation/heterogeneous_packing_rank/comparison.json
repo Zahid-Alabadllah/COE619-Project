@@ -1,0 +1,144 @@
+{
+  "vm_sizes_checked": 84,
+  "rows": [
+    {
+      "case": "diurnal",
+      "policy": "THR",
+      "current_kwh": 5.94227,
+      "forecast_kwh": 5.94227,
+      "delta_kwh": 0.0,
+      "current_migrations": 1,
+      "forecast_migrations": 1
+    },
+    {
+      "case": "diurnal",
+      "policy": "IQR",
+      "current_kwh": 5.94227,
+      "forecast_kwh": 5.94227,
+      "delta_kwh": 0.0,
+      "current_migrations": 1,
+      "forecast_migrations": 1
+    },
+    {
+      "case": "diurnal",
+      "policy": "LR",
+      "current_kwh": 5.94227,
+      "forecast_kwh": 5.94227,
+      "delta_kwh": 0.0,
+      "current_migrations": 1,
+      "forecast_migrations": 1
+    },
+    {
+      "case": "real_a",
+      "policy": "THR",
+      "current_kwh": 17.123634,
+      "forecast_kwh": 17.123634,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_a",
+      "policy": "IQR",
+      "current_kwh": 17.123634,
+      "forecast_kwh": 17.123634,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_a",
+      "policy": "LR",
+      "current_kwh": 17.123634,
+      "forecast_kwh": 17.123634,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_b",
+      "policy": "THR",
+      "current_kwh": 17.180166,
+      "forecast_kwh": 17.180166,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_b",
+      "policy": "IQR",
+      "current_kwh": 17.180166,
+      "forecast_kwh": 17.180166,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_b",
+      "policy": "LR",
+      "current_kwh": 17.180166,
+      "forecast_kwh": 17.180227,
+      "delta_kwh": 6.099999999875649e-05,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_c",
+      "policy": "THR",
+      "current_kwh": 15.461754,
+      "forecast_kwh": 15.461754,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_c",
+      "policy": "IQR",
+      "current_kwh": 15.461754,
+      "forecast_kwh": 15.461754,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "real_c",
+      "policy": "LR",
+      "current_kwh": 15.461754,
+      "forecast_kwh": 15.461754,
+      "delta_kwh": 0.0,
+      "current_migrations": 5,
+      "forecast_migrations": 5
+    },
+    {
+      "case": "heavy",
+      "policy": "THR",
+      "current_kwh": 10.401713,
+      "forecast_kwh": 10.401713,
+      "delta_kwh": 0.0,
+      "current_migrations": 2,
+      "forecast_migrations": 2
+    },
+    {
+      "case": "heavy",
+      "policy": "IQR",
+      "current_kwh": 10.061084,
+      "forecast_kwh": 10.061084,
+      "delta_kwh": 0.0,
+      "current_migrations": 2,
+      "forecast_migrations": 2
+    },
+    {
+      "case": "heavy",
+      "policy": "LR",
+      "current_kwh": 10.401713,
+      "forecast_kwh": 10.401713,
+      "delta_kwh": 0.0,
+      "current_migrations": 2,
+      "forecast_migrations": 2
+    }
+  ],
+  "migration_events_identical": false,
+  "zero_power_checks": 60,
+  "clean_final_placement_checks": 30,
+  "decision": "No energy improvement; real_b LR slightly worse, other cases unchanged. Retire experiment."
+}

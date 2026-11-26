@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "zero_power_checks": 30,
+    "clean_final_placement_checks": 15,
+    "vm_forecasts": 21194,
+    "group_checks": 4488,
+    "vetoes": 0
+  },
+  "max_replay_difference": 0.0,
+  "forecasts_differing_from_persistence": 13621,
+  "past_only_training_verified": true,
+  "control_csv_identical": false,
+  "predictive_energy_advantage": false
+}

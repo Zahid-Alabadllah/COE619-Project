@@ -1,5 +1,23 @@
 # Underload planning and migration-cost audit
 
+## Latest: one heterogeneous-size sensitivity test
+
+The proposed size-sensitivity study was tested once under a predeclared protocol: alternate 1PE and 2PE VMs, retain 1000MIPS/PE and unchanged RAM/bandwidth/storage, match cloudlet PE counts to their VMs, and keep traces/counts/per-PE job lengths fixed. This changes total requested CPU and job work, so its absolute energy cannot be compared to the original as a model improvement. The identical-size slot formula is not applicable here.
+
+The two arms retain matching jobs and windows, 60 zero recorded power checks and 30 clean final placements. THR/IQR match exactly across arms. Four predictive cases have unchanged energy; real_b increases from17.180166 to17.180227kWh, with five migrations in both arms. All84VMsizes are verified. Independent replay matches21,194VMforecasts exactly using past observations only. No predictive energy benefit is demonstrated.
+
+The temporary size/ranking options are retired. Evidence: `heterogeneous_packing_rank/`, plus the two `heterogeneous_rank_*` simulator batches. Source patch: `scripts/research/attempts/heterogeneous_packing_rank.patch` against `19c691d`. Run `analyze_packing_rank.py --heterogeneous` for the comparison. Do not try different size patterns until a favorable result appears; this is a retained negative sensitivity result.
+
+## Latest: forecast packing rank
+
+The next controlled experiment used the same per-VM forecasts to rank feasible destinations rather than vetoing threshold crossings. The control selected the highest prospective current CPU; the predictive arm selected the highest forecast CPU. Both kept current-demand admission and identical physical filters. Only LR changed ranking. The pre-run protocol is `forecast_packing_rank/plan.json`.
+
+Five batches (75 policy runs, including diagnostic repeats) have identical candidate/control CSVs, 150 zero recorded power checks and 75 clean final placements. Exact independent replay verifies 14,345 per-VM forecasts. Across 9,579 common source-group checks, ranking changes 104 tentative proposals but none of the 10 completed plans. All 104 changed proposals have insufficient eligible physical VM slots to evacuate the source. The 18 actual LR migration events are identical.
+
+This identifies a concrete constraint: the changed choices cannot become complete migrations under these equal-size-VM inputs and eligible destination rules. It is not proof that prediction cannot help another benchmark or policy. Preserve this null result; do not describe the shared best-fit changes as predictive savings. Temporary flags/hooks are retired; the source patch against `19c691d` is `scripts/research/attempts/forecast_packing_rank.patch`. Reproduce verification with `analyze_packing_rank.py` and the parameterized `check_vm_group_forecasts.py`.
+
+A future separately declared sensitivity study could vary VM resource sizes while preserving workload traces and identical controls. That would be a modeling change, not an improvement to the original benchmark, and must not be repeatedly tuned to obtain a favorable result.
+
 Actual work date: 27 November 2026. This is early preparation for Term 262, outside the frozen PR2 scope.
 
 The simulator must decide where VMs could move without moving them during that decision. The original underload path temporarily adds the real VM to another host's physical list. Our small reproducer shows the same VM listed on two hosts before a migration starts. A controlled full run also fails the final placement check. These are correctness failures, not algorithm improvements.

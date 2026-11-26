@@ -1,0 +1,8 @@
+{
+ "date":"2026-11-27","base_commit":"19c691d",
+ "purpose":"Single predeclared sensitivity test of forecast destination ranking when VM CPU sizes vary, addressing the homogeneous physical-slot constraint. No search over size patterns.",
+ "sizes":"VM index even=1PE, odd=2PE; 1000MIPS per PE; RAM2048MB,BW1000,storage10000 unchanged. Cloudlet PE equals its VM; per-PE job length unchanged.",
+ "controls":"Same five fixed trace cases, host counts, VM counts, 24h window and job mix. Shared current-demand source/destination best-fit packing; only LR forecast arm ranks destinations by frozen per-VM CPU forecast.",
+ "limitations":"Total CPU capacity requested and total job MI differ from original uniform-VM benchmark, so energy levels cannot be compared directly as a model gain. Physical slot audit based on identical sizes is not applicable here.",
+ "acceptance":["THR/IQR identical across arms", "equal jobs/window across arms", "zero recorded power/placement violations", "compare all five cases and costs", "no reserved traces or parameter tuning", "report negative or null result without trying new size patterns"]
+}

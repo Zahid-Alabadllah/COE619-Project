@@ -1,0 +1,9 @@
+{
+ "date":"2026-11-27","base_commit":"19c691d",
+ "hypothesis":"Use predictions to rank feasible destinations rather than only vetoing 80% crossings. Existing inspected log has 508 multi-destination groups and 130 different current/forecast best-fit rankings; repeated checks are not independent moves.",
+ "control":"Shared numeric demand-source/destination packing, select highest prospective current CPU among physically suitable hosts below the same current-demand threshold; host-ID tie break.",
+ "candidate":"Only LR ranks by summed frozen per-VM five-minute forecasts instead of current CPU. Same current-demand admission threshold, physical CPU/RAM/BW/storage and all other decisions. No forecast veto in ranking mode.",
+ "model":"Frozen robust/persistence per VM, historical samples only, no parameter tuning or future workload reads.",
+ "inputs":"Five inspected development cases, no reserved data; 24-hour mixed jobs.",
+ "acceptance":["THR/IQR identical across arms", "same jobs/window", "zero recorded power/final placement violations", "report energy,migrations,sampled CPU shortfall", "separate shared best-fit improvement from predictive increment", "do not claim a universal winner"]
+}
